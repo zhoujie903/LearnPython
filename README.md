@@ -13,5 +13,9 @@
 代码：login
 项目说明：模拟登录http://example.webscraping.com/places/default/user/login?_next=/places/default/index。 登录成功后获取用户信息 
 
+第13章 使用HTTP代理
+代码：proxy_example、random_proxy
+项目说明：proxy_example从西刺网站获取免费代理[scrapy crawl xici_proxy -o proxy_list.json]；random_proxy依赖proxy_example生成的proxy_list.json，从proxy_list.json中选择一个代理并在请求中使用代理
+
 
 
