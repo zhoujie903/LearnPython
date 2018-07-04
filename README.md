@@ -17,5 +17,8 @@
 代码：proxy_example、random_proxy
 项目说明：proxy_example从西刺网站获取免费代理[scrapy crawl xici_proxy -o proxy_list.json]；random_proxy依赖proxy_example生成的proxy_list.json，从proxy_list.json中选择一个代理并在请求中使用代理
 
+玩具：自己的一些练手项目
+weibo_pc.py：登录PC端的微博, 获取登录用户的粉丝、关注的人、朋友[互相关注]
+
 
 
