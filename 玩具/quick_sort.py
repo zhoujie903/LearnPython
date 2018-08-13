@@ -1,4 +1,5 @@
 # 漫画：什么是快速排序？（上）https://mp.weixin.qq.com/s/wXvs98RGumzFHvQlC1dOeA
+# 漫画：什么是快速排序？（完整版）https://mp.weixin.qq.com/s/PQLC7qFjb74kt6PdExP8mw
 
 # right
 #     right > pivot:  移动right指针
@@ -23,7 +24,10 @@ def quick_sort(a, startIndex, endIndex):
     return a
 
 
-def partition(a, startIndex, endIndex):
+def partition2(a, startIndex, endIndex):
+    '''
+    挖坑法
+    '''
     # 取第一个位置的元素作为基准元素
     pivot = a[startIndex]
     left = startIndex
@@ -55,6 +59,38 @@ def partition(a, startIndex, endIndex):
 
     a[index] = pivot
     return index
+
+
+def partition(a, startIndex, endIndex):
+    '''
+    指针交换法
+    '''
+    # 取第一个位置的元素作为基准元素
+    pivot = a[startIndex]
+    left = startIndex
+    right = endIndex
+
+    while left != right:
+        # 控制right指针比较并左移
+        while left < right and a[right] > pivot:
+            right -= 1
+
+        # 控制right指针比较并右移
+        while left < right and a[left] <= pivot:
+            left += 1
+
+        # 交换left和right指向的元素
+        if left < right:
+            temp = a[left]
+            a[left] = a[right]
+            a[right] = temp
+
+    # pivot和指针重合点交换
+    temp = a[left]
+    a[left] = a[startIndex]
+    a[startIndex] = temp
+
+    return left
 
 
 def main():
