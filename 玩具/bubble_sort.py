@@ -46,7 +46,6 @@ def bubble_sort(a):
     '''
     版本03: 减少轮数 + 减少每轮比较次数
     '''
-    tmp = 0
     # 记录最后一次交换的位置
     lastExchangeIndex = 0
 
@@ -59,9 +58,8 @@ def bubble_sort(a):
             global count
             count += 1
             if a[j] > a[j+1]:
-                tmp = a[j]
-                a[j] = a[j+1]
-                a[j+1] = tmp
+                # 交换
+                a[j], a[j+1] = a[j+1],  a[j]
                 isSorted = False
                 lastExchangeIndex = j
 
