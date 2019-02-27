@@ -81,14 +81,10 @@ def partition(a, startIndex, endIndex):
 
         # 交换left和right指向的元素
         if left < right:
-            temp = a[left]
-            a[left] = a[right]
-            a[right] = temp
+            a[left], a[right] = a[right], a[left]
 
     # pivot和指针重合点交换
-    temp = a[left]
-    a[left] = a[startIndex]
-    a[startIndex] = temp
+    a[left], a[startIndex] = a[startIndex], a[left]
 
     return left
 
