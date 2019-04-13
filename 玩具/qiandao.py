@@ -12,6 +12,7 @@
 import requests
 import re
 import time
+import json
 import sys
 print(sys.stdout.encoding)
 
@@ -26,8 +27,8 @@ sys.stderr = codecs.getwriter("utf-8")(sys.stderr.detach())
 # ------------------------------------------------
 # 每个账号不同；同一个账号每次登录时也是不一样的
 # 同一个账号，退出时，只要不登录，上次的A-Token-Header的值还有效，只有再登录时，上次的token值才失败
-A_Token_Header_13456774460 = 'Mi1DVVRRV0ZCH0JWDVMPdx8DUlA='
-A_Token_Header_19965412404 = 'NStZV1BQV0RLH0JWDVNbIE1ZBlc='
+A_Token_Header_13456774460 = 'OjFXVVRRV0ZCH0IOWlUNdh4DAgE='
+A_Token_Header_19965412404 = 'MTtFV1BQV0RLH0IOWlVXexZTUVc='
 
 # 这里的Cookie好像很奇怪
 # CNZZDATA1276022107的值：同一个账号每次登录时，值不同；但好像也不影响接口请求的成功
@@ -175,6 +176,49 @@ class QuXiaoChuUser(User):
         api = self._genapi(api_coin_lucky_extra)
         return self._post(api, self.headers, data)
 
+    def rob(self):
+        '''
+        世界抢夺
+        '''
+        print("世界抢夺 {}".format(self.uid))
+
+        data = self._uid_data()
+
+        # 获取抢夺信息
+        api = self._genapi('rob/info')
+        result = self._post(api, self.headers, data)
+
+        # 判断是否还有抢夺机会
+        result = json.loads(result)
+        times = result['result']['times_left'] 
+        if times > 0:
+            print('还有抢夺机会 {}次'.format(result['result']['times_left']))
+
+            # 获取抢夺对象
+            api = self._genapi('rob/fetch_target')
+            result = self._post(api, self.headers, data)
+
+            result = json.loads(result)
+            targets = []
+            for person in result['result']:
+                if person['result'] != 1:
+                    targets.append(person['uid']) 
+
+            
+            print(targets)
+
+            c = min(times, len(targets))
+            for i in range(c):
+                # 抢夺
+                print('抢夺对象 {}'.format(targets[i]))
+                data = self._uid_data()
+                data['target'] = targets[i]
+                data['old_id'] = '' 
+                data['result'] = 'true'
+                api = self._genapi('rob/rob')
+                self._post(api, self.headers, data)
+
+
     def _uid_data(self):
         return {'uid': self.uid}
 
@@ -222,10 +266,11 @@ class QuXiaoChuUser(User):
         if d["code"] == "200":
             result = d["result"]
 
+            total = result["times_total"]
             left = result["times_left"]
             extra = result["extra"]
 
-            need = [i for i, v in enumerate(extra) if v != 1]
+            need = [i for i, v in enumerate(extra) if v != 1 and (total - left) > (i+1)*5]
 
             return (left != 0, need)
         else:
@@ -347,6 +392,10 @@ if __name__ == "__main__":
 
         for index in result[1]:
             user.coin_lucky_extra(index)
+
+
+        # 世界抢夺
+        user.rob()
 
 
     # 东方头条App自动签到和金币成熟收集
