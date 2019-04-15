@@ -27,8 +27,8 @@ sys.stderr = codecs.getwriter("utf-8")(sys.stderr.detach())
 # ------------------------------------------------
 # 每个账号不同；同一个账号每次登录时也是不一样的
 # 同一个账号，退出时，只要不登录，上次的A-Token-Header的值还有效，只有再登录时，上次的token值才失败
-A_Token_Header_13456774460 = 'OjFXVVRRV0ZCH0IOWlUNdh4DAgE='
-A_Token_Header_19965412404 = 'MTtFV1BQV0RLH0IOWlVXexZTUVc='
+A_Token_Header_13456774460 = 'ICxfVVRRV0ZCH0IOWgNdIhpTVlM='
+A_Token_Header_19965412404 = 'NDpMV1BQV0RLH0IOWVVaJk1TAlI='
 
 # 这里的Cookie好像很奇怪
 # CNZZDATA1276022107的值：同一个账号每次登录时，值不同；但好像也不影响接口请求的成功
@@ -87,7 +87,25 @@ class QuXiaoChuUser(User):
         self.uid = uid
         self.headers = dict(QuXiaoChuUser.headers)
         self.headers['A-Token-Header'] = token_header
-        self.headers['Cookie'] = cookie    
+        self.headers['Cookie'] = cookie
+
+
+    def userinfo(self):
+        '''
+        获取用户信息
+        https://king.hddgood.com/king_api/v1/king/userinfo
+        ''' 
+
+        print("获取大转盘的次数情况信息 {}".format(self.uid))
+
+        data = self.data
+        data['uid'] = self.uid
+
+        api = self._genapi('king/userinfo')
+        result = self._post(api, self.headers, data) 
+
+        result = json.loads(result)
+        print('金币数量：', result['result']['coin'])  
 
 
     def lucky_draw_info(self):
@@ -219,6 +237,39 @@ class QuXiaoChuUser(User):
                 self._post(api, self.headers, data)
 
 
+    def super_brain(self):
+        '''
+        最强大脑
+        '''
+        # rest/game_report2?uid=633278&param=%7B%22type%22:%22M%22,%22result%22:true%7D
+        # rest/game_report2?uid=633278&param={"type":"M","result":true}
+
+        print("最强大脑 {} ".format(self.uid))
+
+        data = {}
+
+        api = self._genapi("rest/game_report2?uid=" + self.uid + r'&param={"type":"M","result":true}')
+        return self._post(api, self.headers, data)
+
+
+    def pingtu(self):
+        '''
+        六边形拼图
+        '''
+
+        print("六边形拼图 {} ".format(self.uid))
+
+        data = {}
+
+        gameid = {
+            "472251":"H5579905",
+            "633278":"H5584802",
+        }
+
+        api = self._genapi("rest/game_report2?uid=" + self.uid + r'&param={"type":"H","mode":"endless","gameid":"' + gameid[self.uid] + r'","data":"ST_Hex_Blocks_Puzzle_FFIGZ_ls_=0,ST_Hex_Blocks_Puzzle_FHPRG_RST_ls_=1555320439.099,ST_Hex_Blocks_Puzzle_FHPRG_ls_=0,ST_Hex_Blocks_Puzzle_HUSD_ls_=0,ST_Hex_Blocks_Puzzle_LC_ls_=5,ST_Hex_Blocks_Puzzle_NM_HNT_ls_=5,ST_Hex_Blocks_Puzzle_TDIFF_ls_=2,ST_Hex_Blocks_Puzzle_THUSD_ls_=0,ST_Hex_Blocks_Puzzle_TLE_ls_=6,ST_Hex_Blocks_Puzzle_TLH_ls_=1,ST_Hex_Blocks_Puzzle_TLM_ls_=2,ST_Hex_Blocks_Puzzle_aUorI_ls_=1,ST_Hex_Blocks_Puzzle_lang_ls_=1,ST_Hex_Blocks_Puzzle_music_is_on_ls_=1,ST_Hex_Blocks_Puzzle_sound_is_on_ls_=1"}')
+        return self._post(api, self.headers, data)
+
+
     def _uid_data(self):
         return {'uid': self.uid}
 
@@ -234,6 +285,7 @@ class QuXiaoChuUser(User):
         print(res.url)
         result = res.text
         print(result)
+        print('')
         return result
 
     @staticmethod
@@ -359,18 +411,21 @@ class DFTouTiaoUser(User):
         } 
 
 
+def genUsers():
+    yield QuXiaoChuUser(UUID_13456774460, A_Token_Header_13456774460, Cookie_13456774460)
+    yield QuXiaoChuUser(UUID_19965412404, A_Token_Header_19965412404, Cookie_19965412404) 
+
 
 if __name__ == "__main__":
 
-    user134 = QuXiaoChuUser(UUID_13456774460, A_Token_Header_13456774460, Cookie_13456774460)
-    user199 = QuXiaoChuUser(UUID_19965412404, A_Token_Header_19965412404, Cookie_19965412404)
-
-    users = [user134, user199]
-
     # 趣消除App自动签到和大转盘
-    for user in users:
+    for user in genUsers():
+
         # 离线金币
         user.offline()
+
+        user.super_brain()
+        user.pingtu()
 
         # 签到
         result = user.king_daily_info()            
