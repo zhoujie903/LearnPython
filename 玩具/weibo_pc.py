@@ -14,6 +14,7 @@
 
 
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -41,17 +42,24 @@ USER_ID = None
 WAIT_TIME = 10
 # ----
 
-options = Options()
-# options.set_headless()
+def driverNOBrowser():
+    options = Options()
+    # options.add_argument('headless')
+    # options.add_argument('disable-gpu')
+    # options.add_argument('no-sandbox')
 
-# 禁止加载图片
-# prefs = {
-#     'profile.default_content_setting_values' : {
-#         'images' : 2
-#     }
-# }
-# options.add_experimental_option('prefs',prefs)
-browser = webdriver.Chrome(options=options)
+    # 禁止加载图片
+    # prefs = {
+    #     'profile.default_content_setting_values' : {
+    #         'images' : 2
+    #     }
+    # }
+    # options.add_experimental_option('prefs',prefs)
+
+    driverChrome = webdriver.Chrome(options=options)
+    return driverChrome
+
+browser = driverNOBrowser()
 wait = WebDriverWait(browser, WAIT_TIME)
 
 fans = set()        # 我的粉丝
@@ -98,15 +106,10 @@ def login_by_password():
     '''用户名和密码登录'''
     logging.info('login_by_password')
     try:
-        url = WEIBO_URL
-        browser.get(url)
-
-        xpath = '//*[@id="pl_login_form"]/div/div[1]/div/a[1]'
-        wait.until(EC.presence_of_element_located(
-            (By.XPATH, xpath)))
-
-        xpath = '//*[@id="loginname"]'
-        loginname = browser.find_element_by_xpath(xpath)
+        browser.get(WEIBO_URL)
+        wait.until(EC.element_to_be_clickable((By.ID, 'loginname')))       
+        
+        loginname = browser.find_element_by_id('loginname')
         loginname.clear()
         loginname.send_keys(LOGIN_NAME)
 
@@ -115,11 +118,14 @@ def login_by_password():
         password.clear()
         password.send_keys(PASSWORD)
 
-        xpath = '//*[@id="pl_login_form"]/div/div[3]/div[6]/a'
-        login = browser.find_element_by_xpath(xpath)
-        login.click()
-    except TimeoutException:
-        pass
+        #点击登录 
+        js='document.querySelector(\'#pl_login_form > div > div:nth-child(3) > div.info_list.login_btn > a\').click()'
+        browser.execute_script(js)
+        print('点击登录')
+    except WebDriverException as e:
+        print('login_by_password WebDriverException')
+        logging.exception(e)
+        
 
 
 def wait_for_login():
@@ -131,13 +137,10 @@ def wait_for_login():
 def get_login_user_id():
     '''获取登录用户ID, 需要已登录才能获取'''
     logging.info('get_login_user_id')
-    url = SETTING_URL
-    browser.get(url)
+    browser.get(SETTING_URL)
+    wait.until(EC.presence_of_element_located((By.LINK_TEXT, '预览我的主页')))
 
-    xpath = '/html/body/div[2]/div/div[1]/div/div[2]/div/div[1]/div/span/a'
-    wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
-
-    home = browser.find_element_by_xpath(xpath)
+    home = browser.find_element_by_link_text('预览我的主页')
     home_URL = home.get_attribute('href')  # https://weibo.com/1969776354/info
     print(home_URL)
 
@@ -174,8 +177,9 @@ def get_fans():
     try:
         fetch_page_at_index(1)
 
-        xpath = '//*[@id="Pl_Official_RelationFans__87"]/div/div/div/div[2]/div[2]/div/a[last()-1]'
+        xpath = '//div[@class="W_pages"]/a[last()-1]'
         pages = _count_of_pages(xpath)
+        print('pages:',pages)
 
         for i in range(2, pages + 1):
             fetch_page_at_index(i)
@@ -210,8 +214,9 @@ def get_follows():
     try:
         fetch_page_at_index(1)
 
-        xpath = '//*[@id="Pl_Official_RelationMyfollow__92"]/div/div/div/div[4]/div/a[last()-1]'
+        xpath = '//div[@class="W_pages"]/a[last()-1]'
         pages = _count_of_pages(xpath)
+        print('pages:',pages)
 
         for i in range(2, pages + 1):
             fetch_page_at_index(i)
@@ -231,6 +236,7 @@ def _count_of_pages(xpath):
 def main():
     global USER_ID
 
+try:
     if is_login():
         logging.info('已登录')
     else:
@@ -257,6 +263,7 @@ def main():
     else:
         logging.warning('没用获取到用户ID')
 
+finally:
     browser.close()
 
 
