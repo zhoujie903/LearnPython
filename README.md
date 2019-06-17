@@ -29,6 +29,7 @@
 | weibo_pc.py | 登录PC端的微博, 获取登录用户的粉丝、关注的人、朋友[互相关注] |  |
 | qiandao.py | 趣消除App地自动化 |  |
 | dev-toutiao.py | 今日头条极速版App地自动化 |  |
+| dftoutiao.py | 东方头条App地自动化 |  |
 
 
 
