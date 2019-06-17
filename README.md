@@ -11,14 +11,26 @@
 | 第13章 使用HTTP代理 | random_proxy | 依赖proxy_example生成的proxy_list.json，从proxy_list.json中选择一个代理并在请求中使用代理 |
 
 
+## Algorithm目录
+阅读微信订阅号`程序员小灰[chengxuyuan]`、阅读算法书时，敲的代码：
+
+| 代码 | 阅读出处 |  |
+| --- | --- | --- |
+| bubble_sort.py | [漫画：什么是冒泡排序？](https://mp.weixin.qq.com/s/wO11PDZSM5pQ0DfbQjKRQA) |  |
+| quick_sort.py | [漫画：什么是快速排序？(上)](https://mp.weixin.qq.com/s/wXvs98RGumzFHvQlC1dOeA) |  |
+| heap_sort.py | [漫画：什么是二叉堆？](https://mp.weixin.qq.com/s/NJmGs5rLkxiKfYsipx5jCQ) |  |
+
+
 ## 玩具目录
 自己的一些练手项目
-* weibo_pc.py：登录PC端的微博, 获取登录用户的粉丝、关注的人、朋友[互相关注]
 
-阅读顺序：
-* bubble_sort.py:[漫画：什么是冒泡排序？](https://mp.weixin.qq.com/s/wO11PDZSM5pQ0DfbQjKRQA)
-* quick_sort.py:[漫画：什么是快速排序？(上)](https://mp.weixin.qq.com/s/wXvs98RGumzFHvQlC1dOeA)
-* heap_sort.py:[漫画：什么是二叉堆？](https://mp.weixin.qq.com/s/NJmGs5rLkxiKfYsipx5jCQ)
+| 代码 | 说明 |  |
+| --- | --- | --- |
+| weibo_pc.py | 登录PC端的微博, 获取登录用户的粉丝、关注的人、朋友[互相关注] |  |
+| qiandao.py | 趣消除App地自动化 |  |
+
+
+
 
 
 
