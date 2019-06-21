@@ -30,6 +30,10 @@
 | qiandao.py | 趣消除App地自动化 |  |
 | dev-toutiao.py | 今日头条极速版App地自动化 |  |
 | dftoutiao.py | 东方头条App地自动化 |  |
+| chengyu目录 | [扶我起来学数学App - 成语消消乐](https://www.52pojie.cn/thread-978172-1-1.html) |  |
+
+
+
 
 
 
