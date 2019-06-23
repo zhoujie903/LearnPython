@@ -33,12 +33,31 @@ class Chengyu(object):
         
         self.answers = list()
         self.ask_string = ''
-        self.ask_dict = dict()
+
+        # {'和':[1,8], '我':[11]}
+        self.char_indexs_dict = dict()
+
+        # {1:'和', 8:'和', 11:'我'}
         self.index_char_dict = dict()
+
         self.count = 0
+
+        # 自动提交答案的网络发送次数
         self.auto_send_count = 0
+
+        # 找到的的成语中各异字符为2个的答案数量：如 [真真假假] 
+        self.answer_2chars_count = 0
+
+        # {'中流砥柱':[1,9,21,25]}
         self.answer_indexs_dict = dict()
+
+        # 
         self.error_answers = []
+
+        # 玩了多少局
+        self.play_times = 0
+
+
 
     # General lifecycle
     def load(self, loader):
@@ -75,6 +94,7 @@ class Chengyu(object):
             self.ask_string = ask_string        
             # 计算答案
             self.find_answers_v2(ask_string)
+            self.play_times += 1
 
         if m['type'] == 'answer':
             self.answer_indexs_dict[m['answer']] = m['answer_index']
@@ -113,12 +133,13 @@ class Chengyu(object):
 
         self.reset_data_to_init()
 
-        with open(self.dictpath, 'wt') as f:
-            l = list(self.chengyu)
-            l.sort()
-            for item in l:
-                f.write(item)
-                f.write('\n')
+        if self.play_times % 5 == 0:
+            with open(self.dictpath, 'wt') as f:
+                l = list(self.chengyu)
+                l.sort()
+                for item in l:
+                    f.write(item)
+                    f.write('\n')
 
 
     # ---------------------------------------------
@@ -126,8 +147,9 @@ class Chengyu(object):
         '''
             在内存成语字典查找答案
         '''      
-        ask_set = set(ask_string)
-        self.ask_dict = dict( zip(ask_string, range(len(ask_string))))
+        ask_set = set(ask_string)        
+        for i, c in enumerate(ask_string):
+            self.char_indexs_dict.setdefault(c, []).append(i)
         self.index_char_dict = dict( zip(range(len(ask_string)), ask_string)) 
 
         max_count = len(ask_string) / 4          
@@ -135,7 +157,7 @@ class Chengyu(object):
             item_set = set(item)
             if not (item_set - ask_set):
                 self.answers.append(item)
-                if max_count <= len(self.answers):
+                if len(self.answers) - self.answer_2chars_count >= max_count :
                     self.count = len(self.answers)
                     return
         self.count = len(self.answers)
@@ -143,30 +165,24 @@ class Chengyu(object):
     def auto_answer(self, flow):
         if len(self.answers):
             item = self.answers[0]
-            answer_index = [ str(self.ask_dict[c])  for c in item ]
+            answer_index = []
+            for c in item:
+                if self.char_indexs_dict[c]:
+                    index = self.char_indexs_dict[c][0]  
+                    answer_index.append( str(index) )
+                    del self.char_indexs_dict[c][0]
+                else:
+                    '''
+                    这个答案是错误的
+                    '''
+                    self.error_answers.append(item)
+                    self.answers.remove(item)
+                    return
+                
             ask_string = self.ask_string
 
             if len(set(answer_index)) < 4:
-                '''
-                有重复索引，需要矫正
-                '''
-                d = {}                
-                for i, c in enumerate(ask_string):
-                    d.setdefault(c, []).append(i)
-
-                answer_index.clear()
-                for c in item:
-                    if d[c]:
-                        answer_index.append( str(d[c][0]) )
-                        del d[c][0]
-                    else:
-                        '''
-                        这个答案是错误的
-                        '''
-                        self.error_answers.append(item)
-                        self.answers.remove(item)
-                        return
-                    
+                ctx.log.error('算法有错误：{} 小于4'.format(answer_index))
 
             send_message = {
                 'answer': item,
@@ -174,7 +190,9 @@ class Chengyu(object):
                 'type': 'answer'
             }
             mm = json.dumps(send_message)
+            # -----------------------
             print(mm)
+            # ----------------------- 
             self.answer_indexs_dict[item] = answer_index
             # 向服务器发送消息
             if not flow.ended and not flow.error:
@@ -199,7 +217,7 @@ class Chengyu(object):
         '''
             图形化、色彩化显示答案
         '''
-        self.print_color('共找到 {} 个成语'.format(self.count))
+        self.print_color('共找到 {}/{} 个成语'.format(self.count, len(self.ask_string)//4))
         self.print_color('错误成语 {}'.format(self.error_answers))
         self.print_color('共自动 {} 次提交'.format(self.auto_send_count))
         for item in self.answers:
@@ -246,10 +264,15 @@ class Chengyu(object):
         self.ask_string = ''
         self.answers.clear()
         self.index_char_dict.clear()
+
         self.count = 0 
         self.auto_send_count = 0
+        self.answer_2chars_count = 0
+
         self.answer_indexs_dict.clear()
+        self.char_indexs_dict.clear()
         self.error_answers.clear()
+
 
 addons = [
     Chengyu()
