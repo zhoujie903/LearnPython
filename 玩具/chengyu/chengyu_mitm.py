@@ -1,5 +1,5 @@
 import json
-import argparse
+import time
 
 from mitmproxy import ctx
 
@@ -34,6 +34,11 @@ class Chengyu(object):
         self.answers = list()
         self.ask_string = ''
         self.ask_dict = dict()
+        self.index_char_dict = dict()
+        self.count = 0
+        self.auto_send_count = 0
+        self.answer_indexs_dict = dict()
+        self.error_answers = []
 
     # General lifecycle
     def load(self, loader):
@@ -71,25 +76,42 @@ class Chengyu(object):
             # 计算答案
             self.find_answers_v2(ask_string)
 
+        if m['type'] == 'answer':
+            self.answer_indexs_dict[m['answer']] = m['answer_index']
+
         # 删除已回答正确的答案
         if m.get('ack') == 1:
-            self.answers.remove(m['answer'])
+
+            answer = m['answer']
+            answer_index = self.answer_indexs_dict.get(answer,[])
+            for i in answer_index:
+                self.index_char_dict[int(i)] = '  '
+            try:
+                self.answers.remove(m['answer'])
+            except:
+                pass
+             
 
         # 自动答题
-        # self.auto_answer(flow)
+        self.auto_answer(flow)
 
         # 显示答案
         self.print_answers()
 
 
-        # 把答案增加到内存字典中
-        self.__add_new_worlds_to_memory(m)        
+        if m['type'] == 'game_result':
+            # 把答案增加到内存字典中
+            self.__add_new_worlds_to_memory(m) 
+
+            self.reset_data_to_init()      
 
     def websocket_end(self, flow):
         """
             A websocket connection has ended.
         """
         ctx.log.info('\033[1;31m websocket_end \033[0m')
+
+        self.reset_data_to_init()
 
         with open(self.dictpath, 'wt') as f:
             l = list(self.chengyu)
@@ -106,6 +128,7 @@ class Chengyu(object):
         '''      
         ask_set = set(ask_string)
         self.ask_dict = dict( zip(ask_string, range(len(ask_string))))
+        self.index_char_dict = dict( zip(range(len(ask_string)), ask_string)) 
 
         max_count = len(ask_string) / 4          
         for item in self.chengyu:
@@ -113,74 +136,120 @@ class Chengyu(object):
             if not (item_set - ask_set):
                 self.answers.append(item)
                 if max_count <= len(self.answers):
+                    self.count = len(self.answers)
                     return
+        self.count = len(self.answers)
 
     def auto_answer(self, flow):
         if len(self.answers):
             item = self.answers[0]
             answer_index = [ str(self.ask_dict[c])  for c in item ]
             ask_string = self.ask_string
-            while len(set(answer_index)) < 4:
-                index = 0
-                for i, v in enumerate(answer_index):
-                    c = ask_string[int(v)]
-                    index = ask_string.find(c,index)
-                    print(index, v)
-                    if index != -1:
-                        answer_index[i] = str(index)
-                    index += 1
+
+            if len(set(answer_index)) < 4:
+                '''
+                有重复索引，需要矫正
+                '''
+                d = {}                
+                for i, c in enumerate(ask_string):
+                    d.setdefault(c, []).append(i)
+
+                answer_index.clear()
+                for c in item:
+                    if d[c]:
+                        answer_index.append( str(d[c][0]) )
+                        del d[c][0]
+                    else:
+                        '''
+                        这个答案是错误的
+                        '''
+                        self.error_answers.append(item)
+                        self.answers.remove(item)
+                        return
+                    
 
             send_message = {
-                'answer': self.answers[0],
+                'answer': item,
                 'answer_index': answer_index,
                 'type': 'answer'
             }
             mm = json.dumps(send_message)
             print(mm)
+            self.answer_indexs_dict[item] = answer_index
             # 向服务器发送消息
-            flow.inject_message(flow.server_conn, mm)
+            if not flow.ended and not flow.error:
+                self.auto_send_count += 1
+                self.answers.remove(item)
+                flow.inject_message(flow.server_conn, mm)
+                time.sleep(0.5)
+
+
 
 
     def __add_new_worlds_to_memory(self, m):
         '''
             把答案增加到内存字典中
         '''
-        if m['type'] == 'game_result':
-            self.answers.clear()
-            for answer in m['all_answer']:
-                self.chengyu.add(answer['phrase'])
+        for answer in m['all_answer']:
+            self.chengyu.add(answer['phrase'])
 
-            ctx.log.info('\033[1;31m 共收录{}个成语 \033[0m'.format(len(self.chengyu)))
+        ctx.log.info('\033[1;31m 共收录{}个成语 \033[0m'.format(len(self.chengyu)))
 
     def print_answers(self):
         '''
             图形化、色彩化显示答案
-        '''        
-        ask_string = self.ask_string
-        length = len(ask_string)
-
+        '''
+        self.print_color('共找到 {} 个成语'.format(self.count))
+        self.print_color('错误成语 {}'.format(self.error_answers))
+        self.print_color('共自动 {} 次提交'.format(self.auto_send_count))
         for item in self.answers:
             self.print_color(item)
-            self.print_color('--'*6)
+            self.print_matrix(item)
 
-            global colors, White
-            for i, c in enumerate(ask_string, 1):
-                end = ''
-                if i % 6 == 0 or i == length:
-                    end = '\n'                
-                
-                color = White
-                if c in item:                    
-                    color = colors[item.index(c)]
+        if (not self.answers) and self.index_char_dict:
+            self.print_matrix()
 
-                self.print_color(c, end=end, color=color)
 
-            self.print_color('--'*6)
+    def print_matrix(self, item = []):
+        chars_in_line = 6
+        length = len(self.ask_string)        
+
+        lines = (length + chars_in_line - 1) // chars_in_line
+        PADDING = ' '*(lines * chars_in_line - length) 
+        is_need_padding = len(PADDING) != 0
+
+        self.print_color('--'*chars_in_line)
+
+        global colors, White
+        for i, c in self.index_char_dict.items():
+            end = ''
+            if (i+1) % chars_in_line == 0 or (i+1) == length:
+                end = '\n'                
+            
+            color = White
+            if c in item:                    
+                color = colors[item.index(c)]
+
+            line, first = divmod(i, chars_in_line)
+            if is_need_padding and first == 0 and (line + 1 == lines):
+                c = PADDING + c 
+
+            self.print_color(c, end=end, color=color)
+
+        self.print_color('--'*chars_in_line)
 
     def print_color(self, message, end='\n', color=Red):
         print('{}{}\033[0m'.format(color, message), end=end)
 
 
+    def reset_data_to_init(self):
+        self.ask_string = ''
+        self.answers.clear()
+        self.index_char_dict.clear()
+        self.count = 0 
+        self.auto_send_count = 0
+        self.answer_indexs_dict.clear()
+        self.error_answers.clear()
 
 addons = [
     Chengyu()
