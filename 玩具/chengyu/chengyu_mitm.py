@@ -1,5 +1,6 @@
 import json
 import time
+import collections
 
 from mitmproxy import ctx
 
@@ -44,6 +45,7 @@ class Chengyu(object):
 
         # 自动提交答案的网络发送次数
         self.auto_send_count = 0
+        self.ack_true_list = list()
 
         # 找到的的成语中各异字符为2个的答案数量：如 [真真假假] 
         self.answer_2chars_count = 0
@@ -51,7 +53,7 @@ class Chengyu(object):
         # {'中流砥柱':[1,9,21,25]}
         self.answer_indexs_dict = dict()
 
-        # 
+        # 查找到的错误答案
         self.error_answers = []
 
         # 玩了多少局
@@ -88,21 +90,21 @@ class Chengyu(object):
         ctx.log.info('')
 
         m = json.loads(message.content)
-        t = m['type']
+        message_type = m['type']
         if m.get('ask_string'):
-            ask_string = m['ask_string']            
-            self.ask_string = ask_string        
+            self.ask_string = m['ask_string']        
             # 计算答案
-            self.find_answers_v2(ask_string)
+            self.find_answers_v2(self.ask_string)
             self.play_times += 1
 
-        if m['type'] == 'answer':
+        if message_type == 'answer':
             self.answer_indexs_dict[m['answer']] = m['answer_index']
 
         # 删除已回答正确的答案
         if m.get('ack') == 1:
 
             answer = m['answer']
+            self.ack_true_list.append(answer)
             answer_index = self.answer_indexs_dict.get(answer,[])
             for i in answer_index:
                 self.index_char_dict[int(i)] = '  '
@@ -116,14 +118,16 @@ class Chengyu(object):
         self.auto_answer(flow)
 
         # 显示答案
-        self.print_answers()
+        if len(self.ask_string):
+            self.print_answers()
 
 
-        if m['type'] == 'game_result':
+        if message_type == 'game_result':
             # 把答案增加到内存字典中
             self.__add_new_worlds_to_memory(m) 
 
-            self.reset_data_to_init()      
+            self.reset_data_to_init() 
+
 
     def websocket_end(self, flow):
         """
@@ -157,6 +161,8 @@ class Chengyu(object):
             item_set = set(item)
             if not (item_set - ask_set):
                 self.answers.append(item)
+                if len(item_set)<4:
+                    self.answer_2chars_count += 1
                 if len(self.answers) - self.answer_2chars_count >= max_count :
                     self.count = len(self.answers)
                     return
@@ -166,6 +172,19 @@ class Chengyu(object):
         if len(self.answers):
             item = self.answers[0]
             answer_index = []
+            counter = collections.Counter(item)
+
+            for char, count in counter.items():
+                if self.char_indexs_dict[char]:
+                    if len(self.char_indexs_dict[char]) < count:
+                        self.error_answers.append(item)
+                        self.answers.remove(item)
+                        return
+                else:
+                    self.error_answers.append(item)
+                    self.answers.remove(item)
+                    return
+
             for c in item:
                 if self.char_indexs_dict[c]:
                     index = self.char_indexs_dict[c][0]  
@@ -179,7 +198,6 @@ class Chengyu(object):
                     self.answers.remove(item)
                     return
                 
-            ask_string = self.ask_string
 
             if len(set(answer_index)) < 4:
                 ctx.log.error('算法有错误：{} 小于4'.format(answer_index))
@@ -220,9 +238,10 @@ class Chengyu(object):
         self.print_color('共找到 {}/{} 个成语'.format(self.count, len(self.ask_string)//4))
         self.print_color('错误成语 {}'.format(self.error_answers))
         self.print_color('共自动 {} 次提交'.format(self.auto_send_count))
+        self.print_color('确认{}个：{}'.format(len(self.ack_true_list),self.ack_true_list))
         for item in self.answers:
             self.print_color(item)
-            self.print_matrix(item)
+            # self.print_matrix(item)
 
         if (not self.answers) and self.index_char_dict:
             self.print_matrix()
@@ -272,6 +291,7 @@ class Chengyu(object):
         self.answer_indexs_dict.clear()
         self.char_indexs_dict.clear()
         self.error_answers.clear()
+        self.ack_true_list.clear()
 
 
 addons = [
