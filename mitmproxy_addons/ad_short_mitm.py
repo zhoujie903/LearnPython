@@ -8,6 +8,9 @@ from mitmproxy import flowfilter
 '''
 缩短广告的播放时间
 原理：通过替换为一个时长短的视频的URL
+这里有2种广告：
+1. is.snssdk.com  response方法里替换
+2. ad.ixigua.com  Todo  
 '''
 
 
@@ -23,10 +26,9 @@ class Ad_short(object):
 
     def response(self, flow):
         if flowfilter.match(self.filter, flow):
-            text = flow.response.text
             url = '"video_url":"{}"'.format(random.choice(videos)) 
             url +='}'
-            flow.response.text = re.sub(r'"video_url":"(.+)"}', url, text)
+            flow.response.replace(r'"video_url":"(.+)"}', url)
 
 
 addons = [
