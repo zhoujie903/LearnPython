@@ -1,14 +1,14 @@
 # 《算法图解》第7章 狄克斯特拉算法 7.5实现
 
 # 需要三个散列表
-# 1.表示整个图graph; 2.每个节点的开销costs; 3.存储父节点的散列表
+# 1.graph: 表示整个图graph; 2.costs: 每个节点的开销costs; 3.parents: 存储父节点的散列表
 graph = {}
 
 costs = {}
 
 parents = {}
 
-# 一个数组，用于记录处理过的节点，因为对于同一个节 点，你不用处理多次
+# 一个数组，用于记录处理过的节点，因为对于同一个节点，你不用处理多次
 processed = []
 
 def find_lowest_cost_node(costs):
