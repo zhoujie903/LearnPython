@@ -1,4 +1,6 @@
 # 漫画：什么是二叉堆？https://mp.weixin.qq.com/s/NJmGs5rLkxiKfYsipx5jCQ
+# 漫画：什么是二叉堆？（修正版）https://mp.weixin.qq.com/s/cq2EhVtOTzTVpNpLDXfeJg
+# 漫画：什么是堆排序？https://mp.weixin.qq.com/s/8Bid1naBLtEjPoP-R4HkBg
 
 
 def upAdjust(array):
@@ -46,17 +48,43 @@ def downAdjust(array, parentIndex, length):
 
 def buildHeap(array):
     for i in range(len(array)//2, -1, -1):
-        downAdjust(array, i, len(array))
+        heapify(array, len(array)-1, i)
+        
 
+def heapify(array, lastIndex, i):
+    while True:
+        maxPos = i
+        if i * 2 + 1 <= lastIndex and array[i] < array[i * 2 + 1]: 
+            maxPos = i * 2 + 1
+        if i * 2 + 2 <= lastIndex and array[maxPos] < array[i * 2 + 2]:
+            maxPos = i * 2 + 2
+        if maxPos == i:
+            break
+        array[i], array[maxPos] = array[maxPos], array[i]
+        i = maxPos  
+
+
+def heap_short(array):
+    # 1. 把无序数组构建成二叉堆
+    buildHeap(array)
+    k = len(array) - 1
+    while k > 0:
+        array[0], array[k] = array[k], array[0]
+        k -= 1        
+        heapify(array, k, 0)
+        
 
 def main():
     array = [1, 3, 2, 6, 5, 7, 8, 9, 10, 0]
-    upAdjust(array)
-    print(array)
+    print("排序前：", array)
+    heap_short(array)
+    print("排序后：", array)
 
     array = [7, 1, 3, 10, 5, 2, 8, 9, 6]
-    buildHeap(array)
-    print(array)
+    print("排序前：", array)
+    heap_short(array)
+    print("排序后：", array)
+
 
 
 if __name__ == '__main__':
