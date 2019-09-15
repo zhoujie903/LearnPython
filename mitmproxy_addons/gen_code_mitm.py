@@ -42,9 +42,28 @@ class GenCode(object):
 
         # 趣头条
         urls = [
-            r'api-coin-service.aiclk.com/coin/service',     
+            r'taskcenter/getListV2',
+            r'api-coin-service.aiclk.com/coin/service',
+            r'readtimer/report',
+            r'motivateapp/mtvcallback',     
         ]
-        self.qu_tou_tiao = flowfilter.parse('|'.join(urls))        
+        self.qu_tou_tiao = flowfilter.parse('|'.join(urls)) 
+
+        # 百度 - 好看
+        urls = [
+            r'activity/acusercheckin', # 每日签到
+            r'signIn/new/sign', # 游戏中心签到
+            r'activity/acad/rewardad', #看视频
+            r'api/task/1/task/379/complete', #看视频
+        ]
+        self.hao_kan = flowfilter.parse('|'.join(urls)) 
+
+        self.flowfilters = [
+            self.toutiao, 
+            self.huoshan, 
+            self.qu_tou_tiao, 
+            self.hao_kan
+        ]      
 
     def load(self, loader):
         ctx.log.info('event: load')
@@ -61,7 +80,7 @@ class GenCode(object):
 
 
     def response(self, flow: http.HTTPFlow):
-        if self.huoshan(flow) or self.toutiao(flow) or self.qu_tou_tiao(flow):
+        if any( [ filter(flow) for filter in self.flowfilters ] ):
 
             request: http.HTTPRequest = flow.request
 
