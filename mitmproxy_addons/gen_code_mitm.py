@@ -1,4 +1,5 @@
 import json
+import re
 from urllib.parse import urlparse
 
 from mitmproxy import ctx
@@ -24,7 +25,8 @@ class GenCode(object):
             'score_task/v1/landing/add_amount/',             
             'search/suggest/homepage_suggest/',
             'search/suggest/initial_page/',
-            'api/news/feed/v47/',
+            'api/news/feed/v47/',#安卓视频tab页
+            'api/news/feed/v64/',#ios视频tab页
             'api/search/content/',           
         ]
         self.toutiao = flowfilter.parse('|'.join(urls))
@@ -45,7 +47,17 @@ class GenCode(object):
             r'taskcenter/getListV2',
             r'api-coin-service.aiclk.com/coin/service',
             r'readtimer/report',
-            r'motivateapp/mtvcallback',     
+            r'motivateapp/mtvcallback',
+
+            r'x/tree-game/',
+            r'x/tree-game/left-plant-num',
+            r'x/tree-game/plant-ok',
+            r'x/tree-game/add-plant',
+            r'x/tree-game/fertilizer/add',
+            r'x/tree-game/fertilizer/use',
+            r'x/tree-game/water-plants',
+            r'x/tree-game/my-gift-box/draw-lottery',
+            r'x/tree-game/my-gift-box/receive-prize',
         ]
         self.qu_tou_tiao = flowfilter.parse('|'.join(urls)) 
 
@@ -87,7 +99,7 @@ class GenCode(object):
             parse_result = urlparse(request.url)
             url_path = parse_result.path
 
-            function_name = url_path.replace('/','_').strip('_')
+            function_name = re.sub(r'[/-]','_', url_path).strip('_')
             headers_code = self.headers_string(flow)
             params_code = self.params_string(flow)
             data_code = self.data_string(flow) 
@@ -144,6 +156,8 @@ def {function_name}(self):
             lines += f"\n\t\t'{key}': '{value}',"
 
         for key,value in flow.request.multipart_form.items():
+            key = key.decode(encoding='utf-8')
+            value = value.decode(encoding='utf-8') 
             lines += f"\n\t\t'{key}': '{value}',"
 
         # Todo:复杂json数据还不能代码化
