@@ -9,8 +9,8 @@ from mitmproxy import flowfilter
 东方头条App - 幸运大转盘 - 重放
 
 以这2个请求为一组来重放
-https://zhuanpan.dftoutiao.com/zhuanpan/get_zhuanpan_new
-https://zhuanpan.dftoutiao.com/zhuanpan/get_gold
+https://zhuanpan.dftoutiao.com/zhuanpan_v3/get_zhuanpan_new
+https://zhuanpan.dftoutiao.com/zhuanpan_v3/get_gold
 '''
 
 
@@ -22,9 +22,9 @@ def print_color(message):
 
 class Zhuangpan(object):
     def __init__(self):
-        self.filter = flowfilter.parse(r'(~u zhuanpan/get_zhuanpan_new) | (~u zhuanpan/get_gold)')
-        self.new_fliter = flowfilter.parse(r'~u zhuanpan/get_zhuanpan_new') 
-        self.get_fliter = flowfilter.parse(r'~u zhuanpan/get_gold')
+        self.filter = flowfilter.parse(r'(~u zhuanpan_v3/get_zhuanpan_new) | (~u zhuanpan_v3/get_gold)')
+        self.new_fliter = flowfilter.parse(r'~u zhuanpan_v3/get_zhuanpan_new') 
+        self.get_fliter = flowfilter.parse(r'~u zhuanpan_v3/get_gold')
         self.flows = []
         self.urls = set()
         self.remain = 0
@@ -52,7 +52,7 @@ class Zhuangpan(object):
             if self.remain > 0 and len(self.urls) >= 2:                
                 flows = [f.copy() for f in self.flows]
                 ctx.master.commands.call("replay.client", flows)
-                time.sleep(1)                
+                time.sleep(0.2)                
 
 
 addons = [
