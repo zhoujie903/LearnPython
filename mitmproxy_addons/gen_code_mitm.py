@@ -25,6 +25,8 @@ class GenCode(object):
             'score_task/v1/landing/add_amount/',             
             'search/suggest/homepage_suggest/',
             'search/suggest/initial_page/',
+            'score_task/v1/walk/count/',
+            'score_task/v1/walk/bonus/',
             'api/news/feed/v47/',#安卓视频tab页
             'api/news/feed/v64/',#ios视频tab页
             'api/search/content/',           
@@ -44,10 +46,12 @@ class GenCode(object):
 
         # 趣头条
         urls = [
-            r'taskcenter/getListV2',
+            r'sign/sign'
+            r'taskcenter/getListV2',#tab页：任务
             r'api-coin-service.aiclk.com/coin/service',
             r'readtimer/report',
             r'motivateapp/mtvcallback',
+            r'x/feed/getReward',#信息流 - 惊喜红包
 
             r'x/tree-game/',
             r'x/tree-game/left-plant-num',
@@ -58,6 +62,11 @@ class GenCode(object):
             r'x/tree-game/water-plants',
             r'x/tree-game/my-gift-box/draw-lottery',
             r'x/tree-game/my-gift-box/receive-prize',
+
+            r'x/open/game',
+            r'api/loginGame',
+            r'api/qttAddCoin',
+            r'api/AddCoin',# 成语
         ]
         self.qu_tou_tiao = flowfilter.parse('|'.join(urls)) 
 
@@ -70,11 +79,47 @@ class GenCode(object):
         ]
         self.hao_kan = flowfilter.parse('|'.join(urls)) 
 
+        # 百度 - 全民小视频 
+        urls = [
+            r'mvideo/api', # 每日签到
+        ]
+        self.quan_ming = flowfilter.parse('|'.join(urls)) 
+
+
+        urls = [
+            # r'ktt',
+            r'article/treasure_chest',
+            r'TaskCenter/daily_sign',
+            r'WebApi/',
+            r'WebApi/Stage/task_reward',
+            r'WapPage/get_video_status',
+            # r''
+        ]
+        self.ma_yi_kd = flowfilter.parse('|'.join(urls)) 
+
+
+        urls = [
+            r'sign/news_take_s',
+            r'timesaward/timesaward/get_award',
+            r'answer_question_new/get_question',
+            r'answer_question_new/add_user_bonus',
+            r'zhuanpan_v3/get_zhuanpan_new',
+            r'zhuanpan_v3/get_gold',
+            r'hit_susliks/hit_susliks/start_play_game',
+            r'hit_susliks/hit_susliks/finish_play_game',
+            r'hit_susliks/hit_susliks/set_user_video_num',
+            r'hit_susliks/hit_susliks/lucky_draw',
+        ]
+        self.dftt = flowfilter.parse('|'.join(urls))
+
         self.flowfilters = [
             self.toutiao, 
             self.huoshan, 
             self.qu_tou_tiao, 
-            self.hao_kan
+            self.hao_kan,
+            self.quan_ming,
+            self.ma_yi_kd,
+            self.dftt,
         ]      
 
     def load(self, loader):
