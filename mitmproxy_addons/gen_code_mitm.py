@@ -23,10 +23,19 @@ class GenCode(object):
             'score_task/v1/task/get_read_bonus/',
             'score_task/v1/task/done_task/',
             'score_task/v1/landing/add_amount/',             
+            'score_task/v1/user/profit_detail/',
             'search/suggest/homepage_suggest/',
             'search/suggest/initial_page/',
-            'score_task/v1/walk/count/',
-            'score_task/v1/walk/bonus/',
+            r'score_task/v1/walk/',
+
+            'score_task/v1/sleep/status/',
+            'score_task/v1/sleep/start/',
+            'score_task/v1/sleep/stop/',
+            'score_task/v1/sleep/done_task/',#睡觉领金币
+
+            r'ttgame/game_farm/',
+
+            'score_task/lite/v1/eat/done_eat/',
             'api/news/feed/v47/',#安卓视频tab页
             'api/news/feed/v64/',#ios视频tab页
             'api/search/content/',           
@@ -93,11 +102,11 @@ class GenCode(object):
             r'WebApi/',
             r'WebApi/Stage/task_reward',
             r'WapPage/get_video_status',
-            # r''
+            r'article/complete_article',
         ]
         self.ma_yi_kd = flowfilter.parse('|'.join(urls)) 
 
-
+        # 东方头条 
         urls = [
             r'sign/news_take_s',
             r'timesaward/timesaward/get_award',
@@ -109,6 +118,7 @@ class GenCode(object):
             r'hit_susliks/hit_susliks/finish_play_game',
             r'hit_susliks/hit_susliks/set_user_video_num',
             r'hit_susliks/hit_susliks/lucky_draw',
+            r'turn_over_packet/packet/add_packet_bonus',
         ]
         self.dftt = flowfilter.parse('|'.join(urls))
 
@@ -138,7 +148,6 @@ class GenCode(object):
 
     def response(self, flow: http.HTTPFlow):
         if any( [ filter(flow) for filter in self.flowfilters ] ):
-
             request: http.HTTPRequest = flow.request
 
             parse_result = urlparse(request.url)
@@ -207,9 +216,12 @@ def {function_name}(self):
 
         # Todo:复杂json数据还不能代码化
         if 'application/json' in flow.request.headers.get('content-type',''):
-            d = json.loads(flow.request.text)
-            for key,value in d.items():
-                lines += f"\n\t\t'{key}': {value},"
+            try:
+                d = json.loads(flow.request.text)
+                for key,value in d.items():
+                    lines += f"\n\t\t'{key}': {value},"
+            except Exception as e:
+                pass
         
         s = f'''data = {{{lines}\n\t}}'''        
         return s
