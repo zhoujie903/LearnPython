@@ -52,14 +52,8 @@ class Chengyu(object):
         # 服务器确定正确的成语
         self.ack_true_list = list()
 
-        # 找到的的成语中各异字符为2个的答案数量：如 [真真假假]
-        self.answer_2chars_count = 0
-
         # {'中流砥柱':[1,9,21,25]}
         self.answer_indexs_dict = dict()
-
-        # {'中流砥柱':set('中流砥柱')}
-        self.answer_charset_dict = dict()
 
         # 查找到的错误答案
         self.error_answers = []
@@ -181,14 +175,18 @@ class Chengyu(object):
             self.char_indexs_dict.setdefault(c, []).append(i)
         self.index_char_dict = dict( zip(range(len(ask_string)), ask_string))
 
+        used_chars = set()
+        # 找到的的成语中各异字符为2个的答案数量：如 [真真假假]
+        answer_2chars_count = 0
         max_count = len(ask_string) / 4
         for item in self.chengyu:
-            item_set = self.answer_charset_dict.setdefault(item, set(item))
+            item_set = set(item)
             if not (item_set - ask_set):
                 self.answers.append(item)
+                used_chars.update(item_set)
                 if len(item_set)<4:
-                    self.answer_2chars_count += 1
-                if len(self.answers) - self.answer_2chars_count >= max_count :
+                    answer_2chars_count += 1
+                if len(self.answers) - answer_2chars_count >= max_count and used_chars >= ask_set:
                     self.count = len(self.answers)
                     return
         self.count = len(self.answers)
@@ -315,7 +313,6 @@ class Chengyu(object):
 
         self.count = 0
         self.auto_send_count = 0
-        self.answer_2chars_count = 0
 
         self.answer_indexs_dict.clear()
         self.char_indexs_dict.clear()
