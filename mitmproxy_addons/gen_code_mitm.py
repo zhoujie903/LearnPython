@@ -1,5 +1,7 @@
+import pathlib
 import json
 import re
+import pprint
 from urllib.parse import urlparse
 
 from mitmproxy import ctx
@@ -13,8 +15,60 @@ from mitmproxy import http
 class GenCode(object):
     def __init__(self):
         ctx.log.info('__init__')
+        self.file_dir = '/Users/zhoujie/Desktop/api/'
+        self.file_params_keys = 'api_params_keys.text'
+        self.file_all = 'all.text'
+        self.file_headers = 'headers.text'
+        self.file_params = 'params.text'
+        self.file_bodys = 'bodys.text'
+        self.file_cannot = 'can_not_create_data.text'
 
-        # 今日头条 - 
+        self.headers = {}
+        self.params = {}
+        self.bodys = {}
+
+        self.params_keys = {}
+        # 不能伪造但可以重放的数据
+        self.can_not_create = {
+            r'task/timer_submit': {},
+        }
+        
+        try:
+            with open(f'{self.file_dir}{self.file_cannot}', 'r') as f:
+                self.can_not_create = json.load(f)
+                ctx.log.info(f'load {self.file_cannot} success!') 
+        except:
+            pass
+
+        try:
+            with open(f'{self.file_dir}{self.file_params_keys}', 'r') as f:
+                self.params_keys = json.load(f) 
+                ctx.log.info(f'load {self.file_params_keys} success!') 
+        except:
+            pass
+
+        try:
+            with open(f'{self.file_dir}{self.file_headers}', 'r') as f:
+                self.headers = json.load(f) 
+                ctx.log.info(f'load {self.file_headers} success!') 
+        except:
+            pass
+
+        try:
+            with open(f'{self.file_dir}{self.file_params}', 'r') as f:
+                self.params = json.load(f) 
+                ctx.log.info(f'load {self.file_params} success!') 
+        except:
+            pass
+
+        try:
+            with open(f'{self.file_dir}{self.file_bodys}', 'r') as f:
+                self.bodys = json.load(f)
+                ctx.log.info(f'load {self.file_bodys} success!') 
+        except:
+            pass
+
+ 
         urls = [
             'score_task/v1/task/page_data/',
             'score_task/v1/task/sign_in/',
@@ -24,6 +78,7 @@ class GenCode(object):
             'score_task/v1/task/done_task/',
             'score_task/v1/landing/add_amount/',             
             'score_task/v1/user/profit_detail/',
+            'score_task/v1/novel/bonus/', #读小说得金币
             'search/suggest/homepage_suggest/',
             'search/suggest/initial_page/',
             r'score_task/v1/walk/',
@@ -34,6 +89,8 @@ class GenCode(object):
             'score_task/v1/sleep/done_task/',#睡觉领金币
 
             r'ttgame/game_farm/',
+
+            r'score_task/lite/v1/eat/eat_info/',
 
             'score_task/lite/v1/eat/done_eat/',
             'api/news/feed/v47/',#安卓视频tab页
@@ -94,17 +151,23 @@ class GenCode(object):
         ]
         self.quan_ming = flowfilter.parse('|'.join(urls)) 
 
-
+        # 蚂蚁看点
         urls = [
-            # r'ktt',
             r'article/treasure_chest',
             r'TaskCenter/daily_sign',
-            r'WebApi/',
+            # r'WebApi/',
             r'WebApi/Stage/task_reward',
             r'WapPage/get_video_status',
             r'article/complete_article',
         ]
         self.ma_yi_kd = flowfilter.parse('|'.join(urls)) 
+
+        # 中青看点
+        urls = [
+            r'getTimingRedReward.json',#时段签到
+            r'webApi/AnswerReward/',
+        ]
+        self.zhong_qin_kd = flowfilter.parse('|'.join(urls))
 
         # 东方头条 
         urls = [
@@ -122,14 +185,22 @@ class GenCode(object):
         ]
         self.dftt = flowfilter.parse('|'.join(urls))
 
+        # 彩蛋视频 
+        urls = [
+            r'task/timer_submit',
+        ]
+        self.cai_dan_sp = flowfilter.parse('|'.join(urls))
+
         self.flowfilters = [
             self.toutiao, 
-            self.huoshan, 
+            # self.huoshan, 
             self.qu_tou_tiao, 
-            self.hao_kan,
-            self.quan_ming,
-            self.ma_yi_kd,
-            self.dftt,
+            # self.hao_kan,
+            # self.quan_ming,
+            # self.ma_yi_kd,
+            # self.dftt,
+            # self.zhong_qin_kd,
+            # self.cai_dan_sp,
         ]      
 
     def load(self, loader):
@@ -142,7 +213,53 @@ class GenCode(object):
         ctx.log.info('event: running')
 
     def done(self):
-        ctx.log.info('event: done')
+        print('event: done')
+        path = pathlib.Path(f'{self.file_dir}{self.file_params}')
+        with path.open('w') as f:
+            json.dump(self.params,f,indent=2,sort_keys=True)
+            print(f"生成 {self.file_params} 成功")
+
+        path = pathlib.Path(f'{self.file_dir}{self.file_headers}')
+        with path.open('w') as f:
+            for host, headers  in self.headers.items():
+                self._delete_some_headers(headers)
+            json.dump(self.headers,f,indent=2,sort_keys=True)
+            print(f"生成 {self.file_headers} 成功")
+
+        path = pathlib.Path(f'{self.file_dir}{self.file_bodys}')
+        with path.open('w') as f:
+            json.dump(self.bodys,f,indent=2,sort_keys=True)
+            print(f"生成 {self.file_bodys} 成功")
+
+        path = pathlib.Path(f'{self.file_dir}{self.file_cannot}')
+        with path.open('w') as f:
+            temp = self.can_not_create.copy()
+            for body in temp.values():
+                pprint.pprint(body)
+                for key, value in body.items():
+                    pprint.pprint(key)
+                    pprint.pprint(value)
+                    if isinstance(value, set):
+                        body[key] = list(value)
+            json.dump(temp,f,indent=2,sort_keys=True)
+            print(f"生成 {self.file_cannot} 成功")
+
+
+        path = pathlib.Path(f'{self.file_dir}{self.file_all}')
+        with path.open('w') as f:
+            all_data = self.params.copy()
+            for host, dict_value in all_data.items():
+                all_data[host].update(self.headers.get(host, {}))
+                all_data[host].update(self.bodys.get(host, {}))
+            
+            json.dump(all_data,f,indent=2,sort_keys=True)
+            print(f"生成 {self.file_all} 成功")
+
+
+        path = pathlib.Path(f'{self.file_dir}{self.file_params_keys}')
+        with path.open('w') as f:
+            json.dump(self.params_keys,f,indent=2,sort_keys=True)
+            print(f"生成 {self.file_params_keys} 成功")
 
 
 
@@ -153,13 +270,13 @@ class GenCode(object):
             parse_result = urlparse(request.url)
             url_path = parse_result.path
 
-            function_name = re.sub(r'[/-]','_', url_path).strip('_')
+            function_name = re.sub(r'[/-]','_', url_path).strip('_').lower()
             headers_code = self.headers_string(flow)
             params_code = self.params_string(flow)
             data_code = self.data_string(flow) 
 
-            path = f'''/Users/zhoujie/Desktop/api/{function_name}.text'''  
-            with open(path, 'a') as f:
+            path = pathlib.Path(f'{self.file_dir}{function_name}.text')  
+            with path.open('a') as f:
                 print(f'''# ---------------------''',file=f)
 
                 code = f'''
@@ -178,24 +295,41 @@ def {function_name}(self):
 '''
                 f.write(code)
 
+                # 
+                code = f'''
+def {function_name}(self):
+    logging.info('')
+
+    url = '{request.scheme}://{request.pretty_host}{url_path}'
+
+    params = self._params_from(url)
+
+    {data_code}
+
+    result = self._{request.method.lower()}(url, params=params, data=data)
+    result = json.loads(result)
+    return result
+                
+
+'''
+                f.write(code)                
+                # 
+
                 print(f'''Response:''',file=f)
                 print(f'''{flow.response.text}''',file=f)
                 print(f'''# ---------------------\n\n''',file=f)
 
-    def headers_string(self, flow: http.HTTPFlow):
-        lines = ''
-        for key,value in flow.request.headers.items():
-            lines += f"\n\t\t'{key}': '{value}',"
-        s = f'''headers = {{{lines}\n\t}}'''        
-        return s
+                self.gather_params_and_bodys(flow)
+                self.gather_keys(flow)
+
+    def headers_string(self, flow: http.HTTPFlow, indent=1):
+        d = dict(flow.request.headers)
+        return 'headers = {'+json.dumps(d, indent='\t'*(indent+1)).strip('{}') + '\t}'
 
 
-    def params_string(self, flow: http.HTTPFlow):
-        lines = ''
-        for key,value in flow.request.query.items():
-            lines += f"\n\t\t'{key}': '{value}',"
-        s = f'''params = {{{lines}\n\t}}'''        
-        return s
+    def params_string(self, flow: http.HTTPFlow, indent=1):
+        d = dict(flow.request.query)
+        return 'params = {'+json.dumps(d, indent='\t'*(indent+1)).strip('{}') + '\t}'
 
     def data_string(self, flow: http.HTTPFlow):
         '''
@@ -226,9 +360,80 @@ def {function_name}(self):
         s = f'''data = {{{lines}\n\t}}'''        
         return s
 
+    def gather_params_and_bodys(self, flow: http.HTTPFlow): 
+        request: http.HTTPRequest = flow.request
 
+        # 收集params
+        host_key = self.params.setdefault(request.pretty_host,dict())
+        host_key.update(flow.request.query)
+
+        # 收集headers
+        host_key = self.headers.setdefault(request.pretty_host,dict())
+        host_key.update(flow.request.headers)
+
+        host_key = self.bodys.setdefault(request.pretty_host,dict())
+        host_key.update(flow.request.urlencoded_form)
+        host_key.update(flow.request.multipart_form)
+        try:
+            d = json.loads(flow.request.text)
+            host_key.updated(d)
+        except :
+            pass
+
+        # pprint.pprint(self.params)
+
+        # pprint.pprint(self.headers)
+
+        path = request.path
+        for item in self.can_not_create.keys():
+            if item in path:
+                ctx.log.error(f'hit path {path}')
+                d = self.can_not_create[item]
+                body = json.loads(flow.request.text)
+                for key, value in body.items():
+                    values = d.setdefault(key, set())
+                    values.add(value)
+                pprint.pprint(self.can_not_create)
+
+
+
+    def gather_keys(self, flow: http.HTTPFlow): 
+        request: http.HTTPRequest = flow.request
+        host_key = self.params_keys.setdefault(request.pretty_host,dict())
+        parse_result = urlparse(request.url)
+        url_path = parse_result.path
+        fname = url_path
+        host_key[fname] = list(flow.request.query.keys())
+        pprint.pprint(self.params_keys)
+
+
+    def function_name(self, flow: http.HTTPFlow):
+        request: http.HTTPRequest = flow.request
+
+        parse_result = urlparse(request.url)
+        url_path = parse_result.path
+
+        function_name = re.sub(r'[/-]','_', url_path).strip('_').lower() 
+        return function_name
     
+    def _delete_some_headers(self, headers: dict):
+        for key in {'Host','Connection','Content-Length','Accept-Encoding','Cache-Control','Pragma'}:
+            try:
+                headers.pop(key)
+            except :
+                pass
 
 addons = [
     GenCode()
 ]
+
+
+if __name__ == "__main__":
+    import shlex, subprocess
+
+
+    print(__file__)
+    # subprocess.Popen(['mitmdump', '-s', __file__])
+
+
+    print('done')
