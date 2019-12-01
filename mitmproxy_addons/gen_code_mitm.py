@@ -8,16 +8,28 @@ from mitmproxy import ctx
 from mitmproxy import flowfilter
 from mitmproxy import http
 
+from jinja2 import Template
+
 '''
 生成接口python代码
 '''
 
+class NamedFilter(object):
+    def __init__(self, urls, name=''):
+        self.name = name
+        self.flt = flowfilter.parse('|'.join(urls))
+
+    def __call__(self, f):
+        return self.flt(f)
+
 class GenCode(object):
     def __init__(self):
         ctx.log.info('__init__')
+        # self._test_jinja2()
+
         self.file_dir = '/Users/zhoujie/Desktop/api/'
         self.file_params_keys = 'api_params_keys.text'
-        self.file_all = 'all.text'
+        self.file_all = 'api_all_data.text'
         self.file_headers = 'headers.text'
         self.file_params = 'params.text'
         self.file_bodys = 'bodys.text'
@@ -32,7 +44,10 @@ class GenCode(object):
         self.can_not_create = {
             r'task/timer_submit': {},
         }
-        
+
+        # app包含哪些hosts
+        self.app_hosts = {}
+        self.app_apis = {}
         try:
             with open(f'{self.file_dir}{self.file_cannot}', 'r') as f:
                 self.can_not_create = json.load(f)
@@ -97,7 +112,7 @@ class GenCode(object):
             'api/news/feed/v64/',#ios视频tab页
             'api/search/content/',           
         ]
-        self.toutiao = flowfilter.parse('|'.join(urls))
+        self.toutiao = NamedFilter(urls, 'jin-ri-tou-tiao')
 
         # 火山极速版
         urls = [
@@ -108,12 +123,13 @@ class GenCode(object):
             'luckycat/v1/landing/add_amount/',
             'luckycat/v1/task/get_read_bonus/',            
         ]
-        self.huoshan = flowfilter.parse('|'.join(urls))
+        self.huoshan = NamedFilter(urls, 'huo-shan')
 
         # 趣头条
         urls = [
-            r'sign/sign'
-            r'taskcenter/getListV2',#tab页：任务
+            r'sign/sign',
+            r'/app/re/taskCenter/info/v1/get',
+            # r'taskcenter/getListV2',#旧版本 tab页：任务
             r'api-coin-service.aiclk.com/coin/service',
             r'readtimer/report',
             r'motivateapp/mtvcallback',
@@ -134,7 +150,7 @@ class GenCode(object):
             r'api/qttAddCoin',
             r'api/AddCoin',# 成语
         ]
-        self.qu_tou_tiao = flowfilter.parse('|'.join(urls)) 
+        self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao') 
 
         # 百度 - 好看
         urls = [
@@ -143,13 +159,13 @@ class GenCode(object):
             r'activity/acad/rewardad', #看视频
             r'api/task/1/task/379/complete', #看视频
         ]
-        self.hao_kan = flowfilter.parse('|'.join(urls)) 
+        self.hao_kan = NamedFilter(urls, 'hao-kan') 
 
         # 百度 - 全民小视频 
         urls = [
             r'mvideo/api', # 每日签到
         ]
-        self.quan_ming = flowfilter.parse('|'.join(urls)) 
+        self.quan_ming = NamedFilter(urls, 'quan-ming') 
 
         # 蚂蚁看点
         urls = [
@@ -160,14 +176,14 @@ class GenCode(object):
             r'WapPage/get_video_status',
             r'article/complete_article',
         ]
-        self.ma_yi_kd = flowfilter.parse('|'.join(urls)) 
+        self.ma_yi_kd = NamedFilter(urls, 'ma-yi-kd') 
 
         # 中青看点
         urls = [
             r'getTimingRedReward.json',#时段签到
             r'webApi/AnswerReward/',
         ]
-        self.zhong_qin_kd = flowfilter.parse('|'.join(urls))
+        self.zhong_qin_kd = NamedFilter(urls, 'zhong-qin-kd')
 
         # 东方头条 
         urls = [
@@ -183,24 +199,34 @@ class GenCode(object):
             r'hit_susliks/hit_susliks/lucky_draw',
             r'turn_over_packet/packet/add_packet_bonus',
         ]
-        self.dftt = flowfilter.parse('|'.join(urls))
+        self.dftt = NamedFilter(urls, 'dong-fan-tt')
 
         # 彩蛋视频 
         urls = [
             r'task/timer_submit',
         ]
-        self.cai_dan_sp = flowfilter.parse('|'.join(urls))
+        self.cai_dan_sp = NamedFilter(urls, 'cai-dan-sp')
+
+        urls = [
+            r'/login/index',
+            r'/main/index',
+            r'/card/info',
+            r'/card/open',
+            r'/card/doublereward',
+        ]
+        self.kai_xin_da_ti = NamedFilter(urls, 'kai-xin-da-ti')
 
         self.flowfilters = [
             self.toutiao, 
-            # self.huoshan, 
-            self.qu_tou_tiao, 
+            self.huoshan, 
+            # self.qu_tou_tiao, 
             # self.hao_kan,
             # self.quan_ming,
             # self.ma_yi_kd,
             # self.dftt,
             # self.zhong_qin_kd,
             # self.cai_dan_sp,
+            self.kai_xin_da_ti,
         ]      
 
     def load(self, loader):
@@ -214,57 +240,77 @@ class GenCode(object):
 
     def done(self):
         print('event: done')
-        path = pathlib.Path(f'{self.file_dir}{self.file_params}')
-        with path.open('w') as f:
-            json.dump(self.params,f,indent=2,sort_keys=True)
-            print(f"生成 {self.file_params} 成功")
 
-        path = pathlib.Path(f'{self.file_dir}{self.file_headers}')
-        with path.open('w') as f:
-            for host, headers  in self.headers.items():
-                self._delete_some_headers(headers)
-            json.dump(self.headers,f,indent=2,sort_keys=True)
-            print(f"生成 {self.file_headers} 成功")
-
-        path = pathlib.Path(f'{self.file_dir}{self.file_bodys}')
-        with path.open('w') as f:
-            json.dump(self.bodys,f,indent=2,sort_keys=True)
-            print(f"生成 {self.file_bodys} 成功")
-
-        path = pathlib.Path(f'{self.file_dir}{self.file_cannot}')
-        with path.open('w') as f:
-            temp = self.can_not_create.copy()
-            for body in temp.values():
-                pprint.pprint(body)
-                for key, value in body.items():
-                    pprint.pprint(key)
-                    pprint.pprint(value)
-                    if isinstance(value, set):
-                        body[key] = list(value)
-            json.dump(temp,f,indent=2,sort_keys=True)
-            print(f"生成 {self.file_cannot} 成功")
+        self._gen_file(self.params, self.file_params, self.file_dir)
+        print(f"生成 {self.file_params} 成功")
 
 
-        path = pathlib.Path(f'{self.file_dir}{self.file_all}')
-        with path.open('w') as f:
-            all_data = self.params.copy()
-            for host, dict_value in all_data.items():
-                all_data[host].update(self.headers.get(host, {}))
-                all_data[host].update(self.bodys.get(host, {}))
+        for host, headers  in self.headers.items():
+            self._delete_some_headers(headers)
+        self._gen_file(self.headers, self.file_headers, self.file_dir)
+        print(f"生成 {self.file_headers} 成功")
+
+
+        self._gen_file(self.bodys, self.file_bodys, self.file_dir)
+        print(f"生成 {self.file_bodys} 成功")
+
+
+        temp = self.can_not_create.copy()
+        for body in temp.values():
+            for key, value in body.items():
+                if isinstance(value, set):
+                    body[key] = list(value)
+        self._gen_file(temp, self.file_cannot, self.file_dir)
+        print(f"生成 {self.file_cannot} 成功")
+
+
+        all_data = self.params.copy()
+        for host, dict_value in all_data.items():
+            all_data[host].update(self.headers.get(host, {}))
+            all_data[host].update(self.bodys.get(host, {}))
             
-            json.dump(all_data,f,indent=2,sort_keys=True)
-            print(f"生成 {self.file_all} 成功")
+        self._gen_file(all_data, self.file_all, self.file_dir)
+        print(f"生成 {self.file_all} 成功")
+
+        print(self.app_hosts)
+        for app, hosts in self.app_hosts.items():
+            p_k = dict(); app_all_data = dict()
+            for h in hosts:
+                p_k[h] = self.params_keys.get(h, dict())
+                # app_all_data[h] = all_data.get(h, dict())
+                app_all_data.update(all_data.get(h, dict()))
+
+            self._gen_file(p_k, self.file_params_keys, f'{self.file_dir}{app}')
+            self._gen_file(app_all_data, self.file_all, f'{self.file_dir}{app}')
 
 
-        path = pathlib.Path(f'{self.file_dir}{self.file_params_keys}')
-        with path.open('w') as f:
-            json.dump(self.params_keys,f,indent=2,sort_keys=True)
-            print(f"生成 {self.file_params_keys} 成功")
+        self._gen_file(self.params_keys, self.file_params_keys, self.file_dir)
+        print(f"生成 {self.file_params_keys} 成功")
+    
+        pprint.pprint(self.app_apis)
+        for app, apis in self.app_apis.items():
+            seq = apis.values()
+            print(seq)
+            self._test_jinja2(seq,app=app)
 
+            tfile = f'{self.file_dir}users.j2.py'
+            gfile = f'{self.file_dir}{app}/users.py'
+            self.gen_file_from_jinja2(tfile,gfile)
 
+            path = f'{self.file_dir}{app}/{self.file_all}'
+            with open(path) as f:
+                s = 'q_dict = ' + f.read()
+                with open(f'{self.file_dir}{app}/ios.py', mode='w') as ff:
+                    ff.write(s)
 
     def response(self, flow: http.HTTPFlow):
-        if any( [ filter(flow) for filter in self.flowfilters ] ):
+        ft = None
+        for flt in self.flowfilters:
+            if flt(flow):
+                ft = flt
+                break
+        if ft:
+
             request: http.HTTPRequest = flow.request
 
             parse_result = urlparse(request.url)
@@ -275,8 +321,10 @@ class GenCode(object):
             params_code = self.params_string(flow)
             data_code = self.data_string(flow) 
 
-            path = pathlib.Path(f'{self.file_dir}{function_name}.text')  
-            with path.open('a') as f:
+            path = pathlib.Path(f'{self.file_dir}{ft.name}')
+            if not path.exists():
+                path.mkdir(parents=True, exist_ok=True)
+            with (path/f'{function_name}.text').open('a') as f:
                 print(f'''# ---------------------''',file=f)
 
                 code = f'''
@@ -321,6 +369,18 @@ def {function_name}(self):
 
                 self.gather_params_and_bodys(flow)
                 self.gather_keys(flow)
+
+                app_hosts = self.app_hosts.setdefault(ft.name,set())
+                app_hosts.add(request.pretty_host)
+
+                app_apis = self.app_apis.setdefault(ft.name, dict())
+                app_apis[function_name] = {
+                    'name': function_name,
+                    'url': f'{request.scheme}://{request.pretty_host}{url_path}',
+                    'method': request.method.lower(),
+                    'content_type': 'json' if 'json' in request.headers.get('content-type','') else '',
+                }
+
 
     def headers_string(self, flow: http.HTTPFlow, indent=1):
         d = dict(flow.request.headers)
@@ -393,7 +453,7 @@ def {function_name}(self):
                 for key, value in body.items():
                     values = d.setdefault(key, set())
                     values.add(value)
-                pprint.pprint(self.can_not_create)
+                # pprint.pprint(self.can_not_create)
 
 
 
@@ -404,7 +464,7 @@ def {function_name}(self):
         url_path = parse_result.path
         fname = url_path
         host_key[fname] = list(flow.request.query.keys())
-        pprint.pprint(self.params_keys)
+        # pprint.pprint(self.params_keys)
 
 
     def function_name(self, flow: http.HTTPFlow):
@@ -422,6 +482,50 @@ def {function_name}(self):
                 headers.pop(key)
             except :
                 pass
+
+    def _gen_file(self, o, f, fold, mode='w'):
+        path = pathlib.Path(fold)
+        if not path.exists():
+            path.mkdir(parents=True, exist_ok=True)
+
+        with (path/f).open(mode=mode) as f:
+            json.dump(o, f, indent=2, sort_keys=True)
+
+    def _test_jinja2(self, seq, app=''):
+        with open(f'{self.file_dir}code_template.j2.py') as f:
+            s = f.read()
+            t = Template(s)
+            # seq = [
+            #     {
+            #         'name': 'login',
+            #         'url': 'https://baidu.com',
+            #         'method': 'post',
+            #         'content_type': 'json',
+
+            #     },
+            #     {
+            #         'name': 'main',
+            #         'url': 'https://tent.com',
+            #         'method': 'get',
+            #         'content_type': 'form',
+
+            #     }
+            # ]
+            ss = t.render(seq=seq)
+            path = f'{self.file_dir}{app}/code-{app}.py'
+            with open(path, mode='w') as ff:
+                ff.write(ss)
+
+    def gen_file_from_jinja2(self, tfile, gfile, **kwargs):
+        print(tfile)
+        print(gfile)
+        with open(tfile) as f:
+            s = f.read()
+            t = Template(s)
+            ss = t.render(**kwargs)
+            print('xxxxxxxxxx')
+            with open(gfile, mode='w') as ff:
+                ff.write(ss)
 
 addons = [
     GenCode()
