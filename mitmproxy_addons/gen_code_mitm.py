@@ -48,41 +48,16 @@ class GenCode(object):
         # app包含哪些hosts
         self.app_hosts = {}
         self.app_apis = {}
-        try:
-            with open(f'{self.file_dir}{self.file_cannot}', 'r') as f:
-                self.can_not_create = json.load(f)
-                ctx.log.info(f'load {self.file_cannot} success!') 
-        except:
-            pass
 
-        try:
-            with open(f'{self.file_dir}{self.file_params_keys}', 'r') as f:
-                self.params_keys = json.load(f) 
-                ctx.log.info(f'load {self.file_params_keys} success!') 
-        except:
-            pass
+        self.can_not_create = self.load_file(self.file_cannot, self.file_dir)
 
-        try:
-            with open(f'{self.file_dir}{self.file_headers}', 'r') as f:
-                self.headers = json.load(f) 
-                ctx.log.info(f'load {self.file_headers} success!') 
-        except:
-            pass
+        self.params_keys = self.load_file(self.file_params_keys, self.file_dir)
 
-        try:
-            with open(f'{self.file_dir}{self.file_params}', 'r') as f:
-                self.params = json.load(f) 
-                ctx.log.info(f'load {self.file_params} success!') 
-        except:
-            pass
+        self.headers = self.load_file(self.file_headers, self.file_dir)
 
-        try:
-            with open(f'{self.file_dir}{self.file_bodys}', 'r') as f:
-                self.bodys = json.load(f)
-                ctx.log.info(f'load {self.file_bodys} success!') 
-        except:
-            pass
+        self.params = self.load_file(self.file_params, self.file_dir)
 
+        self.bodys = self.load_file(self.file_bodys, self.file_dir)
  
         urls = [
             'score_task/v1/task/page_data/',
@@ -291,7 +266,11 @@ class GenCode(object):
         for app, apis in self.app_apis.items():
             seq = apis.values()
             print(seq)
-            self._test_jinja2(seq,app=app)
+            # self._test_jinja2(seq,app=app)
+
+            tfile = f'{self.file_dir}code_template.j2.py'
+            gfile = f'{self.file_dir}{app}/code-{app}.py'
+            self.gen_file_from_jinja2(tfile,gfile,seq=seq)
 
             tfile = f'{self.file_dir}users.j2.py'
             gfile = f'{self.file_dir}{app}/users.py'
@@ -491,30 +470,14 @@ def {function_name}(self):
         with (path/f).open(mode=mode) as f:
             json.dump(o, f, indent=2, sort_keys=True)
 
-    def _test_jinja2(self, seq, app=''):
-        with open(f'{self.file_dir}code_template.j2.py') as f:
-            s = f.read()
-            t = Template(s)
-            # seq = [
-            #     {
-            #         'name': 'login',
-            #         'url': 'https://baidu.com',
-            #         'method': 'post',
-            #         'content_type': 'json',
-
-            #     },
-            #     {
-            #         'name': 'main',
-            #         'url': 'https://tent.com',
-            #         'method': 'get',
-            #         'content_type': 'form',
-
-            #     }
-            # ]
-            ss = t.render(seq=seq)
-            path = f'{self.file_dir}{app}/code-{app}.py'
-            with open(path, mode='w') as ff:
-                ff.write(ss)
+    def load_file(self, f, fold):
+        try:
+            with open(f'{fold}{f}', 'r') as fd:
+                o = json.load(fd)
+                ctx.log.info(f'load {f} success!')
+                return o 
+        except:
+            ctx.log.error(f'load {f} fail!')
 
     def gen_file_from_jinja2(self, tfile, gfile, **kwargs):
         print(tfile)
