@@ -1,8 +1,10 @@
 import pathlib
+import os.path
 import json
 import re
 import pprint
 from urllib.parse import urlparse
+import logging
 
 from mitmproxy import ctx
 from mitmproxy import flowfilter
@@ -25,39 +27,61 @@ class NamedFilter(object):
 class GenCode(object):
     def __init__(self):
         ctx.log.info('__init__')
-        # self._test_jinja2()
+        
 
+        self.re_ios = re.compile(r'iphone|ios',flags=re.IGNORECASE)
+        self.re_xiao = re.compile(r'xiaomi|miui|mi\+5|miui',flags=re.IGNORECASE)
+
+        self.sep = '--'
+        self.q_dict = 'q_dict'
+        self.template_dir = os.path.dirname(__file__)
         self.file_dir = '/Users/zhoujie/Desktop/api/'
-        self.file_params_keys = 'api_params_keys.text'
-        self.file_all = 'api_all_data.text'
-        self.file_headers = 'headers.text'
-        self.file_params = 'params.text'
-        self.file_bodys = 'bodys.text'
-        self.file_cannot = 'can_not_create_data.text'
+        self.file_params_keys = 'data-params-keys.json'
+        self.file_bodys_keys = 'data-bodys-keys.json'
+        self.file_all = 'data-all.json'
+        self.file_headers = 'data-headers.json'
+        self.file_params = 'data-params.json'
+        self.file_bodys = 'data-bodys.json'
+        self.file_cannot = 'data-xxx-data.json'
+        self.file_app_hosts = 'data-app-hosts.json'
+        self.file_app_fn_url = 'data-fn-url.json'
 
         self.headers = {}
         self.params = {}
         self.bodys = {}
 
         self.params_keys = {}
+        self.bodys_keys = {}
         # 不能伪造但可以重放的数据
         self.can_not_create = {
             r'task/timer_submit': {},
+            r'/v5/article/complete.json': {},
         }
 
         # app包含哪些hosts
         self.app_hosts = {}
         self.app_apis = {}
+        self.app_fn_url = {}
 
         self.can_not_create = self.load_file(self.file_cannot, self.file_dir)
 
         self.params_keys = self.load_file(self.file_params_keys, self.file_dir)
+        self.bodys_keys = self.load_file(self.file_bodys_keys, self.file_dir)
 
         self.headers = self.load_file(self.file_headers, self.file_dir)
 
         self.params = self.load_file(self.file_params, self.file_dir)
 
         self.bodys = self.load_file(self.file_bodys, self.file_dir)
+
+        self.app_hosts = self.load_file(self.file_app_hosts, self.file_dir)
+
+        for device, d in self.app_hosts.items():
+            for app, dd in d.items():
+                self.app_hosts[device][app] = set(dd)
+        pprint.pprint(self.app_hosts)
+
+        self.app_fn_url = self.load_file(self.file_app_fn_url, self.file_dir)
  
         urls = [
             'score_task/v1/task/page_data/',
@@ -157,6 +181,7 @@ class GenCode(object):
         urls = [
             r'getTimingRedReward.json',#时段签到
             r'webApi/AnswerReward/',
+            r'/v5/article/complete.json',
         ]
         self.zhong_qin_kd = NamedFilter(urls, 'zhong-qin-kd')
 
@@ -199,7 +224,7 @@ class GenCode(object):
             # self.quan_ming,
             # self.ma_yi_kd,
             # self.dftt,
-            # self.zhong_qin_kd,
+            self.zhong_qin_kd,
             # self.cai_dan_sp,
             self.kai_xin_da_ti,
         ]      
@@ -215,72 +240,132 @@ class GenCode(object):
 
     def done(self):
         print('event: done')
+        try:
+            # for _, host_headers in self.headers.items():
+            #     for host, headers  in host_headers.items():
+            #         self._delete_some_headers(headers)
+            self._gen_file(self.headers, self.file_headers, self.file_dir)
+            print(f"生成 {self.file_headers} 成功")
 
-        self._gen_file(self.params, self.file_params, self.file_dir)
-        print(f"生成 {self.file_params} 成功")
+            self._gen_file(self.params, self.file_params, self.file_dir)
+            print(f"生成 {self.file_params} 成功")
 
-
-        for host, headers  in self.headers.items():
-            self._delete_some_headers(headers)
-        self._gen_file(self.headers, self.file_headers, self.file_dir)
-        print(f"生成 {self.file_headers} 成功")
-
-
-        self._gen_file(self.bodys, self.file_bodys, self.file_dir)
-        print(f"生成 {self.file_bodys} 成功")
-
-
-        temp = self.can_not_create.copy()
-        for body in temp.values():
-            for key, value in body.items():
-                if isinstance(value, set):
-                    body[key] = list(value)
-        self._gen_file(temp, self.file_cannot, self.file_dir)
-        print(f"生成 {self.file_cannot} 成功")
+            self._gen_file(self.bodys, self.file_bodys, self.file_dir)
+            print(f"生成 {self.file_bodys} 成功")
 
 
-        all_data = self.params.copy()
-        for host, dict_value in all_data.items():
-            all_data[host].update(self.headers.get(host, {}))
-            all_data[host].update(self.bodys.get(host, {}))
+            temp = self.can_not_create.copy()
+            for body in temp.values():
+                for key, value in body.items():
+                    if isinstance(value, set):
+                        body[key] = list(value)
+            self._gen_file(temp, self.file_cannot, self.file_dir)
+            print(f"生成 {self.file_cannot} 成功")
+
+
+            all_data = self.params.copy()
+            for device, d in all_data.items():
+                for app, dd in d.items():
+                    for host, ddd in dd.items():
+                        ddd.update( self.inner(self.headers, device=device, app=app, host=host) )
+                        ddd.update( self.inner(self.bodys, device=device, app=app, host=host) )
+                
+            self._gen_file(all_data, self.file_all, self.file_dir)
+            print(f"生成 {self.file_all} 成功")
+
+            self._gen_file(self.params_keys, self.file_params_keys, self.file_dir)
+            print(f"生成 {self.file_params_keys} 成功")
+
+            self._gen_file(self.bodys_keys, self.file_bodys_keys, self.file_dir)
+            print(f"生成 {self.file_bodys_keys} 成功")
+
+            temp = {}
+            for device, d in self.app_hosts.items():
+                temp[device] = d.copy()
+                for app, dd in d.items():
+                    temp[device][app] = list(dd)
+            self._gen_file(temp, self.file_app_hosts, self.file_dir)
+            print(f"生成 {self.file_app_hosts} 成功")
+
+            self._gen_file(self.app_fn_url, self.file_app_fn_url, self.file_dir)
+            # -------------------------------------------------------
+
+            # 生成app下的 data-bodys-keys.json
+            # data-bodys-keys-xxx.json
+            for device, d in self.bodys_keys.items():
+                for app, dd in d.items():
+                    self._gen_file(dd, f'data-bodys-keys-{device}.json', f'{self.file_dir}{app}')
+            print(f"生成 app - data-bodys-keys.json 成功")            
+
+            # 生成app下的 data-params-keys.json
+            # data-params-keys-xxx.json
+            for device, d in self.params_keys.items():
+                for app, dd in d.items():
+                    self._gen_file(dd, f'data-params-keys-{device}.json', f'{self.file_dir}{app}')
+            print(f"生成 app - data-params-keys.json 成功")
+
+            # 生成app下的 data-fn-url.json
+            # data-fn-url-xxx.json
+            for device, d_app_fn_url in self.app_fn_url.items():
+                for app, fn_url in d_app_fn_url.items():
+                    self._gen_file(fn_url, f'data-fn-url-{device}.json', f'{self.file_dir}{app}')            
+            print(f"生成 app - data-fn-url.json 成功")
+
+            sessions_by_app = {}
+            # sessions_jinja_data = list()
+            # 生成app下的 session_xxx.py
+            # app, device, data
+            for device, d in all_data.items():
+                for app, dd in d.items():
+                    merge_hosts = {}
+                    for host, ddd in dd.items():
+                        merge_hosts.update(ddd)
+                    with open(f'{self.file_dir}{app}/session_{device}.py', mode='w') as f:
+                        s = f'{self.q_dict} = ' + json.dumps(merge_hosts, indent=2, sort_keys=True)
+                        f.write(s)
+                        sessions_jinja_data = sessions_by_app.setdefault(app, list())
+                        sessions_jinja_data.append({ 
+                            'file': f'session_{device}',
+                            'var': self.q_dict,
+                            'session': device,
+                        })
+
+                        with open(f'{self.file_dir}{app}/data-params-keys-{device}.json') as ff:
+                            t = json.load(ff)
+                            s = f'params_keys = ' + json.dumps(t, indent=2, sort_keys=True)
+                            f.write('\n\n') 
+                            f.write(s)
+
+                        with open(f'{self.file_dir}{app}/data-bodys-keys-{device}.json') as ff:
+                            t = json.load(ff)
+                            s = f'bodys_keys = ' + json.dumps(t, indent=2, sort_keys=True)
+                            f.write('\n\n') 
+                            f.write(s)
+
+                        with open(f'{self.file_dir}{app}/data-fn-url-{device}.json') as ff:
+                            t = json.load(ff)
+                            s = f'fn_url = ' + json.dumps(t, indent=2, sort_keys=True)
+                            f.write('\n\n') 
+                            f.write(s)
+
+                        # s = '\n\nq_dict.update(params_keys)\n\nq_dict.update(bodys_keys)\n\nq_dict.update(fn_url)'
+                        # f.write(s)
+
+            # 生成app下的 code.py, sessions.py
+            for app, apis in self.app_apis.items():
+                seq = apis.values()
+
+                tfile = f'{self.template_dir}/code_template.j2.py'
+                gfile = f'{self.file_dir}{app}/code-{app}.py'
+                self.gen_file_from_jinja2(tfile,gfile,seq=seq)
+
+                tfile = f'{self.template_dir}/sessions.j2.py'
+                gfile = f'{self.file_dir}{app}/sessions.py'
+                self.gen_file_from_jinja2(tfile, gfile, seq=sessions_by_app[app])
+        except Exception as e:
+            print(e)
+            logging.error(e)
             
-        self._gen_file(all_data, self.file_all, self.file_dir)
-        print(f"生成 {self.file_all} 成功")
-
-        print(self.app_hosts)
-        for app, hosts in self.app_hosts.items():
-            p_k = dict(); app_all_data = dict()
-            for h in hosts:
-                p_k[h] = self.params_keys.get(h, dict())
-                # app_all_data[h] = all_data.get(h, dict())
-                app_all_data.update(all_data.get(h, dict()))
-
-            self._gen_file(p_k, self.file_params_keys, f'{self.file_dir}{app}')
-            self._gen_file(app_all_data, self.file_all, f'{self.file_dir}{app}')
-
-
-        self._gen_file(self.params_keys, self.file_params_keys, self.file_dir)
-        print(f"生成 {self.file_params_keys} 成功")
-    
-        pprint.pprint(self.app_apis)
-        for app, apis in self.app_apis.items():
-            seq = apis.values()
-            print(seq)
-            # self._test_jinja2(seq,app=app)
-
-            tfile = f'{self.file_dir}code_template.j2.py'
-            gfile = f'{self.file_dir}{app}/code-{app}.py'
-            self.gen_file_from_jinja2(tfile,gfile,seq=seq)
-
-            tfile = f'{self.file_dir}users.j2.py'
-            gfile = f'{self.file_dir}{app}/users.py'
-            self.gen_file_from_jinja2(tfile,gfile)
-
-            path = f'{self.file_dir}{app}/{self.file_all}'
-            with open(path) as f:
-                s = 'q_dict = ' + f.read()
-                with open(f'{self.file_dir}{app}/ios.py', mode='w') as ff:
-                    ff.write(s)
 
     def response(self, flow: http.HTTPFlow):
         ft = None
@@ -296,6 +381,7 @@ class GenCode(object):
             url_path = parse_result.path
 
             function_name = re.sub(r'[/-]','_', url_path).strip('_').lower()
+            api_url = f'{request.scheme}://{request.pretty_host}{url_path}' 
             headers_code = self.headers_string(flow)
             params_code = self.params_string(flow)
             data_code = self.data_string(flow) 
@@ -327,7 +413,7 @@ def {function_name}(self):
 def {function_name}(self):
     logging.info('')
 
-    url = '{request.scheme}://{request.pretty_host}{url_path}'
+    url = '{api_url}'
 
     params = self._params_from(url)
 
@@ -339,26 +425,35 @@ def {function_name}(self):
                 
 
 '''
-                f.write(code)                
+                # f.write(code)                
                 # 
 
-                print(f'''Response:''',file=f)
-                print(f'''{flow.response.text}''',file=f)
-                print(f'''# ---------------------\n\n''',file=f)
+                # print(f'''Response:''',file=f)
+                # print(f'''{flow.response.text}''',file=f)
+                # print(f'''# ---------------------\n\n''',file=f)
 
-                self.gather_params_and_bodys(flow)
-                self.gather_keys(flow)
+                device = self._guess_device(flow)
 
-                app_hosts = self.app_hosts.setdefault(ft.name,set())
+                self.gather_params_and_bodys(flow, device=device, app=ft.name)
+
+                # app_hosts = self.app_hosts.setdefault(ft.name,set())
+                d = self.inner_by_list(self.app_hosts, [device])
+                app_hosts = d.setdefault(ft.name, set())
                 app_hosts.add(request.pretty_host)
+                ctx.log.error(str(self.app_hosts))
 
                 app_apis = self.app_apis.setdefault(ft.name, dict())
                 app_apis[function_name] = {
                     'name': function_name,
-                    'url': f'{request.scheme}://{request.pretty_host}{url_path}',
+                    'url': api_url,
                     'method': request.method.lower(),
                     'content_type': 'json' if 'json' in request.headers.get('content-type','') else '',
                 }
+
+                d_v = self.app_fn_url.setdefault(device, dict())
+                fn_url = d_v.setdefault(ft.name, dict())
+                fn_url[function_name] = api_url
+                pprint.pprint(self.app_fn_url) 
 
 
     def headers_string(self, flow: http.HTTPFlow, indent=1):
@@ -399,29 +494,44 @@ def {function_name}(self):
         s = f'''data = {{{lines}\n\t}}'''        
         return s
 
-    def gather_params_and_bodys(self, flow: http.HTTPFlow): 
+    def gather_params_and_bodys(self, flow: http.HTTPFlow, device='', app=''): 
         request: http.HTTPRequest = flow.request
 
-        # 收集params
-        host_key = self.params.setdefault(request.pretty_host,dict())
-        host_key.update(flow.request.query)
+        by_host_device = request.pretty_host
+        host = request.pretty_host
 
         # 收集headers
-        host_key = self.headers.setdefault(request.pretty_host,dict())
-        host_key.update(flow.request.headers)
+        d = self.inner(self.headers, device=device, app=app, host=host)
+        d.update(flow.request.headers)
 
-        host_key = self.bodys.setdefault(request.pretty_host,dict())
-        host_key.update(flow.request.urlencoded_form)
-        host_key.update(flow.request.multipart_form)
+        # 收集params
+        d = self.inner(self.params, device=device, app=app, host=host)
+        d.update(flow.request.query)
+
+        # 收集bodys
+        d = self.inner(self.bodys, device=device, app=app, host=host) 
+        d.update(flow.request.urlencoded_form)
+        d.update(flow.request.multipart_form)
         try:
-            d = json.loads(flow.request.text)
-            host_key.updated(d)
+            o = json.loads(flow.request.text)
+            d.updated(o)
         except :
             pass
 
-        # pprint.pprint(self.params)
 
-        # pprint.pprint(self.headers)
+        parse_result = urlparse(request.url)
+        fname = parse_result.path
+
+        ctx.log.error("------------")
+        ctx.log.error(str(d))
+        bkeys = list(d.keys())
+        ctx.log.error("------------")
+        d = self.inner(self.bodys_keys, device=device, app=app, host=host) 
+        d[fname] = bkeys        
+
+        d = self.inner(self.params_keys, device=device, app=app, host=host) 
+        d[fname] = list(flow.request.query.keys())
+
 
         path = request.path
         for item in self.can_not_create.keys():
@@ -432,18 +542,7 @@ def {function_name}(self):
                 for key, value in body.items():
                     values = d.setdefault(key, set())
                     values.add(value)
-                # pprint.pprint(self.can_not_create)
 
-
-
-    def gather_keys(self, flow: http.HTTPFlow): 
-        request: http.HTTPRequest = flow.request
-        host_key = self.params_keys.setdefault(request.pretty_host,dict())
-        parse_result = urlparse(request.url)
-        url_path = parse_result.path
-        fname = url_path
-        host_key[fname] = list(flow.request.query.keys())
-        # pprint.pprint(self.params_keys)
 
 
     def function_name(self, flow: http.HTTPFlow):
@@ -470,6 +569,36 @@ def {function_name}(self):
         with (path/f).open(mode=mode) as f:
             json.dump(o, f, indent=2, sort_keys=True)
 
+    def _guess_device(self, flow: http.HTTPFlow):
+        device = ''
+        request = flow.request
+
+        guess_by_data = ''
+        # ------------------------------------
+        for h, v in request.headers.items():
+            d = v.lower()
+            if 'iphone' in d:
+                device = 'ios'
+                guess_by_data = v 
+                break
+
+            if self.re_xiao.search(d):
+                device = 'xiaomi'
+                guess_by_data = v 
+                break                
+
+
+        for h, v in request.urlencoded_form.items():
+            if self.re_xiao.search(v):
+                device = 'xiaomi'
+                guess_by_data = v 
+                break            
+        # ------------------------------------
+
+        ctx.log.error(f'device = {device}')
+        ctx.log.error(f'guess = {guess_by_data}')
+        return device 
+
     def load_file(self, f, fold):
         try:
             with open(f'{fold}{f}', 'r') as fd:
@@ -478,17 +607,30 @@ def {function_name}(self):
                 return o 
         except:
             ctx.log.error(f'load {f} fail!')
+            return dict()
 
     def gen_file_from_jinja2(self, tfile, gfile, **kwargs):
-        print(tfile)
-        print(gfile)
+        # print(tfile)
+        # print(gfile)
         with open(tfile) as f:
             s = f.read()
             t = Template(s)
             ss = t.render(**kwargs)
-            print('xxxxxxxxxx')
+            # print('xxxxxxxxxx')
             with open(gfile, mode='w') as ff:
                 ff.write(ss)
+
+    def inner(self, d, device='', app='', host=''):
+        d = d.setdefault(device, dict())
+        d = d.setdefault(app, dict())
+        d = d.setdefault(host, dict())
+        return d
+
+    def inner_by_list(self, d, l: list):
+        for key in l:
+            d = d.setdefault(key, dict())
+        return d
+
 
 addons = [
     GenCode()
