@@ -91,7 +91,7 @@ class User(object):
         return { k:v for k,v in self.x.items() if k in set(params_keys) }
 
 {% for request in seq %}
-    def {{ request.name }}(self):
+    def {{ request.name }}(self{{ request.fun_params }}):
         logging.info('')
 
         url = self.urls['{{ request.name }}']

@@ -16,13 +16,45 @@ from jinja2 import Template
 生成接口python代码
 '''
 
+class Api(object):
+    def __init__(self, url, d=dict()):
+        self.url = url
+        self.d = d
+        self.str_d = self._str_fun_params()
+
+    def __str__(self):
+        return f'Api(url={self.url}, d={self.d})'
+    
+    def _str_fun_params(self):
+        s = ''
+        for k,v in self.d.items():
+            if v:
+                s += f', {k}={v!r}'
+            else:
+                s += f', {k}'
+        return s
+
+    def str_fun_params(self):
+        return self.str_d
+
 class NamedFilter(object):
     def __init__(self, urls, name=''):
         self.name = name
-        self.flt = flowfilter.parse('|'.join(urls))
+        self.flts = dict()
+        for u in urls:
+            a = u
+            if isinstance(u, str):
+                a = Api(u)
+            flt = flowfilter.parse(a.url)
+            self.flts[flt] = a
+        self.current_api = None
 
     def __call__(self, f):
-        return self.flt(f)
+        for flt, api in self.flts.items():
+            if flt(f):
+                self.current_api = api
+                return True 
+        return False
 
 class GenCode(object):
     def __init__(self):
@@ -31,6 +63,7 @@ class GenCode(object):
 
         self.re_ios = re.compile(r'iphone|ios',flags=re.IGNORECASE)
         self.re_xiao = re.compile(r'xiaomi|miui|mi\+5|miui',flags=re.IGNORECASE)
+        self.re_huawei = re.compile(r'huawei',flags=re.IGNORECASE)
 
         self.sep = '--'
         self.q_dict = 'q_dict'
@@ -87,7 +120,7 @@ class GenCode(object):
             'score_task/v1/task/page_data/',
             'score_task/v1/task/sign_in/',
             'score_task/v1/task/open_treasure_box/',
-            'score_task/v1/task/new_excitation_ad/',            
+            Api('score_task/v1/task/new_excitation_ad/', {"score_source":None}),            
             'score_task/v1/task/get_read_bonus/',
             'score_task/v1/task/done_task/',
             'score_task/v1/landing/add_amount/',             
@@ -95,6 +128,7 @@ class GenCode(object):
             'score_task/v1/novel/bonus/', #读小说得金币
             'search/suggest/homepage_suggest/',
             'search/suggest/initial_page/',
+            Api(r'score_task/v1/walk/count/',{"count":None}),
             r'score_task/v1/walk/',
 
             'score_task/v1/sleep/status/',
@@ -127,6 +161,8 @@ class GenCode(object):
         # 趣头条
         urls = [
             r'sign/sign',
+            r'/mission/intPointReward',#时段签到
+            r'/content/readV2',
             r'/app/re/taskCenter/info/v1/get',
             # r'taskcenter/getListV2',#旧版本 tab页：任务
             r'api-coin-service.aiclk.com/coin/service',
@@ -145,9 +181,12 @@ class GenCode(object):
             r'x/tree-game/my-gift-box/receive-prize',
 
             r'x/open/game',
+            r'/api/Login',
             r'api/loginGame',
             r'api/qttAddCoin',
             r'api/AddCoin',# 成语
+
+            r'/x/open/coin/add',#切菜
         ]
         self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao') 
 
@@ -216,17 +255,36 @@ class GenCode(object):
         ]
         self.kai_xin_da_ti = NamedFilter(urls, 'kai-xin-da-ti')
 
+        # 趣键盘
+        urls = [
+            r'/gk/draw/info',
+            r'/gk/draw/extract',
+            Api('/gk/draw/double',{"ticket":None}),
+            r'/gk/draw/package',
+            r'/gk/draw/pkdouble',
+
+            Api('/gk/game/bianlidian/receiveBox',{"packageId": None}),
+            Api('/gk/game/bianlidian/draw/double',{"ticket":None}),
+            r'/gk/garbage/',
+            r'/gk/game/dadishu/',
+            r'/gk/game/bianlidian/',
+            r'/qujianpan/',
+            # r'',
+        ]
+        self.qu_jian_pan = NamedFilter(urls, 'qu-jian-pan')
+
         self.flowfilters = [
             self.toutiao, 
             self.huoshan, 
-            # self.qu_tou_tiao, 
-            # self.hao_kan,
-            # self.quan_ming,
-            # self.ma_yi_kd,
-            # self.dftt,
+            self.qu_tou_tiao, 
+            self.hao_kan,
+            self.quan_ming,
+            self.ma_yi_kd,
+            self.dftt,
             self.zhong_qin_kd,
-            # self.cai_dan_sp,
+            self.cai_dan_sp,
             self.kai_xin_da_ti,
+            self.qu_jian_pan,
         ]      
 
     def load(self, loader):
@@ -362,7 +420,10 @@ class GenCode(object):
                 tfile = f'{self.template_dir}/sessions.j2.py'
                 gfile = f'{self.file_dir}{app}/sessions.py'
                 self.gen_file_from_jinja2(tfile, gfile, seq=sessions_by_app[app])
+
+            print('done !!!')
         except Exception as e:
+            logging.error('有异常：')
             print(e)
             logging.error(e)
             
@@ -428,19 +489,20 @@ def {function_name}(self):
                 # f.write(code)                
                 # 
 
-                # print(f'''Response:''',file=f)
-                # print(f'''{flow.response.text}''',file=f)
-                # print(f'''# ---------------------\n\n''',file=f)
+                print(f'''Response:''',file=f)
+                print(f'''{flow.response.text}''',file=f)
+                print(f'''# ---------------------\n\n''',file=f)
 
+                api: Api = ft.current_api
+                ctx.log.error(f'api = {api}')
                 device = self._guess_device(flow)
 
                 self.gather_params_and_bodys(flow, device=device, app=ft.name)
 
-                # app_hosts = self.app_hosts.setdefault(ft.name,set())
                 d = self.inner_by_list(self.app_hosts, [device])
                 app_hosts = d.setdefault(ft.name, set())
                 app_hosts.add(request.pretty_host)
-                ctx.log.error(str(self.app_hosts))
+                # ctx.log.error(str(self.app_hosts))
 
                 app_apis = self.app_apis.setdefault(ft.name, dict())
                 app_apis[function_name] = {
@@ -448,12 +510,12 @@ def {function_name}(self):
                     'url': api_url,
                     'method': request.method.lower(),
                     'content_type': 'json' if 'json' in request.headers.get('content-type','') else '',
+                    'fun_params':api.str_fun_params(),
                 }
 
                 d_v = self.app_fn_url.setdefault(device, dict())
                 fn_url = d_v.setdefault(ft.name, dict())
                 fn_url[function_name] = api_url
-                pprint.pprint(self.app_fn_url) 
 
 
     def headers_string(self, flow: http.HTTPFlow, indent=1):
@@ -514,7 +576,7 @@ def {function_name}(self):
         d.update(flow.request.multipart_form)
         try:
             o = json.loads(flow.request.text)
-            d.updated(o)
+            d.update(o)
         except :
             pass
 
@@ -522,12 +584,8 @@ def {function_name}(self):
         parse_result = urlparse(request.url)
         fname = parse_result.path
 
-        ctx.log.error("------------")
-        ctx.log.error(str(d))
-        bkeys = list(d.keys())
-        ctx.log.error("------------")
         d = self.inner(self.bodys_keys, device=device, app=app, host=host) 
-        d[fname] = bkeys        
+        d[fname] = list(d.keys())        
 
         d = self.inner(self.params_keys, device=device, app=app, host=host) 
         d[fname] = list(flow.request.query.keys())
@@ -587,16 +645,39 @@ def {function_name}(self):
                 guess_by_data = v 
                 break                
 
+            if self.re_huawei.search(d):
+                device = 'huawei'
+                guess_by_data = v 
+                break
+
+        for h, v in request.query.items():
+            if self.re_xiao.search(v):
+                device = 'xiaomi'
+                guess_by_data = v 
+                break            
+
+            if self.re_huawei.search(v):
+                device = 'huawei'
+                guess_by_data = v 
+                break
 
         for h, v in request.urlencoded_form.items():
             if self.re_xiao.search(v):
                 device = 'xiaomi'
                 guess_by_data = v 
                 break            
+
+            if self.re_huawei.search(v):
+                device = 'huawei'
+                guess_by_data = v 
+                break
         # ------------------------------------
 
         ctx.log.error(f'device = {device}')
         ctx.log.error(f'guess = {guess_by_data}')
+        if device == '':
+            ctx.log.error(f"not guess: {request.url}")
+            device = 'default'
         return device 
 
     def load_file(self, f, fold):
