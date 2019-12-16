@@ -162,6 +162,7 @@ class GenCode(object):
         urls = [
             r'sign/sign',
             r'/mission/intPointReward',#时段签到
+            r'/mission/receiveTreasureBox',
             r'/content/readV2',
             r'/app/re/taskCenter/info/v1/get',
             # r'taskcenter/getListV2',#旧版本 tab页：任务
@@ -171,6 +172,7 @@ class GenCode(object):
             r'x/feed/getReward',#信息流 - 惊喜红包
 
             r'x/tree-game/',
+            r'x/tree-game/task-list',
             r'x/tree-game/left-plant-num',
             r'x/tree-game/plant-ok',
             r'x/tree-game/add-plant',
@@ -308,8 +310,12 @@ class GenCode(object):
             self._gen_file(self.params, self.file_params, self.file_dir)
             print(f"生成 {self.file_params} 成功")
 
-            self._gen_file(self.bodys, self.file_bodys, self.file_dir)
-            print(f"生成 {self.file_bodys} 成功")
+            try:
+                #pprint.pprint(self.bodys)
+                self._gen_file(self.bodys, self.file_bodys, self.file_dir)
+                print(f"生成 {self.file_bodys} 成功")
+            except Exception as e:
+                print(e)                
 
 
             temp = self.can_not_create.copy()
@@ -556,7 +562,10 @@ def {function_name}(self):
         s = f'''data = {{{lines}\n\t}}'''        
         return s
 
-    def gather_params_and_bodys(self, flow: http.HTTPFlow, device='', app=''): 
+    def gather_params_and_bodys(self, flow: http.HTTPFlow, device='', app=''):
+        '''
+        request.multipart_form: Key and value are bytes. json序列化时会出错：键不能为bytes
+        ''' 
         request: http.HTTPRequest = flow.request
 
         by_host_device = request.pretty_host
@@ -571,12 +580,20 @@ def {function_name}(self):
         d.update(flow.request.query)
 
         # 收集bodys
+        bodys_keys = list()
         d = self.inner(self.bodys, device=device, app=app, host=host) 
         d.update(flow.request.urlencoded_form)
-        d.update(flow.request.multipart_form)
+        bodys_keys = list(flow.request.urlencoded_form.keys())
+        # d.update(flow.request.multipart_form)
+        for key,value in flow.request.multipart_form.items():
+            key = key.decode(encoding='utf-8')
+            value = value.decode(encoding='utf-8') 
+            d[key] = value
+            bodys_keys.append(key)
         try:
             o = json.loads(flow.request.text)
             d.update(o)
+            bodys_keys = o.keys()
         except :
             pass
 
@@ -584,9 +601,11 @@ def {function_name}(self):
         parse_result = urlparse(request.url)
         fname = parse_result.path
 
-        d = self.inner(self.bodys_keys, device=device, app=app, host=host) 
-        d[fname] = list(d.keys())        
-
+        dd = self.inner(self.bodys_keys, device=device, app=app, host=host) 
+        dd[fname] = bodys_keys#list(d.keys())
+        ctx.log.error('abc--------------abc')
+        ctx.log.error(str(dd))        
+        ctx.log.error('abc--------------abc')
         d = self.inner(self.params_keys, device=device, app=app, host=host) 
         d[fname] = list(flow.request.query.keys())
 
