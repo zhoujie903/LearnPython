@@ -66,13 +66,11 @@ class GenCode(object):
         self.re_xiao = re.compile(r'xiaomi|miui|mi\+5|miui',flags=re.IGNORECASE)
         self.re_huawei = re.compile(r'huawei',flags=re.IGNORECASE)
 
-        self.sep = '--'
-        self.q_dict = 'q_dict'
         self.template_dir = os.path.dirname(__file__)
         self.file_dir = '/Users/zhoujie/Desktop/api/'
         self.file_params_keys = 'data-params-keys.json'
         self.file_bodys_keys = 'data-bodys-keys.json'
-        self.file_all = 'data-all.json'
+        # self.file_all = 'data-all.json'
         self.file_headers = 'data-headers.json'
         self.file_params = 'data-params.json'
         self.file_bodys = 'data-bodys.json'
@@ -277,6 +275,11 @@ class GenCode(object):
 
         # 趣键盘
         urls = [
+            r'/gk/game/fanpai/basicInfo',
+            r'/gk/game/fanpai/getAward',
+            r'/gk/game/fanpai/awardDouble',
+            r'/gk/game/fanpai/',
+
             r'/gk/draw/info',
             r'/gk/draw/extract',
             Api('/gk/draw/double',{"ticket":None}),
@@ -345,15 +348,10 @@ class GenCode(object):
             print(f"生成 {self.file_cannot} 成功")
 
 
-            all_data = self.params.copy()
-            for device, d in all_data.items():
-                for app, dd in d.items():
-                    for host, ddd in dd.items():
-                        ddd.update( self.inner(self.headers, device=device, app=app, host=host) )
-                        ddd.update( self.inner(self.bodys, device=device, app=app, host=host) )
+            # all_data = self.params.copy()
                 
-            self._gen_file(all_data, self.file_all, self.file_dir)
-            print(f"生成 {self.file_all} 成功")
+            # self._gen_file(all_data, self.file_all, self.file_dir)
+            # print(f"生成 {self.file_all} 成功")
 
             self._gen_file(self.params_keys, self.file_params_keys, self.file_dir)
             print(f"生成 {self.file_params_keys} 成功")
@@ -397,41 +395,36 @@ class GenCode(object):
             # sessions_jinja_data = list()
             # 生成app下的 session_xxx.py
             # app, device, data
-            for device, d in all_data.items():
+            for device, d in self.headers.items():
                 for app, dd in d.items():
+                    sessions_jinja_data = sessions_by_app.setdefault(app, list())
+                    sessions_jinja_data.append({ 
+                        'file': f'session_{device}',
+                        'session': device,
+                    })
+
                     merge_hosts = {}
                     for host, ddd in dd.items():
                         merge_hosts.update(ddd)
+                        
                     with open(f'{self.file_dir}{app}/session_{device}.py', mode='w') as f:
-                        s = f'{self.q_dict} = ' + json.dumps(merge_hosts, indent=2, sort_keys=True)
-                        f.write(s)
-                        sessions_jinja_data = sessions_by_app.setdefault(app, list())
-                        sessions_jinja_data.append({ 
-                            'file': f'session_{device}',
-                            'var': self.q_dict,
-                            'session': device,
-                        })
 
-                        with open(f'{self.file_dir}{app}/data-params-keys-{device}.json') as ff:
-                            t = json.load(ff)
-                            s = f'params_keys = ' + json.dumps(t, indent=2, sort_keys=True)
-                            f.write('\n\n') 
-                            f.write(s)
+                        def gen_var(file_name: str, var_name: str, f):
+                            with open(file_name) as ff:
+                                t = json.load(ff)
+                                s = f'{var_name} = ' + json.dumps(t, indent=2, sort_keys=True)
+                                f.write('\n\n') 
+                                f.write(s)    
+                        gen_var(f'{self.file_dir}{app}/data-params-keys-{device}.json', 'params_keys', f)
 
-                        with open(f'{self.file_dir}{app}/data-bodys-keys-{device}.json') as ff:
-                            t = json.load(ff)
-                            s = f'bodys_keys = ' + json.dumps(t, indent=2, sort_keys=True)
-                            f.write('\n\n') 
-                            f.write(s)
+                        gen_var(f'{self.file_dir}{app}/data-bodys-keys-{device}.json', 'bodys_keys', f)
 
-                        with open(f'{self.file_dir}{app}/data-fn-url-{device}.json') as ff:
-                            t = json.load(ff)
-                            s = f'fn_url = ' + json.dumps(t, indent=2, sort_keys=True)
-                            f.write('\n\n') 
-                            f.write(s)
+                        gen_var(f'{self.file_dir}{app}/data-fn-url-{device}.json', 'fn_url', f)
+                        
 
-                        # s = '\n\nq_dict.update(params_keys)\n\nq_dict.update(bodys_keys)\n\nq_dict.update(fn_url)'
-                        # f.write(s)
+            self.plain_values_to_file(self.headers, 'header_values')
+            self.plain_values_to_file(self.params, 'param_values')
+            self.plain_values_to_file(self.bodys, 'body_values')
 
             # 生成app下的 code.py, sessions.py
             for app, apis in self.app_apis.items():
@@ -611,7 +604,7 @@ def {function_name}(self):
         try:
             o = json.loads(flow.request.text)
             d.update(o)
-            bodys_keys = o.keys()
+            bodys_keys = list(o.keys())
         except :
             pass
 
@@ -715,6 +708,7 @@ def {function_name}(self):
         if device == '':
             ctx.log.error(f"not guess: {request.url}")
             device = 'default'
+            device = 'huawei'
         return device 
 
     def load_file(self, f, fold):
@@ -748,6 +742,18 @@ def {function_name}(self):
         for key in l:
             d = d.setdefault(key, dict())
         return d
+
+    def plain_values_to_file(self, data: dict, var_name):
+        for device, d in data.items():
+            for app, dd in d.items():
+                merge_hosts = {}
+                for host, ddd in dd.items():
+                    merge_hosts.update(ddd)
+                    
+                with open(f'{self.file_dir}{app}/session_{device}.py', mode='a') as f:
+                    s = f'{var_name} = ' + json.dumps(merge_hosts, indent=2, sort_keys=True)
+                    f.write('\n\n')
+                    f.write(s)
 
 
 addons = [

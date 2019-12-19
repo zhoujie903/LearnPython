@@ -23,10 +23,12 @@ logging.info(sys.stdout.encoding)
 
 class User(object):
     def __init__(self, session_data: tuple): 
-        self.x = session_data[0]
+        self.headers = session_data[0]
         self.params_keys = session_data[1]
         self.bodys_keys = session_data[2]
         self.urls = session_data[3]
+        self.params = session_data[4]
+        self.bodys = session_data[5]
         self.session = requests.Session()
         self.session.headers = self._header()
 
@@ -38,9 +40,9 @@ class User(object):
         return {
             # 'Host': '',
             # 'Accept': 'application/json',
-            'User-Agent': self.x['User-Agent'],
-            'user-agent': self.x['user-agent'],
-            # 'Cookie':self.x['Cookie'],
+            'User-Agent': self.headers['User-Agent'],
+            'user-agent': self.headers['user-agent'],
+            # 'Cookie':self.headers['Cookie'],
         }
 
     def _post(self, url, p=logging.warning, **kwargs):
@@ -81,14 +83,14 @@ class User(object):
         host = parse_result.netloc
         path = parse_result.path
         params_keys = self.params_keys[host][path]
-        return { k:v for k,v in self.x.items() if k in set(params_keys) }
+        return { k:v for k,v in self.params.items() if k in set(params_keys) }
 
     def _bodys_from(self, url):
         parse_result = urlparse(url)
         host = parse_result.netloc
         path = parse_result.path
         params_keys = self.bodys_keys[host][path]
-        return { k:v for k,v in self.x.items() if k in set(params_keys) }
+        return { k:v for k,v in self.bodys.items() if k in set(params_keys) }
 
 {% for request in seq %}
     def {{ request.name }}(self{{ request.fun_params }}):
