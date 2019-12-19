@@ -92,7 +92,7 @@ class User(object):
 
 {% for request in seq %}
     def {{ request.name }}(self{{ request.fun_params }}):
-        logging.info('')
+        logging.info('{{ request.name }}')
 
         url = self.urls['{{ request.name }}']
 

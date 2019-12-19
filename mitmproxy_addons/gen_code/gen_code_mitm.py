@@ -2,6 +2,7 @@ import pathlib
 import os.path
 import json
 import re
+import time
 import pprint
 from urllib.parse import urlparse
 import logging
@@ -160,8 +161,10 @@ class GenCode(object):
 
         # 趣头条
         urls = [
-            r'sign/sign',
+            r'sign/sign',#每日签到
             r'/mission/intPointReward',#时段签到
+            r'/x/game-center/user/sign-in',
+            r'/newuserline/activity/signRewardNew',#挑战签到
             r'/mission/receiveTreasureBox',
             r'/content/readV2',
             r'/app/re/taskCenter/info/v1/get',
@@ -170,6 +173,9 @@ class GenCode(object):
             r'readtimer/report',
             r'motivateapp/mtvcallback',
             r'x/feed/getReward',#信息流 - 惊喜红包
+            r'x/v1/goldpig/bubbleWithdraw', # 金猪 - 看视频
+            r'x/v1/goldpig/withdraw', #金猪 
+            r'finance/piggybank/taskReward',#存钱罐
 
             r'x/tree-game/',
             r'x/tree-game/task-list',
@@ -183,12 +189,13 @@ class GenCode(object):
             r'x/tree-game/my-gift-box/receive-prize',
 
             r'x/open/game',
+            r'x/task/encourage/activity/grant',#游戏 - 瓜分
             r'/api/Login',
             r'api/loginGame',
             r'api/qttAddCoin',
-            r'api/AddCoin',# 成语
+            r'api/AddCoin',# 游戏 - 成语
 
-            r'/x/open/coin/add',#切菜
+            r'/x/open/coin/add',#游戏 - 切菜
         ]
         self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao') 
 
@@ -209,12 +216,23 @@ class GenCode(object):
 
         # 蚂蚁看点
         urls = [
-            r'article/treasure_chest',
+            r'article/treasure_chest',#时段签到
             r'TaskCenter/daily_sign',
             # r'WebApi/',
             r'WebApi/Stage/task_reward',
             r'WapPage/get_video_status',
-            r'article/complete_article',
+            r'WebApi/RotaryTable/turn_rotary_new',
+            r'WebApi/RotaryTable/turn_reward',
+            r'WebApi/RotaryTable/video_double',
+            r'WebApi/RotaryTable/chestReward',
+            r'WebApi/Answer/getData',
+            r'WebApi/Answer/answer_question',
+            r'WebApi/Answer/answer_reward',
+            r'WebApi/Answer/video_double',
+            r'WebApi/Answer/fill_energy',
+            r'article/haotu_video',#看视频得金币
+            r'article/complete_article',#读文章得金币
+            r'v5/user/rewar_video_callback',
         ]
         self.ma_yi_kd = NamedFilter(urls, 'ma-yi-kd') 
 
@@ -457,7 +475,7 @@ class GenCode(object):
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
             with (path/f'{function_name}.text').open('a') as f:
-                print(f'''# ---------------------''',file=f)
+                print(f'''# {time.strftime('%m-%d %H:%M:%S')}---------------------''',file=f)
 
                 code = f'''
 def {function_name}(self):
@@ -478,13 +496,13 @@ def {function_name}(self):
                 # 
                 code = f'''
 def {function_name}(self):
-    logging.info('')
+    logging.info('{function_name}')
 
     url = '{api_url}'
 
     params = self._params_from(url)
 
-    {data_code}
+    data = self._bodys_from(url)
 
     result = self._{request.method.lower()}(url, params=params, data=data)
     result = json.loads(result)
@@ -492,7 +510,7 @@ def {function_name}(self):
                 
 
 '''
-                # f.write(code)                
+                f.write(code)                
                 # 
 
                 print(f'''Response:''',file=f)
