@@ -29,7 +29,7 @@ class Api(object):
         self.str_d = ''
 
     def __str__(self):
-        return f'Api(url={self.url}, d={self.d})'
+        return f'Api(url={self.url})'
     
     def _str_fun_params(self):
         s = ''
@@ -89,6 +89,11 @@ class GenCode(object):
         self.re_huawei = re.compile(r'huawei',flags=re.IGNORECASE)
 
         self.template_dir = os.path.dirname(__file__)
+        tfile = f'{self.template_dir}/api_template.j2.py'
+        with open(tfile) as f:
+            s = f.read()
+            self.api_template = Template(s) 
+
         self.file_dir = '/Users/zhoujie/Desktop/api/'
         self.file_params_keys = 'data-params-keys.json'
         self.file_bodys_keys = 'data-bodys-keys.json'
@@ -487,7 +492,8 @@ class GenCode(object):
                 ft = flt
                 break
         if ft:
-
+            api: Api = ft.current_api
+            ctx.log.error(f'api = {api}')
             request: http.HTTPRequest = flow.request
 
             parse_result = urlparse(request.url)
@@ -503,58 +509,6 @@ class GenCode(object):
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
             with (path/f'{function_name}.text').open('a') as f:
-                print(f'''# {time.strftime('%m-%d %H:%M:%S')}---------------------''',file=f)
-
-                code = f'''
-def {function_name}(self):
-
-    {headers_code}
-
-    {params_code}
-
-    {data_code}
-
-    url = '{request.scheme}://{request.pretty_host}{url_path}'
-    result = self._{request.method.lower()}(url, headers=headers, params=params, data=data)
-    return result
-                
-'''
-                f.write(code)
-
-                # 
-                code = f'''
-def {function_name}(self):
-    logging.info('{function_name}')
-
-    url = '{api_url}'
-
-    params = self._params_from(url)
-
-    data = self._bodys_from(url)
-
-    result = self._{request.method.lower()}(url, params=params, data=data)
-    result = json.loads(result)
-    return result
-                
-
-'''
-                f.write(code)                
-                # 
-
-                print(f'''Response:''',file=f)
-                print(f'''{flow.response.text}''',file=f)
-                print(f'''# ---------------------\n\n''',file=f)
-
-                api: Api = ft.current_api
-                ctx.log.error(f'api = {api}')
-                device = self._guess_device(flow)
-
-                self.gather_params_and_bodys(flow, device=device, app=ft.name)
-
-                d = self.inner_by_list(self.app_hosts, [device])
-                app_hosts = d.setdefault(ft.name, set())
-                app_hosts.add(request.pretty_host)
-                # ctx.log.error(str(self.app_hosts))
 
                 app_apis = self.app_apis.setdefault(ft.name, dict())
                 if not function_name in app_apis:
@@ -563,11 +517,29 @@ def {function_name}(self):
                     api.method = request.method.lower()
                     api.content_type = 'json' if 'json' in request.headers.get('content-type','') else ''
                     api.fun_params = api.str_fun_params()
-                    app_apis[function_name] = api 
+                    app_apis[function_name] = api
+
+                api.time = time.strftime('%m-%d %H:%M:%S')
+                api.headers_code = headers_code
+                api.params_code = params_code
+                api.data_code = data_code
+                api.response = flow.response.text
+
+                code = self.api_template.render(request=api)
+                f.write(code)                
+
+                device = self._guess_device(flow)
+
+                self.gather_params_and_bodys(flow, device=device, app=ft.name)
+
+                d = self.inner_by_list(self.app_hosts, [device])
+                app_hosts = d.setdefault(ft.name, set())
+                app_hosts.add(request.pretty_host)
 
                 d_v = self.app_fn_url.setdefault(device, dict())
                 fn_url = d_v.setdefault(ft.name, dict())
                 fn_url[function_name] = api_url
+
 
 
     def headers_string(self, flow: http.HTTPFlow, indent=1):
@@ -817,12 +789,14 @@ if __name__ == "__main__":
     api.body_as_all = True
     seq = [api]  
 
-    # template_dir = os.path.dirname(__file__)
-    # tfile = f'{template_dir}/code_template.j2.py'
-    # with open(tfile) as f:
-    #     s = f.read()
-    #     t = Template(s)
-    #     ss = t.render(seq=seq)
-    #     print(ss)
+    template_dir = os.path.dirname(__file__)
+    tfile = f'{template_dir}/code_template.j2.py'
+    tfile = f'{template_dir}/api_template.j2.py'
+    with open(tfile) as f:
+        s = f.read()
+        t = Template(s)
+        # ss = t.render(seq=seq)
+        ss = t.render(request=api)
+        print(ss)
 
     print('done')
