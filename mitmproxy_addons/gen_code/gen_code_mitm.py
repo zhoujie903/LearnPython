@@ -22,6 +22,8 @@ class Api(object):
         self.url = url
         self.d = d
         self.str_d = self._str_fun_params()
+        self.params_as_all = d.get('params_as_all', False) 
+        self.body_as_all = d.get('body_as_all', False)
 
     def __str__(self):
         return f'Api(url={self.url}, d={self.d})'
@@ -160,12 +162,12 @@ class GenCode(object):
         # 趣头条
         urls = [
             r'sign/sign',#每日签到
-            r'/mission/intPointReward',#时段签到
+            Api(r'/mission/intPointReward',{"params_as_all":True}),#时段签到
             r'/x/game-center/user/sign-in',
             r'/newuserline/activity/signRewardNew',#挑战签到
             r'/mission/receiveTreasureBox',
             r'/content/readV2',
-            r'/app/re/taskCenter/info/v1/get',
+            Api(r'/app/re/taskCenter/info/v1/get',{"params_as_all":True}),
             # r'taskcenter/getListV2',#旧版本 tab页：任务
             r'api-coin-service.aiclk.com/coin/service',
             r'readtimer/report',
@@ -223,11 +225,20 @@ class GenCode(object):
             r'WebApi/RotaryTable/turn_reward',
             r'WebApi/RotaryTable/video_double',
             r'WebApi/RotaryTable/chestReward',
+
+            # 旧版答题
             r'WebApi/Answer/getData',
             r'WebApi/Answer/answer_question',
             r'WebApi/Answer/answer_reward',
             r'WebApi/Answer/video_double',
             r'WebApi/Answer/fill_energy',
+            
+            # 新版答题
+            r'/v6/Answer/getData.json',
+            r'/v5/answer/first_reward',
+            r'/v6/Answer/answer_question.json',
+            r'/v5/answer/answer_reward.json',
+
             r'article/haotu_video',#看视频得金币
             r'article/complete_article',#读文章得金币
             r'v5/user/rewar_video_callback',
@@ -261,6 +272,8 @@ class GenCode(object):
         # 彩蛋视频 
         urls = [
             r'task/timer_submit',
+            r'/h5/task/submit',
+            r'/h5/bubble/prize',
         ]
         self.cai_dan_sp = NamedFilter(urls, 'cai-dan-sp')
 
@@ -522,13 +535,13 @@ def {function_name}(self):
                 # ctx.log.error(str(self.app_hosts))
 
                 app_apis = self.app_apis.setdefault(ft.name, dict())
-                app_apis[function_name] = {
-                    'name': function_name,
-                    'url': api_url,
-                    'method': request.method.lower(),
-                    'content_type': 'json' if 'json' in request.headers.get('content-type','') else '',
-                    'fun_params':api.str_fun_params(),
-                }
+                if not function_name in app_apis:
+                    api.name = function_name
+                    api.url = api_url
+                    api.method = request.method.lower()
+                    api.content_type = 'json' if 'json' in request.headers.get('content-type','') else ''
+                    api.fun_params = api.str_fun_params()
+                    app_apis[function_name] = api 
 
                 d_v = self.app_fn_url.setdefault(device, dict())
                 fn_url = d_v.setdefault(ft.name, dict())
@@ -767,6 +780,31 @@ if __name__ == "__main__":
 
     print(__file__)
     # subprocess.Popen(['mitmdump', '-s', __file__])
+    
+    api =Api(r'/mission/intPointReward',{'params_as_all':None})#时段签到
+    print(api.str_fun_params())
 
+    seq = [{
+        'name': 'mission_intPointReward',
+        'url': '/mission/intPointReward',
+        'method': 'post',
+        'content_type': 'json',
+        'fun_params':api.str_fun_params(),
+    }]
+    api.name = 'mission_intPointReward'
+    api.method = 'post'
+    api.content_type = 'json'
+    api.fun_params = api.str_fun_params()
+    api.params_as_all = True
+    api.body_as_all = True
+    seq = [api]  
+
+    template_dir = os.path.dirname(__file__)
+    tfile = f'{template_dir}/code_template.j2.py'
+    with open(tfile) as f:
+        s = f.read()
+        t = Template(s)
+        ss = t.render(seq=seq)
+        print(ss)
 
     print('done')

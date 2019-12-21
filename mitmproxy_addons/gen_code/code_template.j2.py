@@ -32,9 +32,6 @@ class User(object):
         self.session = requests.Session()
         self.session.headers = self._header()
 
-        # with (pathlib.Path(__file__).parent/'data-params-keys.json').open() as f:            
-        #     self.keys = json.load(f)
-
 
     def _header(self):
         return {
@@ -100,7 +97,15 @@ class User(object):
 
         params = self._params_from(url)
 
+    {%- if request.params_as_all %}
+        params = params_as_all
+    {%- endif %}
+
         data = self._bodys_from(url)
+
+    {%- if request.body_as_all %}
+        data = body_as_all
+    {%- endif %}
 
     {% if request.content_type == 'json' %}
         result = self._{{ request.method }}(url, params=params, json=data)
