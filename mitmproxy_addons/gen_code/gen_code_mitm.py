@@ -18,26 +18,46 @@ from jinja2 import Template
 '''
 
 class Api(object):
-    def __init__(self, url, d=dict()):
+    def __init__(self, url, params_as_all=False, body_as_all=False, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None):
         self.url = url
-        self.d = d
-        self.str_d = self._str_fun_params()
-        self.params_as_all = d.get('params_as_all', False) 
-        self.body_as_all = d.get('body_as_all', False)
+        self.f_p_arg = f_p_arg
+        self.f_b_arg = f_b_arg
+        self.f_p_kwarg = f_p_kwarg
+        self.f_b_kwarg = f_b_kwarg        
+        self.params_as_all = params_as_all 
+        self.body_as_all = body_as_all
+        self.str_d = ''
 
     def __str__(self):
         return f'Api(url={self.url}, d={self.d})'
     
     def _str_fun_params(self):
         s = ''
-        for k,v in self.d.items():
-            if v:
+        if self.f_p_arg and not self.params_as_all:
+            s +=", "
+            s +=", ".join(self.f_p_arg)
+
+        if self.f_b_arg and not self.body_as_all:
+            s +=", "
+            s +=", ".join(self.f_b_arg)
+
+        if self.f_p_kwarg and not self.params_as_all:
+            for k,v in self.f_p_kwarg.items():
                 s += f', {k}={v!r}'
-            else:
-                s += f', {k}'
+
+        if self.f_b_kwarg and not self.body_as_all:
+            for k,v in self.f_b_kwarg.items():
+                s += f', {k}={v!r}'
+
+        if self.params_as_all:
+            s +=', params_as_all'
+        if self.body_as_all:
+            s +=', body_as_all'
         return s
 
     def str_fun_params(self):
+        if not self.str_d:
+            self.str_d = self._str_fun_params()
         return self.str_d
 
 class NamedFilter(object):
@@ -162,14 +182,15 @@ class GenCode(object):
         # 趣头条
         urls = [
             r'sign/sign',#每日签到
-            Api(r'/mission/intPointReward',{"params_as_all":True}),#时段签到
+            Api(r'/mission/intPointReward',params_as_all=True),#时段签到
             r'/x/game-center/user/sign-in',
             r'/newuserline/activity/signRewardNew',#挑战签到
             r'/mission/receiveTreasureBox',
             r'/content/readV2',
-            Api(r'/app/re/taskCenter/info/v1/get',{"params_as_all":True}),
+            Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True),
             # r'taskcenter/getListV2',#旧版本 tab页：任务
-            r'api-coin-service.aiclk.com/coin/service',
+            # r'api-coin-service.aiclk.com/coin/service',
+            Api(r'/coin/service',params_as_all=True),
             r'readtimer/report',
             r'motivateapp/mtvcallback',
             r'x/feed/getReward',#信息流 - 惊喜红包
@@ -195,7 +216,8 @@ class GenCode(object):
             r'api/qttAddCoin',
             r'api/AddCoin',# 游戏 - 成语
 
-            r'/x/open/coin/add',#游戏 - 切菜
+            #游戏 - 切菜
+            Api(r'/x/open/coin/add',body_as_all=True),
         ]
         self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao') 
 
@@ -735,13 +757,10 @@ def {function_name}(self):
             return dict()
 
     def gen_file_from_jinja2(self, tfile, gfile, **kwargs):
-        # print(tfile)
-        # print(gfile)
         with open(tfile) as f:
             s = f.read()
             t = Template(s)
             ss = t.render(**kwargs)
-            # print('xxxxxxxxxx')
             with open(gfile, mode='w') as ff:
                 ff.write(ss)
 
@@ -781,16 +800,15 @@ if __name__ == "__main__":
     print(__file__)
     # subprocess.Popen(['mitmdump', '-s', __file__])
     
-    api =Api(r'/mission/intPointReward',{'params_as_all':None})#时段签到
+    api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'})#时段签到
+    print(api.str_fun_params())
+    api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
+    print(api.str_fun_params())
+    api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
+    print(api.str_fun_params())
+    api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
     print(api.str_fun_params())
 
-    seq = [{
-        'name': 'mission_intPointReward',
-        'url': '/mission/intPointReward',
-        'method': 'post',
-        'content_type': 'json',
-        'fun_params':api.str_fun_params(),
-    }]
     api.name = 'mission_intPointReward'
     api.method = 'post'
     api.content_type = 'json'
@@ -799,12 +817,12 @@ if __name__ == "__main__":
     api.body_as_all = True
     seq = [api]  
 
-    template_dir = os.path.dirname(__file__)
-    tfile = f'{template_dir}/code_template.j2.py'
-    with open(tfile) as f:
-        s = f.read()
-        t = Template(s)
-        ss = t.render(seq=seq)
-        print(ss)
+    # template_dir = os.path.dirname(__file__)
+    # tfile = f'{template_dir}/code_template.j2.py'
+    # with open(tfile) as f:
+    #     s = f.read()
+    #     t = Template(s)
+    #     ss = t.render(seq=seq)
+    #     print(ss)
 
     print('done')
