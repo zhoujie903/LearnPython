@@ -96,12 +96,34 @@ class User(object):
         url = self.urls['{{ request.name }}']
 
         params = self._params_from(url)
+    {%- if request.f_p_arg %}
+    {%- for k in request.f_p_arg %}
+        params['{{ k }}'] = {{ k }} 
+    {%- endfor %}
+    {%- endif %}
+
+    {%- if request.f_p_kwarg %}
+    {%- for k in request.f_p_kwarg %}
+        params['{{ k }}'] = {{ k }} 
+    {%- endfor %}
+    {%- endif %}
 
     {%- if request.params_as_all %}
         params = params_as_all
     {%- endif %}
 
         data = self._bodys_from(url)
+    {%- if request.f_b_arg %}
+    {%- for k in request.f_b_arg %}
+        data['{{ k }}'] = {{ k }} 
+    {%- endfor %}
+    {%- endif %}
+
+    {%- if request.f_b_kwarg %}
+    {%- for k in request.f_b_kwarg %}
+        data['{{ k }}'] = {{ k }} 
+    {%- endfor %}
+    {%- endif %}
 
     {%- if request.body_as_all %}
         data = body_as_all
