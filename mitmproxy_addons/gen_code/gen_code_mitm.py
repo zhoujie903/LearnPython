@@ -18,7 +18,7 @@ from jinja2 import Template
 '''
 
 class Api(object):
-    def __init__(self, url, params_as_all=False, body_as_all=False, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None):
+    def __init__(self, url, params_as_all=False, body_as_all=False, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
         self.url = url
         self.f_p_arg = f_p_arg
         self.f_b_arg = f_b_arg
@@ -27,6 +27,8 @@ class Api(object):
         self.params_as_all = params_as_all 
         self.body_as_all = body_as_all
         self.str_d = ''
+        # content_type取值'json', 'multipart_form', 'urlencoded_form', 'get'
+        self.content_type = content_type 
 
     def __str__(self):
         return f'Api(url={self.url})'
@@ -196,7 +198,7 @@ class GenCode(object):
             Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True),
             # r'taskcenter/getListV2',#旧版本 tab页：任务
             # r'api-coin-service.aiclk.com/coin/service',
-            Api(r'/coin/service',params_as_all=True),
+            Api(r'/coin/service', body_as_all=True),
             r'readtimer/report',
             r'motivateapp/mtvcallback',
             r'x/feed/getReward',#信息流 - 惊喜红包
@@ -244,7 +246,7 @@ class GenCode(object):
 
         # 蚂蚁看点
         urls = [
-            r'article/treasure_chest',#时段签到
+            Api(r'article/treasure_chest', f_b_arg={'p'}, content_type='multipart_form'),#时段签到
             r'TaskCenter/daily_sign',
             # r'WebApi/',
             r'WebApi/Stage/task_reward',
@@ -253,13 +255,6 @@ class GenCode(object):
             r'WebApi/RotaryTable/turn_reward',
             r'WebApi/RotaryTable/video_double',
             r'WebApi/RotaryTable/chestReward',
-
-            # 旧版答题
-            r'WebApi/Answer/getData',
-            r'WebApi/Answer/answer_question',
-            r'WebApi/Answer/answer_reward',
-            r'WebApi/Answer/video_double',
-            r'WebApi/Answer/fill_energy',
             
             # 新版答题
             r'/v6/Answer/getData.json',
@@ -270,6 +265,13 @@ class GenCode(object):
             r'article/haotu_video',#看视频得金币
             r'article/complete_article',#读文章得金币
             r'v5/user/rewar_video_callback',
+
+            # 旧版答题
+            r'WebApi/Answer/getData',
+            r'WebApi/Answer/answer_question',
+            r'WebApi/Answer/answer_reward',
+            r'WebApi/Answer/video_double',
+            r'WebApi/Answer/fill_energy',
         ]
         self.ma_yi_kd = NamedFilter(urls, 'ma-yi-kd') 
 
@@ -494,11 +496,11 @@ class GenCode(object):
             parse_result = urlparse(request.url)
             url_path = parse_result.path
 
-            function_name = re.sub(r'[/-]','_', url_path).strip('_').lower()
+            function_name = re.sub(r'[./-]','_', url_path).strip('_').lower()
             api_url = f'{request.scheme}://{request.pretty_host}{url_path}' 
             headers_code = self.headers_string(flow)
             params_code = self.params_string(flow)
-            data_code = self.data_string(flow) 
+            data_code = self.data_string(flow, api) 
 
             path = pathlib.Path(f'{self.file_dir}{ft.name}')
             if not path.exists():
@@ -546,31 +548,13 @@ class GenCode(object):
         d = dict(flow.request.query)
         return 'params = {'+json.dumps(d, indent='\t'*(indent+1)).strip('{}') + '\t}'
 
-    def data_string(self, flow: http.HTTPFlow):
-        '''
-        Content-Type: application/x-www-form-urlencoded
-        Content-Type: application/json; charset=utf-8
-        Content-Type: text/plain;charset=utf-8
-        '''
+    def data_string(self, flow: http.HTTPFlow, api: Api):
         lines = ''
 
-        # [urlencoded_form, multipart_form, plan, json]取其一
-        for key,value in flow.request.urlencoded_form.items():
-            lines += f"\n\t\t'{key}': '{value}',"
-
-        for key,value in flow.request.multipart_form.items():
-            key = key.decode(encoding='utf-8')
-            value = value.decode(encoding='utf-8') 
-            lines += f"\n\t\t'{key}': '{value}',"
-
-        # Todo:复杂json数据还不能代码化
-        if 'application/json' in flow.request.headers.get('content-type',''):
-            try:
-                d = json.loads(flow.request.text)
-                for key,value in d.items():
-                    lines += f"\n\t\t'{key}': {value},"
-            except Exception as e:
-                pass
+        d = self.dict_from_request_body(flow, api)
+        if d:
+            for key, value in d.items():
+                lines += f"\n\t\t'{key}': {value!r},"    
         
         s = f'''data = {{{lines}\n\t}}'''        
         return s
@@ -597,7 +581,7 @@ class GenCode(object):
         d = self.inner(self.bodys, device=device, app=app, host=host) 
         d.update(flow.request.urlencoded_form)
         bodys_keys = list(flow.request.urlencoded_form.keys())
-        # d.update(flow.request.multipart_form)
+
         for key,value in flow.request.multipart_form.items():
             key = key.decode(encoding='utf-8')
             value = value.decode(encoding='utf-8') 
@@ -610,12 +594,12 @@ class GenCode(object):
         except :
             pass
 
-
+        self.dict_from_request_body(flow, api)
         parse_result = urlparse(request.url)
         fname = parse_result.path
 
         dd = self.inner(self.bodys_keys, device=device, app=app, host=host) 
-        dd[fname] = bodys_keys#list(d.keys())
+        dd[fname] = bodys_keys
         ctx.log.error('abc--------------abc')
         ctx.log.error(str(dd))        
         ctx.log.error('abc--------------abc')
@@ -766,6 +750,50 @@ class GenCode(object):
                     s = f'{var_name} = ' + json.dumps(merge_hosts, indent=2, sort_keys=True)
                     f.write('\n\n')
                     f.write(s)
+
+    def dict_from_request_body(self, flow: http.HTTPFlow, api: Api):
+        d = None
+        if api.content_type == 'json':
+            try:
+                d = json.loads(flow.request.text)
+            except :
+                pass
+
+        elif api.content_type == 'urlencoded_form' or flow.request.urlencoded_form:
+            # 返回的类型是 multidict.MultiDictView
+            d = flow.request.urlencoded_form
+            api.content_type = 'urlencoded_form'
+
+        elif api.content_type == 'multipart_form' or flow.request.multipart_form:
+            ctx.log.error('是multipart_form')
+            d = dict()
+            for key,value in flow.request.multipart_form.items():                
+                key = key.decode(encoding='utf-8')
+                value = value.decode(encoding='utf-8')
+                d[key] = value
+            api.content_type = 'multipart_form'
+
+        elif api.content_type == 'get':
+            pass
+
+        else:
+            # api.content_type没有决定出来：1,没有设置且第1次击中api；2,body没有内容也无法决定content_type；3,get请求一般没有body 
+
+            if flow.request.text:
+                ctx.log.error('有请求内容')
+            else:
+                ctx.log.error('没有请求内容')
+                if flow.request.method == 'GET':
+                    api.content_type = 'get'
+                    return d
+
+            try:
+                d = json.loads(flow.request.text)
+                api.content_type = 'json'
+            except:
+                pass
+
+        return d        
 
 
 addons = [
