@@ -29,6 +29,8 @@ class User(object):
         self.urls = session_data[3]
         self.params = session_data[4]
         self.bodys = session_data[5]
+        self.params_as_all = session_data[6]
+        self.bodys_as_all = session_data[7]
         self.session = requests.Session()
         self.session.headers = self._header()
 
@@ -137,6 +139,22 @@ class User(object):
         result = json.loads(result)
         return result
 {% endfor %}
+
+
+{% for request in seq %}
+{%- if request.params_as_all and not request.body_as_all %}
+def {{ request.name }}(user: User):
+    for item in user.params_as_all['{{ request.name }}']:
+        user.{{ request.name }}(item)
+{%- endif %}
+
+{%- if request.body_as_all and not request.params_as_all %}
+def {{ request.name }}(user: User):
+    for item in user.body_as_all['{{ request.name }}']:
+        user.{{ request.name }}(item)
+{%- endif %}
+{% endfor %}
+
 
 def genUsers():
     for session_data in users:

@@ -97,7 +97,6 @@ class GenCode(object):
         self.file_dir = '/Users/zhoujie/Desktop/api/'
         self.file_params_keys = 'data-params-keys.json'
         self.file_bodys_keys = 'data-bodys-keys.json'
-        # self.file_all = 'data-all.json'
         self.file_headers = 'data-headers.json'
         self.file_params = 'data-params.json'
         self.file_bodys = 'data-bodys.json'
@@ -111,6 +110,8 @@ class GenCode(object):
 
         self.params_keys = {}
         self.bodys_keys = {}
+        self.params_as_all = {}
+        self.bodys_as_all = {}
         # 不能伪造但可以重放的数据
         self.can_not_create = {
             r'task/timer_submit': {},
@@ -410,26 +411,18 @@ class GenCode(object):
             self._gen_file(self.app_fn_url, self.file_app_fn_url, self.file_dir)
             # -------------------------------------------------------
 
-            # 生成app下的 data-bodys-keys.json
-            # data-bodys-keys-xxx.json
-            for device, d in self.bodys_keys.items():
-                for app, dd in d.items():
-                    self._gen_file(dd, f'data-bodys-keys-{device}.json', f'{self.file_dir}{app}')
-            print(f"生成 app - data-bodys-keys.json 成功")            
+            def gen_app_data_to_file(data: dict, file_name):
+                for device, d in data.items():
+                    for app, dd in d.items():
+                        self._gen_file(dd, f'{file_name}-{device}.json', f'{self.file_dir}{app}')
+                        print(f"生成 App - {app:20} - {file_name}-{device}.json 成功")
 
-            # 生成app下的 data-params-keys.json
-            # data-params-keys-xxx.json
-            for device, d in self.params_keys.items():
-                for app, dd in d.items():
-                    self._gen_file(dd, f'data-params-keys-{device}.json', f'{self.file_dir}{app}')
-            print(f"生成 app - data-params-keys.json 成功")
-
-            # 生成app下的 data-fn-url.json
-            # data-fn-url-xxx.json
-            for device, d_app_fn_url in self.app_fn_url.items():
-                for app, fn_url in d_app_fn_url.items():
-                    self._gen_file(fn_url, f'data-fn-url-{device}.json', f'{self.file_dir}{app}')            
-            print(f"生成 app - data-fn-url.json 成功")
+            # 生成app下的 data-bodys-keys.json, data-params-keys.json, data-fn-url.json 
+            gen_app_data_to_file(self.bodys_keys, 'data-bodys-keys')
+            gen_app_data_to_file(self.params_keys, 'data-params-keys')
+            gen_app_data_to_file(self.app_fn_url, 'data-fn-url')
+            gen_app_data_to_file(self.params_as_all, 'data-params_as_all')
+            gen_app_data_to_file(self.bodys_as_all, 'data-bodys_as_all')
 
             sessions_by_app = {}
             # sessions_jinja_data = list()
@@ -465,6 +458,8 @@ class GenCode(object):
             self.plain_values_to_file(self.headers, 'header_values')
             self.plain_values_to_file(self.params, 'param_values')
             self.plain_values_to_file(self.bodys, 'body_values')
+            self.plain_values_to_file(self.params_as_all, 'params_as_all')
+            self.plain_values_to_file(self.bodys_as_all, 'bodys_as_all')
 
             # 生成app下的 code.py, sessions.py
             for app, apis in self.app_apis.items():
@@ -530,7 +525,7 @@ class GenCode(object):
 
                 device = self._guess_device(flow)
 
-                self.gather_params_and_bodys(flow, device=device, app=ft.name)
+                self.gather_params_and_bodys(flow, api, device=device, app=ft.name)
 
                 d = self.inner_by_list(self.app_hosts, [device])
                 app_hosts = d.setdefault(ft.name, set())
@@ -580,7 +575,7 @@ class GenCode(object):
         s = f'''data = {{{lines}\n\t}}'''        
         return s
 
-    def gather_params_and_bodys(self, flow: http.HTTPFlow, device='', app=''):
+    def gather_params_and_bodys(self, flow: http.HTTPFlow, api: Api, device='', app=''):
         '''
         request.multipart_form: Key and value are bytes. json序列化时会出错：键不能为bytes
         ''' 
@@ -638,7 +633,20 @@ class GenCode(object):
                     values = d.setdefault(key, set())
                     values.add(value)
 
+        if api.params_as_all:
+            d = self.inner(self.params_as_all, device=device, app=app, host=host)
+            
+            if not api.name in d:
+                d[api.name] = []
+            d[api.name].append(dict(flow.request.query))
 
+        if api.body_as_all:
+            d = self.inner(self.bodys_as_all, device=device, app=app, host=host)
+            
+            if not api.name in d:
+                d[api.name] = []
+            d[api.name].append(dict(flow.request.query))#Todo
+            ctx.log.error('self.bodys_as_all:')
 
     def function_name(self, flow: http.HTTPFlow):
         request: http.HTTPRequest = flow.request
@@ -772,31 +780,31 @@ if __name__ == "__main__":
     print(__file__)
     # subprocess.Popen(['mitmdump', '-s', __file__])
     
-    api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'})#时段签到
+    api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'})#时段签到
     print(api.str_fun_params())
-    api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
+    api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
     print(api.str_fun_params())
-    api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
+    # api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
     print(api.str_fun_params())
-    api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
+    # api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
     print(api.str_fun_params())
 
     api.name = 'mission_intPointReward'
     api.method = 'post'
     api.content_type = 'json'
     api.fun_params = api.str_fun_params()
-    api.params_as_all = True
-    api.body_as_all = True
+    # api.params_as_all = True
+    # api.body_as_all = True
     seq = [api]  
 
     template_dir = os.path.dirname(__file__)
     tfile = f'{template_dir}/code_template.j2.py'
-    tfile = f'{template_dir}/api_template.j2.py'
+    # tfile = f'{template_dir}/api_template.j2.py'
     with open(tfile) as f:
         s = f.read()
         t = Template(s)
-        # ss = t.render(seq=seq)
-        ss = t.render(request=api)
+        ss = t.render(seq=seq)
+        # ss = t.render(request=api)
         print(ss)
 
     print('done')
