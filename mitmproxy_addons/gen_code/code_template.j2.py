@@ -92,10 +92,14 @@ class User(object):
         return { k:v for k,v in self.bodys.items() if k in set(params_keys) }
 
 {% for request in seq %}
-    def {{ request.name }}(self{{ request.fun_params }}):
-        logging.info('{{ request.name }}')
+    def {{ request.f_name }}(self{{ request.fun_params }}):
+    {%- if request.log %}
+        logging.info('{{ request.log }}')
+    {%- else %}
+        logging.info('{{ request.f_name }}')
+    {%- endif %}
 
-        url = self.urls['{{ request.name }}']
+        url = self.urls['{{ request.url_path }}']
 
         params = self._params_from(url)
     {%- if request.f_p_arg %}
@@ -143,13 +147,13 @@ class User(object):
 
 {% for request in seq %}
 {%- if request.params_as_all and not request.body_as_all %}
-def {{ request.name }}(user: User):
+def {{ request.f_name }}(user: User):
     for item in user.params_as_all['{{ request.name }}']:
         user.{{ request.name }}(item)
 {%- endif %}
 
 {%- if request.body_as_all and not request.params_as_all %}
-def {{ request.name }}(user: User):
+def {{ request.f_name }}(user: User):
     for item in user.body_as_all['{{ request.name }}']:
         user.{{ request.name }}(item)
 {%- endif %}

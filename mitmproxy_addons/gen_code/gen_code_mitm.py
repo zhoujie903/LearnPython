@@ -6,6 +6,7 @@ import time
 import pprint
 from urllib.parse import urlparse
 import logging
+import itertools
 
 from mitmproxy import ctx
 from mitmproxy import flowfilter
@@ -18,10 +19,16 @@ from jinja2 import Template
 '''
 
 class Api(object):
-    def __init__(self, url, params_as_all=False, body_as_all=False, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
+    def __init__(self, url, f_name='', log='', params_as_all=False, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
         self.url = url
+        self.url_path = ''
+        self.f_name = f_name
+        self._name = ''
+        self.log = log
         self.f_p_arg = f_p_arg
+        self.f_p_enc = f_p_enc
         self.f_b_arg = f_b_arg
+        self.f_b_enc = f_b_enc
         self.f_p_kwarg = f_p_kwarg
         self.f_b_kwarg = f_b_kwarg        
         self.params_as_all = params_as_all 
@@ -62,6 +69,16 @@ class Api(object):
             self.str_d = self._str_fun_params()
         return self.str_d
 
+    @property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, name):
+        self._name = name
+        if not self.f_name:
+            self.f_name = name
+
 class NamedFilter(object):
     def __init__(self, urls, name=''):
         self.name = name
@@ -86,9 +103,9 @@ class GenCode(object):
         ctx.log.info('__init__')
         
 
-        self.re_ios = re.compile(r'iphone|ios',flags=re.IGNORECASE)
-        self.re_xiao = re.compile(r'xiaomi|miui|mi\+5|miui',flags=re.IGNORECASE)
-        self.re_huawei = re.compile(r'huawei',flags=re.IGNORECASE)
+        self.re_ios = re.compile(r'iphone|ios', flags=re.IGNORECASE)
+        self.re_xiao = re.compile(r'xiaomi|mi\+5|miui', flags=re.IGNORECASE)
+        self.re_huawei = re.compile(r'huawei', flags=re.IGNORECASE)
 
         self.template_dir = os.path.dirname(__file__)
         tfile = f'{self.template_dir}/api_template.j2.py'
@@ -102,7 +119,6 @@ class GenCode(object):
         self.file_headers = 'data-headers.json'
         self.file_params = 'data-params.json'
         self.file_bodys = 'data-bodys.json'
-        self.file_cannot = 'data-xxx-data.json'
         self.file_app_hosts = 'data-app-hosts.json'
         self.file_app_fn_url = 'data-fn-url.json'
 
@@ -111,21 +127,17 @@ class GenCode(object):
         self.bodys = {}
 
         self.params_keys = {}
+        self.params_encry = {}
         self.bodys_keys = {}
+        self.bodys_encry = {}
         self.params_as_all = {}
         self.bodys_as_all = {}
-        # 不能伪造但可以重放的数据
-        self.can_not_create = {
-            r'task/timer_submit': {},
-            r'/v5/article/complete.json': {},
-        }
 
         # app包含哪些hosts
         self.app_hosts = {}
         self.app_apis = {}
         self.app_fn_url = {}
 
-        self.can_not_create = self.load_file(self.file_cannot, self.file_dir)
 
         self.params_keys = self.load_file(self.file_params_keys, self.file_dir)
         self.bodys_keys = self.load_file(self.file_bodys_keys, self.file_dir)
@@ -190,7 +202,7 @@ class GenCode(object):
         # 趣头条
         urls = [
             r'sign/sign',#每日签到
-            Api(r'/mission/intPointReward',params_as_all=True),#时段签到
+            Api(r'/mission/intPointReward', log='时段签到', params_as_all=True),
             r'/x/game-center/user/sign-in',
             r'/newuserline/activity/signRewardNew',#挑战签到
             r'/mission/receiveTreasureBox',
@@ -246,7 +258,7 @@ class GenCode(object):
 
         # 蚂蚁看点
         urls = [
-            Api(r'article/treasure_chest', f_b_arg={'p'}, content_type='multipart_form'),#时段签到
+            Api(r'article/treasure_chest', log='时段签到', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
             r'TaskCenter/daily_sign',
             # r'WebApi/',
             r'WebApi/Stage/task_reward',
@@ -262,8 +274,8 @@ class GenCode(object):
             r'/v6/Answer/answer_question.json',
             r'/v5/answer/answer_reward.json',
 
-            r'article/haotu_video',#看视频得金币
-            r'article/complete_article',#读文章得金币
+            Api(r'article/haotu_video',log='看视频得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
+            Api(r'article/complete_article',log='读文章得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
             r'v5/user/rewar_video_callback',
 
             # 旧版答题
@@ -382,19 +394,6 @@ class GenCode(object):
                 print(e)                
 
 
-            temp = self.can_not_create.copy()
-            for body in temp.values():
-                for key, value in body.items():
-                    if isinstance(value, set):
-                        body[key] = list(value)
-            self._gen_file(temp, self.file_cannot, self.file_dir)
-            print(f"生成 {self.file_cannot} 成功")
-
-
-            # all_data = self.params.copy()
-                
-            # self._gen_file(all_data, self.file_all, self.file_dir)
-            # print(f"生成 {self.file_all} 成功")
 
             self._gen_file(self.params_keys, self.file_params_keys, self.file_dir)
             print(f"生成 {self.file_params_keys} 成功")
@@ -462,6 +461,8 @@ class GenCode(object):
             self.plain_values_to_file(self.bodys, 'body_values')
             self.plain_values_to_file(self.params_as_all, 'params_as_all')
             self.plain_values_to_file(self.bodys_as_all, 'bodys_as_all')
+            self.plain_values_to_file(self.params_encry, 'params_encry')
+            self.plain_values_to_file(self.bodys_encry, 'bodys_encry')
 
             # 生成app下的 code.py, sessions.py
             for app, apis in self.app_apis.items():
@@ -511,6 +512,7 @@ class GenCode(object):
                 if not function_name in app_apis:
                     api.name = function_name
                     api.url = api_url
+                    api.url_path = url_path
                     api.method = request.method.lower()
                     api.content_type = 'json' if 'json' in request.headers.get('content-type','') else ''
                     api.fun_params = api.str_fun_params()
@@ -525,7 +527,7 @@ class GenCode(object):
                 code = self.api_template.render(request=api)
                 f.write(code)                
 
-                device = self._guess_device(flow)
+                device = self._guess_device(flow, api)
 
                 self.gather_params_and_bodys(flow, api, device=device, app=ft.name)
 
@@ -535,7 +537,7 @@ class GenCode(object):
 
                 d_v = self.app_fn_url.setdefault(device, dict())
                 fn_url = d_v.setdefault(ft.name, dict())
-                fn_url[function_name] = api_url
+                fn_url[url_path] = api_url
 
 
 
@@ -579,68 +581,48 @@ class GenCode(object):
         # 收集bodys
         bodys_keys = list()
         d = self.inner(self.bodys, device=device, app=app, host=host) 
-        d.update(flow.request.urlencoded_form)
-        bodys_keys = list(flow.request.urlencoded_form.keys())
+        body_dict = self.dict_from_request_body(flow, api)
+        if body_dict:
+            d.update(body_dict)
+            bodys_keys = list(body_dict.keys())
 
-        for key,value in flow.request.multipart_form.items():
-            key = key.decode(encoding='utf-8')
-            value = value.decode(encoding='utf-8') 
-            d[key] = value
-            bodys_keys.append(key)
-        try:
-            o = json.loads(flow.request.text)
-            d.update(o)
-            bodys_keys = list(o.keys())
-        except :
-            pass
-
-        self.dict_from_request_body(flow, api)
         parse_result = urlparse(request.url)
         fname = parse_result.path
 
         dd = self.inner(self.bodys_keys, device=device, app=app, host=host) 
         dd[fname] = bodys_keys
-        ctx.log.error('abc--------------abc')
-        ctx.log.error(str(dd))        
-        ctx.log.error('abc--------------abc')
+
         d = self.inner(self.params_keys, device=device, app=app, host=host) 
         d[fname] = list(flow.request.query.keys())
 
 
         path = request.path
-        for item in self.can_not_create.keys():
-            if item in path:
-                ctx.log.error(f'hit path {path}')
-                d = self.can_not_create[item]
-                body = json.loads(flow.request.text)
-                for key, value in body.items():
-                    values = d.setdefault(key, set())
-                    values.add(value)
 
+        d = self.inner(self.params_as_all, device=device, app=app, host=host)
         if api.params_as_all:
-            d = self.inner(self.params_as_all, device=device, app=app, host=host)
-            
             if not api.name in d:
                 d[api.name] = []
             d[api.name].append(dict(flow.request.query))
 
+        d = self.inner(self.bodys_as_all, device=device, app=app, host=host)
         if api.body_as_all:
-            d = self.inner(self.bodys_as_all, device=device, app=app, host=host)
-            
             if not api.name in d:
                 d[api.name] = []
             d[api.name].append(dict(flow.request.query))#Todo
             ctx.log.error('self.bodys_as_all:')
 
-    def function_name(self, flow: http.HTTPFlow):
-        request: http.HTTPRequest = flow.request
+        d = self.inner_by_list(self.params_encry,[device, app, host, api.url_path])
+        if api.f_p_enc and not api.params_as_all:
+            for k in api.f_p_enc:
+                l = d.setdefault(k, list())
+                l.append(flow.request.query[k])
 
-        parse_result = urlparse(request.url)
-        url_path = parse_result.path
+        d = self.inner_by_list(self.bodys_encry,[device, app, host, api.url_path])
+        if api.f_b_enc and not api.body_as_all:
+            for k in api.f_b_enc:
+                l = d.setdefault(k, list())
+                l.append(body_dict[k])
 
-        function_name = re.sub(r'[/-]','_', url_path).strip('_').lower() 
-        return function_name
-    
     def _delete_some_headers(self, headers: dict):
         for key in {'Host','Connection','Content-Length','Accept-Encoding','Cache-Control','Pragma'}:
             try:
@@ -656,52 +638,35 @@ class GenCode(object):
         with (path/f).open(mode=mode) as f:
             json.dump(o, f, indent=2, sort_keys=True)
 
-    def _guess_device(self, flow: http.HTTPFlow):
+    def _guess_device(self, flow: http.HTTPFlow, api: Api):
         device = ''
+        guess_by_data = ''
         request = flow.request
 
-        guess_by_data = ''
-        # ------------------------------------
-        for h, v in request.headers.items():
-            d = v.lower()
-            if 'iphone' in d:
-                device = 'ios'
-                guess_by_data = v 
-                break
+        def gass(data):
+            nonlocal guess_by_data, device
+            for k, v in data:
+                if self.re_ios.search(v):
+                    device = 'ios'
+                    guess_by_data = v 
+                    break
 
-            if self.re_xiao.search(d):
-                device = 'xiaomi'
-                guess_by_data = v 
-                break                
+                if self.re_xiao.search(v):
+                    device = 'xiaomi'
+                    guess_by_data = v 
+                    break            
 
-            if self.re_huawei.search(d):
-                device = 'huawei'
-                guess_by_data = v 
-                break
+                if self.re_huawei.search(v):
+                    device = 'huawei'
+                    guess_by_data = v 
+                    break
 
-        for h, v in request.query.items():
-            if self.re_xiao.search(v):
-                device = 'xiaomi'
-                guess_by_data = v 
-                break            
-
-            if self.re_huawei.search(v):
-                device = 'huawei'
-                guess_by_data = v 
-                break
-
-        for h, v in request.urlencoded_form.items():
-            if self.re_xiao.search(v):
-                device = 'xiaomi'
-                guess_by_data = v 
-                break            
-
-            if self.re_huawei.search(v):
-                device = 'huawei'
-                guess_by_data = v 
-                break
-        # ------------------------------------
-
+        gass( itertools.chain(request.headers.items(), request.query.items()) )
+        if not device:
+            d = self.dict_from_request_body(flow, api)
+            if d: 
+                gass(d.items())
+        
         ctx.log.error(f'device = {device}')
         ctx.log.error(f'guess = {guess_by_data}')
         if device == '':
@@ -810,11 +775,11 @@ if __name__ == "__main__":
     
     api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'})#时段签到
     print(api.str_fun_params())
-    api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
+    api =Api(r'/mission/intPointReward',f_name='hourly_sign', log='时段签到', params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
     print(api.str_fun_params())
     # api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
     print(api.str_fun_params())
-    # api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
+    api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
     print(api.str_fun_params())
 
     api.name = 'mission_intPointReward'
