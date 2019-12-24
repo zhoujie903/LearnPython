@@ -137,6 +137,7 @@ class GenCode(object):
         self.app_hosts = {}
         self.app_apis = {}
         self.app_fn_url = {}
+        self.session_hit = set()
 
 
         self.params_keys = self.load_file(self.file_params_keys, self.file_dir)
@@ -412,11 +413,16 @@ class GenCode(object):
             self._gen_file(self.app_fn_url, self.file_app_fn_url, self.file_dir)
             # -------------------------------------------------------
 
+            print('session_hit')
+            print(str(self.session_hit))
             def gen_app_data_to_file(data: dict, file_name):
-                for device, d in data.items():
-                    for app, dd in d.items():
+                for device, app in self.session_hit:
+                    try:
+                        dd = data[device][app]
                         self._gen_file(dd, f'{file_name}-{device}.json', f'{self.file_dir}{app}')
                         print(f"生成 App - {app:20} - {file_name}-{device}.json 成功")
+                    except:
+                        pass
 
             # 生成app下的 data-bodys-keys.json, data-params-keys.json, data-fn-url.json 
             gen_app_data_to_file(self.bodys_keys, 'data-bodys-keys')
@@ -530,6 +536,7 @@ class GenCode(object):
                 device = self._guess_device(flow, api)
 
                 self.gather_params_and_bodys(flow, api, device=device, app=ft.name)
+                self.session_hit.add((device, ft.name))
 
                 d = self.inner_by_list(self.app_hosts, [device])
                 app_hosts = d.setdefault(ft.name, set())
@@ -705,8 +712,9 @@ class GenCode(object):
         return d
 
     def plain_values_to_file(self, data: dict, var_name):
-        for device, d in data.items():
-            for app, dd in d.items():
+        for device, app in self.session_hit:
+            try:
+                dd = data[device][app]
                 merge_hosts = {}
                 for host, ddd in dd.items():
                     merge_hosts.update(ddd)
@@ -715,6 +723,9 @@ class GenCode(object):
                     s = f'{var_name} = ' + json.dumps(merge_hosts, indent=2, sort_keys=True)
                     f.write('\n\n')
                     f.write(s)
+                    print(f"生成 App - {app:20} - session_{device}.py {var_name} 成功")
+            except:
+                pass
 
     def dict_from_request_body(self, flow: http.HTTPFlow, api: Api):
         d = None
