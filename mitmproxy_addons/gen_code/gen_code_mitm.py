@@ -368,12 +368,21 @@ class GenCode(object):
 
     def load(self, loader):
         ctx.log.info('event: load')
+        loader.add_option(
+            name = 'session',
+            typespec = str,
+            default = 'default',
+            help = '若接口不能推断出session,则用这值来设定默认值', 
+        )
 
     def configure(self, updated):
         ctx.log.info('event: configure')
+        if 'session' in updated:
+            self.default_session = ctx.options.session
 
     def running(self):
         ctx.log.info('event: running')
+        ctx.log.info('default session = ' + ctx.options.session)
 
     def done(self):
         print('event: done')
@@ -678,8 +687,7 @@ class GenCode(object):
         ctx.log.error(f'guess = {guess_by_data}')
         if device == '':
             ctx.log.error(f"not guess: {request.url}")
-            device = 'default'
-            device = 'huawei'
+            device = ctx.options.session
         return device 
 
     def load_file(self, f, fold):
