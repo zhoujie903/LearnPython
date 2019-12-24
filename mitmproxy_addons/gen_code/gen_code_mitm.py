@@ -25,10 +25,21 @@ class Api(object):
         self.f_name = f_name
         self._name = ''
         self.log = log
+
         self.f_p_arg = f_p_arg
         self.f_p_enc = f_p_enc
+        if f_p_enc:
+            if self.f_p_arg == None:
+                self.f_p_arg = set()
+            self.f_p_arg.update(f_p_enc)
+
         self.f_b_arg = f_b_arg
         self.f_b_enc = f_b_enc
+        if f_b_enc:
+            if self.f_b_arg == None:
+                self.f_b_arg = set()
+            self.f_b_arg.update(f_b_enc)
+
         self.f_p_kwarg = f_p_kwarg
         self.f_b_kwarg = f_b_kwarg        
         self.params_as_all = params_as_all 
@@ -81,7 +92,7 @@ class Api(object):
 
 class NamedFilter(object):
     def __init__(self, urls, name=''):
-        self.name = name
+        self.app_name = name
         self.flts = dict()
         for u in urls:
             a = u
@@ -200,6 +211,13 @@ class GenCode(object):
         ]
         self.huoshan = NamedFilter(urls, 'huo-shan')
 
+        # 趣头条小视频
+        urls = [
+            Api(r'seafood-api.1sapp.com/v1/readtimer/report',log='看视频得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'})
+        ]
+
+        self.qtt_video = NamedFilter(urls, 'qtt-video')
+
         # 趣头条
         urls = [
             r'sign/sign',#每日签到
@@ -278,6 +296,8 @@ class GenCode(object):
             Api(r'article/haotu_video',log='看视频得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
             Api(r'article/complete_article',log='读文章得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
             r'v5/user/rewar_video_callback',
+            Api(r'/v5/user/adlickstart.json',log='点击广告领金币 - 开始', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
+            Api(r'/v5/user/adlickend.json',log='点击广告领金币 - 结束', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
 
             # 旧版答题
             r'WebApi/Answer/getData',
@@ -290,9 +310,12 @@ class GenCode(object):
 
         # 中青看点
         urls = [
-            r'getTimingRedReward.json',#时段签到
+            Api(r'getTimingRedReward.json', f_name='hourly_sign',log='时段签到'),
             r'webApi/AnswerReward/',
-            r'/v5/article/complete.json',
+            Api(r'/v5/Game/GameVideoReward.json'),
+            Api(r'/taskCenter/getAdVideoReward',log='任务中心 - 看视频'),
+            Api(r'/WebApi/invite/openHourRed',log='开宝箱'),
+            Api(r'/v5/article/complete.json',log='看视频得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='urlencoded_form'),
         ]
         self.zhong_qin_kd = NamedFilter(urls, 'zhong-qin-kd')
 
@@ -355,6 +378,7 @@ class GenCode(object):
         self.flowfilters = [
             self.toutiao, 
             self.huoshan, 
+            self.qtt_video,
             self.qu_tou_tiao, 
             self.hao_kan,
             self.quan_ming,
@@ -518,12 +542,12 @@ class GenCode(object):
             params_code = self.params_string(flow)
             data_code = self.data_string(flow, api) 
 
-            path = pathlib.Path(f'{self.file_dir}{ft.name}')
+            path = pathlib.Path(f'{self.file_dir}{ft.app_name}')
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
             with (path/f'{function_name}.text').open('a') as f:
 
-                app_apis = self.app_apis.setdefault(ft.name, dict())
+                app_apis = self.app_apis.setdefault(ft.app_name, dict())
                 if not function_name in app_apis:
                     api.name = function_name
                     api.url = api_url
@@ -544,15 +568,15 @@ class GenCode(object):
 
                 device = self._guess_device(flow, api)
 
-                self.gather_params_and_bodys(flow, api, device=device, app=ft.name)
-                self.session_hit.add((device, ft.name))
+                self.gather_params_and_bodys(flow, api, device=device, app=ft.app_name)
+                self.session_hit.add((device, ft.app_name))
 
                 d = self.inner_by_list(self.app_hosts, [device])
-                app_hosts = d.setdefault(ft.name, set())
+                app_hosts = d.setdefault(ft.app_name, set())
                 app_hosts.add(request.pretty_host)
 
                 d_v = self.app_fn_url.setdefault(device, dict())
-                fn_url = d_v.setdefault(ft.name, dict())
+                fn_url = d_v.setdefault(ft.app_name, dict())
                 fn_url[url_path] = api_url
 
 
@@ -624,17 +648,17 @@ class GenCode(object):
         if api.body_as_all:
             if not api.name in d:
                 d[api.name] = []
-            d[api.name].append(dict(flow.request.query))#Todo
+            d[api.name].append(dict(body_dict))
             ctx.log.error('self.bodys_as_all:')
 
-        d = self.inner_by_list(self.params_encry,[device, app, host, api.url_path])
         if api.f_p_enc and not api.params_as_all:
+            d = self.inner_by_list(self.params_encry,[device, app, host, api.url_path])
             for k in api.f_p_enc:
                 l = d.setdefault(k, list())
                 l.append(flow.request.query[k])
 
-        d = self.inner_by_list(self.bodys_encry,[device, app, host, api.url_path])
         if api.f_b_enc and not api.body_as_all:
+            d = self.inner_by_list(self.bodys_encry,[device, app, host, api.url_path])
             for k in api.f_b_enc:
                 l = d.setdefault(k, list())
                 l.append(body_dict[k])
@@ -799,6 +823,8 @@ if __name__ == "__main__":
     # api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
     print(api.str_fun_params())
     api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
+    print(api.str_fun_params())
+    api =Api(r'/mission/intPointReward',f_p_enc={'p_enc'})
     print(api.str_fun_params())
 
     api.name = 'mission_intPointReward'
