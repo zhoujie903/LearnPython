@@ -109,6 +109,10 @@ class NamedFilter(object):
                 return True 
         return False
 
+    def add(self, api: Api):
+        flt = flowfilter.parse(api.url)
+        self.flts[flt] = api
+
 class GenCode(object):
     def __init__(self):
         ctx.log.info('__init__')
@@ -257,6 +261,10 @@ class GenCode(object):
 
             #游戏 - 切菜
             Api(r'/x/open/coin/add',body_as_all=True),
+
+            # 金猪
+            Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg={'tag'}),
+            r'/actcenter/piggy/',
         ]
         self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao') 
 
@@ -493,6 +501,7 @@ class GenCode(object):
 
             # 生成app下的 code.py, sessions.py
             for app, apis in self.app_apis.items():
+                print(f'生成code - {app}')
                 seq = apis.values()
 
                 tfile = f'{self.template_dir}/code_template.j2.py'
@@ -517,12 +526,16 @@ class GenCode(object):
                 ft = flt
                 break
         if ft:
-            api: Api = ft.current_api
-            ctx.log.error(f'api = {api}')
+            api: Api = ft.current_api            
             request: http.HTTPRequest = flow.request
 
             parse_result = urlparse(request.url)
             url_path = parse_result.path
+            if api.url_path and (not api.url_path == url_path):
+                api = Api(url_path)
+                ft.add(api)
+
+            ctx.log.error(f'api = {api}')
 
             function_name = re.sub(r'[./-]','_', url_path).strip('_').lower()
             api_url = f'{request.scheme}://{request.pretty_host}{url_path}' 
