@@ -415,25 +415,14 @@ class GenCode(object):
             #     for host, headers  in host_headers.items():
             #         self._delete_some_headers(headers)
             self._gen_file(self.headers, self.file_headers, self.file_dir)
-            print(f"生成 {self.file_headers} 成功")
 
             self._gen_file(self.params, self.file_params, self.file_dir)
-            print(f"生成 {self.file_params} 成功")
 
-            try:
-                #pprint.pprint(self.bodys)
-                self._gen_file(self.bodys, self.file_bodys, self.file_dir)
-                print(f"生成 {self.file_bodys} 成功")
-            except Exception as e:
-                print(e)                
-
-
+            self._gen_file(self.bodys, self.file_bodys, self.file_dir)
 
             self._gen_file(self.params_keys, self.file_params_keys, self.file_dir)
-            print(f"生成 {self.file_params_keys} 成功")
 
             self._gen_file(self.bodys_keys, self.file_bodys_keys, self.file_dir)
-            print(f"生成 {self.file_bodys_keys} 成功")
 
             temp = {}
             for device, d in self.app_hosts.items():
@@ -441,7 +430,6 @@ class GenCode(object):
                 for app, dd in d.items():
                     temp[device][app] = list(dd)
             self._gen_file(temp, self.file_app_hosts, self.file_dir)
-            print(f"生成 {self.file_app_hosts} 成功")
 
             self._gen_file(self.app_fn_url, self.file_app_fn_url, self.file_dir)
             # -------------------------------------------------------
@@ -452,8 +440,8 @@ class GenCode(object):
                 for device, app in self.session_hit:
                     try:
                         dd = data[device][app]
+                        print(f"生成 App", end='\t')
                         self._gen_file(dd, f'{file_name}-{device}.json', f'{self.file_dir}{app}')
-                        print(f"生成 App - {app:20} - {file_name}-{device}.json 成功")
                     except:
                         pass
 
@@ -675,8 +663,9 @@ class GenCode(object):
         if not path.exists():
             path.mkdir(parents=True, exist_ok=True)
 
-        with (path/f).open(mode=mode) as f:
-            json.dump(o, f, indent=2, sort_keys=True)
+        with (path/f).open(mode=mode) as fd:
+            json.dump(o, fd, indent=2, sort_keys=True)
+            print(f"生成 {f} 成功")
 
     def _guess_device(self, flow: http.HTTPFlow, api: Api):
         device = ''
