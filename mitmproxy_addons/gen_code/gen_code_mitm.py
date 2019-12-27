@@ -229,14 +229,14 @@ class GenCode(object):
             r'/x/game-center/user/sign-in',
             r'/newuserline/activity/signRewardNew',#挑战签到
             r'/mission/receiveTreasureBox',
-            r'/content/readV2',
+            Api(r'/content/readV2',params_as_all=True),
             Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True),
             # r'taskcenter/getListV2',#旧版本 tab页：任务
             # r'api-coin-service.aiclk.com/coin/service',
             Api(r'/coin/service', body_as_all=True),
             r'readtimer/report',
-            r'motivateapp/mtvcallback',
-            r'x/feed/getReward',#信息流 - 惊喜红包
+            Api(r'motivateapp/mtvcallback',params_as_all=True),
+            Api(r'x/feed/getReward',log='信息流-惊喜红包', params_as_all=True),
             r'x/v1/goldpig/bubbleWithdraw', # 金猪 - 看视频
             r'x/v1/goldpig/withdraw', #金猪 
             r'finance/piggybank/taskReward',#存钱罐
@@ -464,40 +464,81 @@ class GenCode(object):
             # sessions_jinja_data = list()
             # 生成app下的 session_xxx.py
             # app, device, data
-            for device, d in self.headers.items():
-                for app, dd in d.items():
-                    sessions_jinja_data = sessions_by_app.setdefault(app, list())
-                    sessions_jinja_data.append({ 
-                        'file': f'session_{device}',
-                        'session': device,
-                    })
+            # for device, d in self.headers.items():
+            #     for app, dd in d.items():
+            #         sessions_jinja_data = sessions_by_app.setdefault(app, list())
+            #         sessions_jinja_data.append({ 
+            #             'file': f'session_{device}',
+            #             'session': device,
+            #         })
 
-                    merge_hosts = {}
-                    for host, ddd in dd.items():
-                        merge_hosts.update(ddd)
+            #         merge_hosts = {}
+            #         for host, ddd in dd.items():
+            #             merge_hosts.update(ddd)
                         
-                    with open(f'{self.file_dir}{app}/session_{device}.py', mode='w') as f:
+            #         with open(f'{self.file_dir}{app}/session_{device}.py', mode='w') as f:
 
-                        def gen_var(file_name: str, var_name: str, f):
-                            with open(file_name) as ff:
-                                t = json.load(ff)
-                                s = f'{var_name} = ' + json.dumps(t, indent=2, sort_keys=True)
-                                f.write('\n\n') 
-                                f.write(s)    
-                        gen_var(f'{self.file_dir}{app}/data-params-keys-{device}.json', 'params_keys', f)
+            #             def gen_var(file_name: str, var_name: str, f):
+            #                 with open(file_name) as ff:
+            #                     t = json.load(ff)
+            #                     s = f'{var_name} = ' + json.dumps(t, indent=2, sort_keys=True)
+            #                     f.write('\n\n') 
+            #                     f.write(s)    
+            #             gen_var(f'{self.file_dir}{app}/data-params-keys-{device}.json', 'params_keys', f)
 
-                        gen_var(f'{self.file_dir}{app}/data-bodys-keys-{device}.json', 'bodys_keys', f)
+            #             gen_var(f'{self.file_dir}{app}/data-bodys-keys-{device}.json', 'bodys_keys', f)
 
-                        gen_var(f'{self.file_dir}{app}/data-fn-url-{device}.json', 'fn_url', f)
+            #             gen_var(f'{self.file_dir}{app}/data-fn-url-{device}.json', 'fn_url', f)
                         
 
-            self.plain_values_to_file(self.headers, 'header_values')
-            self.plain_values_to_file(self.params, 'param_values')
-            self.plain_values_to_file(self.bodys, 'body_values')
-            self.plain_values_to_file(self.params_as_all, 'params_as_all')
-            self.plain_values_to_file(self.bodys_as_all, 'bodys_as_all')
-            self.plain_values_to_file(self.params_encry, 'params_encry')
-            self.plain_values_to_file(self.bodys_encry, 'bodys_encry')
+            # self.plain_values_to_file(self.headers, 'header_values')
+            # self.plain_values_to_file(self.params, 'param_values')
+            # self.plain_values_to_file(self.bodys, 'body_values')
+            # self.plain_values_to_file(self.params_as_all, 'params_as_all')
+            # self.plain_values_to_file(self.bodys_as_all, 'bodys_as_all')
+            # self.plain_values_to_file(self.params_encry, 'params_encry')
+            # self.plain_values_to_file(self.bodys_encry, 'bodys_encry')
+
+            
+            for device, app in self.session_hit:
+                sessions_jinja_data = sessions_by_app.setdefault(app, list())
+                sessions_jinja_data.append({ 
+                    'file': f'session_{device}',
+                    'session': device,
+                })
+
+
+                var_dict = dict()
+
+                def abc(data: dict, var_name, var_dict: dict):
+                    try:
+                        dd = data[device][app]
+                        merge_hosts = {}
+                        try:                            
+                            for host, ddd in dd.items():
+                                merge_hosts.update(ddd)
+                        except:
+                            merge_hosts = dd                            
+                        var_dict[var_name] = json.dumps(merge_hosts, indent=2, sort_keys=True)
+                        print(f"生成 App - {app:20} - session_{device}.py {var_name} 成功")
+                    except Exception as e:
+                        print(e)
+                        var_dict[var_name] = '{}'
+
+                abc(self.headers, 'header_values', var_dict)
+                abc(self.app_fn_url, 'fn_url', var_dict)
+                abc(self.params_keys, 'params_keys', var_dict)
+                abc(self.bodys_keys, 'bodys_keys', var_dict)
+                abc(self.params, 'param_values', var_dict)
+                abc(self.bodys, 'body_values', var_dict)
+                abc(self.params_as_all, 'params_as_all', var_dict)
+                abc(self.bodys_as_all, 'bodys_as_all', var_dict)
+                abc(self.params_encry, 'params_encry', var_dict)
+                abc(self.bodys_encry, 'bodys_encry', var_dict)
+
+                tfile = f'{self.template_dir}/session_xxx.j2.py'
+                gfile = f'{self.file_dir}{app}/session_{device}.py'
+                self.gen_file_from_jinja2(tfile, gfile, seq=var_dict)
 
             # 生成app下的 code.py, sessions.py
             for app, apis in self.app_apis.items():
@@ -744,22 +785,6 @@ class GenCode(object):
         for key in l:
             d = d.setdefault(key, dict())
         return d
-
-    def plain_values_to_file(self, data: dict, var_name):
-        for device, app in self.session_hit:
-            try:
-                dd = data[device][app]
-                merge_hosts = {}
-                for host, ddd in dd.items():
-                    merge_hosts.update(ddd)
-                    
-                with open(f'{self.file_dir}{app}/session_{device}.py', mode='a') as f:
-                    s = f'{var_name} = ' + json.dumps(merge_hosts, indent=2, sort_keys=True)
-                    f.write('\n\n')
-                    f.write(s)
-                    print(f"生成 App - {app:20} - session_{device}.py {var_name} 成功")
-            except:
-                pass
 
     def dict_from_request_body(self, flow: http.HTTPFlow, api: Api):
         d = None

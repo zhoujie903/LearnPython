@@ -148,13 +148,25 @@ class User(object):
 {% for request in seq %}
 {%- if request.params_as_all and not request.body_as_all %}
 def {{ request.f_name }}(user: User):
-    for item in user.params_as_all['{{ request.name }}']:
+    for item in user.params_as_all['{{ request.url_path }}']:
         user.{{ request.name }}(item)
 {%- endif %}
 
 {%- if request.body_as_all and not request.params_as_all %}
 def {{ request.f_name }}(user: User):
-    for item in user.body_as_all['{{ request.name }}']:
+    for item in user.body_as_all['{{ request.url_path }}']:
+        user.{{ request.name }}(item)
+{%- endif %}
+
+{%- if request.f_p_enc  and not request.params_as_all %}
+def {{ request.f_name }}(user: User):
+    for item in user.params_encry['{{ request.url_path }}']['{{ request.f_p_enc[0] }}']:
+        user.{{ request.name }}(item)
+{%- endif %}
+
+{%- if request.f_b_enc and not request.body_as_all %}
+def {{ request.f_name }}(user: User):
+    for item in user.bodys_encry['{{ request.url_path }}']['{{ request.f_b_enc[0] }}']:
         user.{{ request.name }}(item)
 {%- endif %}
 {% endfor %}
