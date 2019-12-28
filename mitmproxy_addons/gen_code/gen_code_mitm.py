@@ -7,6 +7,7 @@ import pprint
 from urllib.parse import urlparse
 import logging
 import itertools
+import collections
 
 from mitmproxy import ctx
 from mitmproxy import flowfilter
@@ -92,8 +93,8 @@ class Api(object):
             self.f_name = name
 
 class NamedFilter(object):
-    def __init__(self, urls, name=''):
-        self.app_name = name
+    def __init__(self, urls, app_name=''):
+        self.app_name = app_name
         self.flts = dict()
         for u in urls:
             a = u
@@ -117,11 +118,13 @@ class NamedFilter(object):
 class GenCode(object):
     def __init__(self):
         ctx.log.info('__init__')
-        
-
-        self.re_ios = re.compile(r'iphone|ios', flags=re.IGNORECASE)
-        self.re_xiao = re.compile(r'xiaomi|mi\+5|miui', flags=re.IGNORECASE)
-        self.re_huawei = re.compile(r'huawei', flags=re.IGNORECASE)
+        # 设置代码文件生成的目录\文件夹
+        self.api_dir = '/Users/zhoujie/Desktop/api/'
+        self.guess_session = collections.OrderedDict(
+            ios=re.compile(r'iphone|ios', flags=re.IGNORECASE),
+            xiaomi=re.compile(r'xiaomi|mi\+5|miui', flags=re.IGNORECASE),
+            huawei=re.compile(r'huawei', flags=re.IGNORECASE),
+        )
 
         self.template_dir = os.path.dirname(__file__)
         tfile = f'{self.template_dir}/api_template.j2.py'
@@ -129,7 +132,6 @@ class GenCode(object):
             s = f.read()
             self.api_template = Template(s) 
 
-        self.file_dir = '/Users/zhoujie/Desktop/api/'
         self.file_params_keys = 'data-params-keys.json'
         self.file_bodys_keys = 'data-bodys-keys.json'
         self.file_headers = 'data-headers.json'
@@ -156,23 +158,23 @@ class GenCode(object):
         self.session_hit = set()
 
 
-        self.params_keys = self.load_file(self.file_params_keys, self.file_dir)
-        self.bodys_keys = self.load_file(self.file_bodys_keys, self.file_dir)
+        self.params_keys = self.load_file(self.file_params_keys, self.api_dir)
+        self.bodys_keys = self.load_file(self.file_bodys_keys, self.api_dir)
 
-        self.headers = self.load_file(self.file_headers, self.file_dir)
+        self.headers = self.load_file(self.file_headers, self.api_dir)
 
-        self.params = self.load_file(self.file_params, self.file_dir)
+        self.params = self.load_file(self.file_params, self.api_dir)
 
-        self.bodys = self.load_file(self.file_bodys, self.file_dir)
+        self.bodys = self.load_file(self.file_bodys, self.api_dir)
 
-        self.app_hosts = self.load_file(self.file_app_hosts, self.file_dir)
+        self.app_hosts = self.load_file(self.file_app_hosts, self.api_dir)
 
         for device, d in self.app_hosts.items():
             for app, dd in d.items():
                 self.app_hosts[device][app] = set(dd)
         pprint.pprint(self.app_hosts)
 
-        self.app_fn_url = self.load_file(self.file_app_fn_url, self.file_dir)
+        self.app_fn_url = self.load_file(self.file_app_fn_url, self.api_dir)
  
         urls = [
             'score_task/v1/task/page_data/',
@@ -380,7 +382,6 @@ class GenCode(object):
             r'/gk/game/dadishu/',
             r'/gk/game/bianlidian/',
             r'/qujianpan/',
-            # r'',
         ]
         self.qu_jian_pan = NamedFilter(urls, 'qu-jian-pan')
 
@@ -423,24 +424,24 @@ class GenCode(object):
             # for _, host_headers in self.headers.items():
             #     for host, headers  in host_headers.items():
             #         self._delete_some_headers(headers)
-            self._gen_file(self.headers, self.file_headers, self.file_dir)
+            self._gen_file(self.headers, self.file_headers, self.api_dir)
 
-            self._gen_file(self.params, self.file_params, self.file_dir)
+            self._gen_file(self.params, self.file_params, self.api_dir)
 
-            self._gen_file(self.bodys, self.file_bodys, self.file_dir)
+            self._gen_file(self.bodys, self.file_bodys, self.api_dir)
 
-            self._gen_file(self.params_keys, self.file_params_keys, self.file_dir)
+            self._gen_file(self.params_keys, self.file_params_keys, self.api_dir)
 
-            self._gen_file(self.bodys_keys, self.file_bodys_keys, self.file_dir)
+            self._gen_file(self.bodys_keys, self.file_bodys_keys, self.api_dir)
 
             temp = {}
             for device, d in self.app_hosts.items():
                 temp[device] = d.copy()
                 for app, dd in d.items():
                     temp[device][app] = list(dd)
-            self._gen_file(temp, self.file_app_hosts, self.file_dir)
+            self._gen_file(temp, self.file_app_hosts, self.api_dir)
 
-            self._gen_file(self.app_fn_url, self.file_app_fn_url, self.file_dir)
+            self._gen_file(self.app_fn_url, self.file_app_fn_url, self.api_dir)
             # -------------------------------------------------------
 
             print('session_hit')
@@ -450,7 +451,7 @@ class GenCode(object):
                     try:
                         dd = data[device][app]
                         print(f"生成 App", end='\t')
-                        self._gen_file(dd, f'{file_name}-{device}.json', f'{self.file_dir}{app}')
+                        self._gen_file(dd, f'{file_name}-{device}.json', f'{self.api_dir}{app}')
                     except:
                         pass
 
@@ -504,7 +505,7 @@ class GenCode(object):
                 abc(self.bodys_encry, 'bodys_encry', var_dict)
 
                 tfile = f'{self.template_dir}/session_xxx.j2.py'
-                gfile = f'{self.file_dir}{app}/session_{device}.py'
+                gfile = f'{self.api_dir}{app}/session_{device}.py'
                 self.gen_file_from_jinja2(tfile, gfile, seq=var_dict)
 
             # 生成app下的 code.py, sessions.py
@@ -513,11 +514,11 @@ class GenCode(object):
                 seq = apis.values()
 
                 tfile = f'{self.template_dir}/code_template.j2.py'
-                gfile = f'{self.file_dir}{app}/code-{app}.py'
+                gfile = f'{self.api_dir}{app}/code-{app}.py'
                 self.gen_file_from_jinja2(tfile,gfile,seq=seq)
 
                 tfile = f'{self.template_dir}/sessions.j2.py'
-                gfile = f'{self.file_dir}{app}/sessions.py'
+                gfile = f'{self.api_dir}{app}/sessions.py'
                 self.gen_file_from_jinja2(tfile, gfile, seq=sessions_by_app[app])
 
             print('done !!!')
@@ -543,7 +544,7 @@ class GenCode(object):
                 api = Api(url_path)
                 ft.add(api)
 
-            ctx.log.error(f'api = {api}')
+            ctx.log.error(f'触发 api = {api}')
 
             function_name = re.sub(r'[./-]','_', url_path).strip('_').lower()
             api_url = f'{request.scheme}://{request.pretty_host}{url_path}' 
@@ -551,7 +552,7 @@ class GenCode(object):
             params_code = self.params_string(flow)
             data_code = self.data_string(flow, api) 
 
-            path = pathlib.Path(f'{self.file_dir}{ft.app_name}')
+            path = pathlib.Path(f'{self.api_dir}{ft.app_name}')
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
             with (path/f'{function_name}.text').open('a') as f:
@@ -695,20 +696,15 @@ class GenCode(object):
 
         def gass(data):
             nonlocal guess_by_data, device
+            found = False
             for k, v in data:
-                if self.re_ios.search(v):
-                    device = 'ios'
-                    guess_by_data = v 
-                    break
-
-                if self.re_xiao.search(v):
-                    device = 'xiaomi'
-                    guess_by_data = v 
-                    break            
-
-                if self.re_huawei.search(v):
-                    device = 'huawei'
-                    guess_by_data = v 
+                for session, r in self.guess_session.items():
+                    if r.search(v):
+                        device = session
+                        guess_by_data = v
+                        found = True 
+                        break
+                if found:
                     break
 
         gass( itertools.chain(request.headers.items(), request.query.items()) )
@@ -717,8 +713,8 @@ class GenCode(object):
             if d: 
                 gass(d.items())
         
-        ctx.log.error(f'device = {device}')
-        ctx.log.error(f'guess = {guess_by_data}')
+        ctx.log.error(f'依据值：{guess_by_data}')
+        ctx.log.error(f'猜测为：session = {device}')
         if device == '':
             ctx.log.error(f"not guess: {request.url}")
             device = ctx.options.session
