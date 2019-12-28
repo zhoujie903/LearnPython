@@ -16,6 +16,7 @@ from jinja2 import Template
 
 '''
 生成接口python代码
+mitmdump --flow-detail 0 --set session='huawei' -s "/Users/zhoujie/Documents/zhoujie903/LearnScrapy/mitmproxy_addons/gen_code/gen_code_mitm.py" 
 '''
 
 class Api(object):
@@ -285,7 +286,7 @@ class GenCode(object):
 
         # 蚂蚁看点
         urls = [
-            Api(r'article/treasure_chest', log='时段签到', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
+            Api(r'article/treasure_chest', log='时段签到', f_b_enc={'p'}, content_type='multipart_form'),
             r'TaskCenter/daily_sign',
             # r'WebApi/',
             r'WebApi/Stage/task_reward',
@@ -301,11 +302,11 @@ class GenCode(object):
             r'/v6/Answer/answer_question.json',
             r'/v5/answer/answer_reward.json',
 
-            Api(r'article/haotu_video',log='看视频得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
-            Api(r'article/complete_article',log='读文章得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
-            r'v5/user/rewar_video_callback',
-            Api(r'/v5/user/adlickstart.json',log='点击广告领金币 - 开始', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
-            Api(r'/v5/user/adlickend.json',log='点击广告领金币 - 结束', f_b_enc={'p'}, f_b_arg={'p'}, content_type='multipart_form'),
+            Api(r'article/haotu_video',log='看视频得金币', f_b_enc={'p'}, content_type='multipart_form'),
+            Api(r'article/complete_article',log='读文章得金币', f_b_enc={'p'}, content_type='multipart_form'),
+            Api(r'/v5/user/rewar_video_callback', log='视频广告 - 得金币', f_b_enc={'p'}, content_type='multipart_form'),
+            Api(r'/v5/user/adlickstart.json',log='点击广告领金币 - 开始', f_b_enc={'p'}, content_type='multipart_form'),
+            Api(r'/v5/user/adlickend.json',log='点击广告领金币 - 结束', f_b_enc={'p'}, content_type='multipart_form'),
 
             # 旧版答题
             r'WebApi/Answer/getData',
@@ -463,43 +464,6 @@ class GenCode(object):
             sessions_by_app = {}
             # sessions_jinja_data = list()
             # 生成app下的 session_xxx.py
-            # app, device, data
-            # for device, d in self.headers.items():
-            #     for app, dd in d.items():
-            #         sessions_jinja_data = sessions_by_app.setdefault(app, list())
-            #         sessions_jinja_data.append({ 
-            #             'file': f'session_{device}',
-            #             'session': device,
-            #         })
-
-            #         merge_hosts = {}
-            #         for host, ddd in dd.items():
-            #             merge_hosts.update(ddd)
-                        
-            #         with open(f'{self.file_dir}{app}/session_{device}.py', mode='w') as f:
-
-            #             def gen_var(file_name: str, var_name: str, f):
-            #                 with open(file_name) as ff:
-            #                     t = json.load(ff)
-            #                     s = f'{var_name} = ' + json.dumps(t, indent=2, sort_keys=True)
-            #                     f.write('\n\n') 
-            #                     f.write(s)    
-            #             gen_var(f'{self.file_dir}{app}/data-params-keys-{device}.json', 'params_keys', f)
-
-            #             gen_var(f'{self.file_dir}{app}/data-bodys-keys-{device}.json', 'bodys_keys', f)
-
-            #             gen_var(f'{self.file_dir}{app}/data-fn-url-{device}.json', 'fn_url', f)
-                        
-
-            # self.plain_values_to_file(self.headers, 'header_values')
-            # self.plain_values_to_file(self.params, 'param_values')
-            # self.plain_values_to_file(self.bodys, 'body_values')
-            # self.plain_values_to_file(self.params_as_all, 'params_as_all')
-            # self.plain_values_to_file(self.bodys_as_all, 'bodys_as_all')
-            # self.plain_values_to_file(self.params_encry, 'params_encry')
-            # self.plain_values_to_file(self.bodys_encry, 'bodys_encry')
-
-            
             for device, app in self.session_hit:
                 sessions_jinja_data = sessions_by_app.setdefault(app, list())
                 sessions_jinja_data.append({ 
@@ -510,13 +474,16 @@ class GenCode(object):
 
                 var_dict = dict()
 
-                def abc(data: dict, var_name, var_dict: dict):
+                def abc(data: dict, var_name, var_dict: dict, mergehost=True):
                     try:
                         dd = data[device][app]
                         merge_hosts = {}
-                        try:                            
-                            for host, ddd in dd.items():
-                                merge_hosts.update(ddd)
+                        try:
+                            if mergehost:                            
+                                for host, ddd in dd.items():
+                                    merge_hosts.update(ddd)
+                            else:
+                                merge_hosts = dd
                         except:
                             merge_hosts = dd                            
                         var_dict[var_name] = json.dumps(merge_hosts, indent=2, sort_keys=True)
@@ -527,8 +494,8 @@ class GenCode(object):
 
                 abc(self.headers, 'header_values', var_dict)
                 abc(self.app_fn_url, 'fn_url', var_dict)
-                abc(self.params_keys, 'params_keys', var_dict)
-                abc(self.bodys_keys, 'bodys_keys', var_dict)
+                abc(self.params_keys, 'params_keys', var_dict, mergehost=False)
+                abc(self.bodys_keys, 'bodys_keys', var_dict, mergehost=False)
                 abc(self.params, 'param_values', var_dict)
                 abc(self.bodys, 'body_values', var_dict)
                 abc(self.params_as_all, 'params_as_all', var_dict)

@@ -22,15 +22,17 @@ logging.basicConfig(format='%(asctime)s:%(message)s', datefmt='%m-%d %H:%M:%S', 
 logging.info(sys.stdout.encoding)
 
 class User(object):
-    def __init__(self, session_data: tuple): 
-        self.headers = session_data[0]
-        self.params_keys = session_data[1]
-        self.bodys_keys = session_data[2]
-        self.urls = session_data[3]
-        self.params = session_data[4]
-        self.bodys = session_data[5]
-        self.params_as_all = session_data[6]
-        self.bodys_as_all = session_data[7]
+    def __init__(self, session_data: dict): 
+        self.headers = session_data['header_values']
+        self.params_keys = session_data['params_keys']
+        self.bodys_keys = session_data['bodys_keys']
+        self.urls = session_data['fn_url']
+        self.params = session_data['param_values']
+        self.bodys = session_data['body_values']
+        self.params_as_all = session_data['params_as_all']
+        self.bodys_as_all = session_data['bodys_as_all']
+        self.params_encry = session_data['params_encry']
+        self.bodys_encry = session_data['bodys_encry']
         self.session = requests.Session()
         self.session.headers = self._header()
 
@@ -160,13 +162,13 @@ def {{ request.f_name }}(user: User):
 
 {%- if request.f_p_enc  and not request.params_as_all %}
 def {{ request.f_name }}(user: User):
-    for item in user.params_encry['{{ request.url_path }}']['{{ request.f_p_enc[0] }}']:
+    for item in user.params_encry['{{ request.url_path }}']['{{ request.f_p_enc|first }}']:
         user.{{ request.name }}(item)
 {%- endif %}
 
 {%- if request.f_b_enc and not request.body_as_all %}
 def {{ request.f_name }}(user: User):
-    for item in user.bodys_encry['{{ request.url_path }}']['{{ request.f_b_enc[0] }}']:
+    for item in user.bodys_encry['{{ request.url_path }}']['{{ request.f_b_enc|first }}']:
         user.{{ request.name }}(item)
 {%- endif %}
 {% endfor %}
