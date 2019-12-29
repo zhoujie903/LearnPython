@@ -8,6 +8,8 @@ from urllib.parse import urlparse
 import logging
 import itertools
 import collections
+import importlib
+import traceback
 
 from mitmproxy import ctx
 from mitmproxy import flowfilter
@@ -21,7 +23,7 @@ mitmdump --flow-detail 0 --set session='huawei' -s "/Users/zhoujie/Documents/zho
 '''
 
 class Api(object):
-    def __init__(self, url, f_name='', log='', params_as_all=False, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
+    def __init__(self, url, f_name='', log='', params_as_all=False, p_as_all_limit=50, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
         self.url = url
         self.url_path = ''
         self.f_name = f_name
@@ -46,6 +48,7 @@ class Api(object):
         self.f_b_kwarg = f_b_kwarg        
         self.params_as_all = params_as_all 
         self.body_as_all = body_as_all
+        self.p_as_all_limit = p_as_all_limit
         self.str_d = ''
         # content_type取值'json', 'multipart_form', 'urlencoded_form', 'get'
         self.content_type = content_type 
@@ -151,8 +154,6 @@ class GenCode(object):
         self.params_as_all = {}
         self.bodys_as_all = {}
 
-        # app包含哪些hosts
-        self.app_hosts = {}
         self.app_apis = {}
         self.app_fn_url = {}
         self.session_hit = set()
@@ -166,13 +167,6 @@ class GenCode(object):
         self.params = self.load_file(self.file_params, self.api_dir)
 
         self.bodys = self.load_file(self.file_bodys, self.api_dir)
-
-        self.app_hosts = self.load_file(self.file_app_hosts, self.api_dir)
-
-        for device, d in self.app_hosts.items():
-            for app, dd in d.items():
-                self.app_hosts[device][app] = set(dd)
-        pprint.pprint(self.app_hosts)
 
         self.app_fn_url = self.load_file(self.file_app_fn_url, self.api_dir)
  
@@ -230,10 +224,11 @@ class GenCode(object):
             r'sign/sign',#每日签到
             Api(r'/mission/intPointReward', log='时段签到', params_as_all=True),
             r'/x/game-center/user/sign-in',
+            r'/x/game-center/user/last-sign-coin',
             r'/newuserline/activity/signRewardNew',#挑战签到
             r'/mission/receiveTreasureBox',
             Api(r'/content/readV2',params_as_all=True),
-            Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True),
+            Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True, p_as_all_limit=1),
             # r'taskcenter/getListV2',#旧版本 tab页：任务
             # r'api-coin-service.aiclk.com/coin/service',
             Api(r'/coin/service', body_as_all=True),
@@ -327,6 +322,7 @@ class GenCode(object):
             Api(r'/taskCenter/getAdVideoReward',log='任务中心 - 看视频'),
             Api(r'/WebApi/invite/openHourRed',log='开宝箱'),
             Api(r'/v5/article/complete.json',log='看视频得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='urlencoded_form'),
+            Api(r'/WebApi/Task/receiveBereadRed',log='任务中心 - 领红包'),
         ]
         self.zhong_qin_kd = NamedFilter(urls, 'zhong-qin-kd')
 
@@ -421,29 +417,6 @@ class GenCode(object):
     def done(self):
         print('event: done')
         try:
-            # for _, host_headers in self.headers.items():
-            #     for host, headers  in host_headers.items():
-            #         self._delete_some_headers(headers)
-            self._gen_file(self.headers, self.file_headers, self.api_dir)
-
-            self._gen_file(self.params, self.file_params, self.api_dir)
-
-            self._gen_file(self.bodys, self.file_bodys, self.api_dir)
-
-            self._gen_file(self.params_keys, self.file_params_keys, self.api_dir)
-
-            self._gen_file(self.bodys_keys, self.file_bodys_keys, self.api_dir)
-
-            temp = {}
-            for device, d in self.app_hosts.items():
-                temp[device] = d.copy()
-                for app, dd in d.items():
-                    temp[device][app] = list(dd)
-            self._gen_file(temp, self.file_app_hosts, self.api_dir)
-
-            self._gen_file(self.app_fn_url, self.file_app_fn_url, self.api_dir)
-            # -------------------------------------------------------
-
             print('session_hit')
             print(str(self.session_hit))
             def gen_app_data_to_file(data: dict, file_name):
@@ -463,7 +436,6 @@ class GenCode(object):
             gen_app_data_to_file(self.bodys_as_all, 'data-bodys_as_all')
 
             sessions_by_app = {}
-            # sessions_jinja_data = list()
             # 生成app下的 session_xxx.py
             for device, app in self.session_hit:
                 sessions_jinja_data = sessions_by_app.setdefault(app, list())
@@ -475,7 +447,44 @@ class GenCode(object):
 
                 var_dict = dict()
 
-                def abc(data: dict, var_name, var_dict: dict, mergehost=True):
+                def import_module(app, device):
+                    import sys
+                    path = self.api_dir + f'{app}/'
+                    sys.path.append(path)
+                    try:
+                        module_name = f'session_{device}'
+                        session_module = importlib.import_module(module_name)
+                        return session_module
+                    except Exception as e:
+                        # traceback.print_exc()
+                        pass
+                    sys.path.remove(path)
+
+                session_module = import_module(app, device)
+                def get_old_data(session_module, var_name):
+                    old_data = dict()
+                    try:
+                        old_data = getattr(session_module, var_name)
+                    except Exception as e:
+                        # traceback.print_exc()
+                        pass
+                    return old_data
+
+                def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
+                    if list_append:
+                        for k, v in old_data.items():
+                            try:
+                                if isinstance(v, list):                                    
+                                    l = new_data.get(k)
+                                    v.extend(l)
+                                    new_data[k] = v[0:limit]
+                            except :
+                                pass
+
+                    old_data.update(new_data)
+                    return old_data
+                
+                def abc(data: dict, var_name, var_dict: dict, mergehost=True, list_append: bool=False, limit=50):
                     try:
                         dd = data[device][app]
                         merge_hosts = {}
@@ -486,23 +495,24 @@ class GenCode(object):
                             else:
                                 merge_hosts = dd
                         except:
-                            merge_hosts = dd                            
+                            merge_hosts = dd
+                        old_data = get_old_data(session_module, var_name)
+                        merge_hosts = merge_data(merge_hosts, old_data, list_append=list_append, limit=limit)
                         var_dict[var_name] = json.dumps(merge_hosts, indent=2, sort_keys=True)
                         print(f"生成 App - {app:20} - session_{device}.py {var_name} 成功")
                     except Exception as e:
                         print(e)
                         var_dict[var_name] = '{}'
-
                 abc(self.headers, 'header_values', var_dict)
                 abc(self.app_fn_url, 'fn_url', var_dict)
                 abc(self.params_keys, 'params_keys', var_dict, mergehost=False)
                 abc(self.bodys_keys, 'bodys_keys', var_dict, mergehost=False)
                 abc(self.params, 'param_values', var_dict)
                 abc(self.bodys, 'body_values', var_dict)
-                abc(self.params_as_all, 'params_as_all', var_dict)
-                abc(self.bodys_as_all, 'bodys_as_all', var_dict)
-                abc(self.params_encry, 'params_encry', var_dict)
-                abc(self.bodys_encry, 'bodys_encry', var_dict)
+                abc(self.params_as_all, 'params_as_all', var_dict, list_append=True)
+                abc(self.bodys_as_all, 'bodys_as_all', var_dict, list_append=True)
+                abc(self.params_encry, 'params_encry', var_dict, list_append=True)
+                abc(self.bodys_encry, 'bodys_encry', var_dict, list_append=True)
 
                 tfile = f'{self.template_dir}/session_xxx.j2.py'
                 gfile = f'{self.api_dir}{app}/session_{device}.py'
@@ -581,10 +591,6 @@ class GenCode(object):
                 self.gather_params_and_bodys(flow, api, device=device, app=ft.app_name)
                 self.session_hit.add((device, ft.app_name))
 
-                d = self.inner_by_list(self.app_hosts, [device])
-                app_hosts = d.setdefault(ft.app_name, set())
-                app_hosts.add(request.pretty_host)
-
                 d_v = self.app_fn_url.setdefault(device, dict())
                 fn_url = d_v.setdefault(ft.app_name, dict())
                 fn_url[url_path] = api_url
@@ -652,7 +658,8 @@ class GenCode(object):
         if api.params_as_all:
             if not api.url_path in d:
                 d[api.url_path] = []
-            d[api.url_path].append(dict(flow.request.query))
+            if api.p_as_all_limit > len(d[api.url_path]):
+                d[api.url_path].append(dict(flow.request.query))
 
         d = self.inner(self.bodys_as_all, device=device, app=app, host=host)
         if api.body_as_all:
