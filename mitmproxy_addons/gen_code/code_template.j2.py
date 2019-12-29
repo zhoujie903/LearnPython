@@ -14,6 +14,7 @@ import logging
 import random
 import pathlib
 from urllib.parse import urlparse
+import traceback
 
 from sessions import users
 
@@ -180,4 +181,8 @@ def genUsers():
 
 if __name__ == "__main__":
     for user in genUsers():
-        logging.info('\033[1;31m---------------------------\033[0m')    
+        logging.info('\033[1;31m---------------------------\033[0m')
+        try:
+            pass
+        except Exception as e:
+            traceback.print_exc()    
