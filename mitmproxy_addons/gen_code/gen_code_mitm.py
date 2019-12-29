@@ -650,15 +650,15 @@ class GenCode(object):
 
         d = self.inner(self.params_as_all, device=device, app=app, host=host)
         if api.params_as_all:
-            if not api.name in d:
-                d[api.name] = []
-            d[api.name].append(dict(flow.request.query))
+            if not api.url_path in d:
+                d[api.url_path] = []
+            d[api.url_path].append(dict(flow.request.query))
 
         d = self.inner(self.bodys_as_all, device=device, app=app, host=host)
         if api.body_as_all:
-            if not api.name in d:
-                d[api.name] = []
-            d[api.name].append(dict(body_dict))
+            if not api.url_path in d:
+                d[api.url_path] = []
+            d[api.url_path].append(dict(body_dict))
             ctx.log.error('self.bodys_as_all:')
 
         if api.f_p_enc and not api.params_as_all:
