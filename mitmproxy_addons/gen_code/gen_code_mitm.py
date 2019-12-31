@@ -381,10 +381,37 @@ class GenCode(object):
         ]
         self.qu_jian_pan = NamedFilter(urls, 'qu-jian-pan')
 
+        urls = [
+            Api('/x/tree-game/gapp/info',log='趣种菜 - 信息'),
+            Api('/x/tree-game/gapp/box/my/rand-reward',log='趣种菜 - 拆礼物 - 点击'),
+            Api('/x/tree-game/gapp/box/my/take-reward',log='趣种菜 - 拆礼物 - 收获'),
+            Api('/x/tree-game/gapp/add-plant',log='趣种菜 - 植物 - 种下'),
+            Api('/x/tree-game/gapp/plant-ok',log='趣种菜 - 植物 - 收获'),
+            Api('/x/tree-game/gapp/water-plants',log='趣种菜 - 植物 - 浇水'),
+            # 翻翻乐
+            Api('/x/middle/flop/info',log='趣种菜 - 翻翻乐 - 信息'),
+            Api('/x/middle/flop/start',log='趣种菜 - 翻翻乐 - 开始'),
+            '/x/middle/flop/',
+            # 水池
+            '/x/tree-game/gapp/pool/',
+            # 兔子
+            '/x/tree-game/gapp/activity/rabbit/',
+            Api('/x/tree-game/gapp/activity/carrot/take-reward',log='趣种菜 - 植物 - 点我'),
+        ]
+        self.qu_zhong_cai = NamedFilter(urls, 'qu-zhong-cai')
+
+        urls = [
+            '/x/v1/goldpig/withdraw',
+            '/x/task/v3/list',            
+            Api('/x/task/v2/take-reward',log='领金币'),
+        ]
+        self.you_xi_he_zi = NamedFilter(urls, 'you-xi-he-zi')
+
         self.flowfilters = [
             self.toutiao, 
             self.huoshan, 
             self.qtt_video,
+            self.qu_zhong_cai,
             self.qu_tou_tiao, 
             self.hao_kan,
             self.quan_ming,
@@ -394,6 +421,7 @@ class GenCode(object):
             self.cai_dan_sp,
             self.kai_xin_da_ti,
             self.qu_jian_pan,
+            self.you_xi_he_zi,
         ]      
 
     def load(self, loader):
@@ -458,7 +486,9 @@ class GenCode(object):
                     except Exception as e:
                         # traceback.print_exc()
                         pass
-                    sys.path.remove(path)
+                    finally:
+                        importlib.invalidate_caches()
+                        sys.path.remove(path)
 
                 session_module = import_module(app, device)
                 def get_old_data(session_module, var_name):
@@ -471,18 +501,17 @@ class GenCode(object):
                     return old_data
 
                 def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
-                    if list_append:
-                        for k, v in old_data.items():
-                            try:
-                                if isinstance(v, list):                                    
-                                    l = new_data.get(k)
-                                    v.extend(l)
-                                    new_data[k] = v[0:limit]
-                            except :
-                                pass
+                    for k,v in old_data.items():
+                        if isinstance(v, dict):
+                            v.update(new_data[k])
+                        if isinstance(v, list):
+                            if list_append:
+                                old_data[k].extend(new_data.get(k,list()))    
+                            else:
+                                old_data[k] = new_data.get(k,list())
+                    new_data.update(old_data)
 
-                    old_data.update(new_data)
-                    return old_data
+                    return new_data
                 
                 def abc(data: dict, var_name, var_dict: dict, mergehost=True, list_append: bool=False, limit=50):
                     try:
