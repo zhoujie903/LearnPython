@@ -573,9 +573,11 @@ class GenCode(object):
 
     def response(self, flow: http.HTTPFlow):
         ft = None
-        for flt in self.flowfilters:
+        for i, flt in enumerate( self.flowfilters ):
             if flt(flow):
                 ft = flt
+                self.flowfilters.pop(i)
+                self.flowfilters.insert(0,flt)
                 break
         if ft:
             api: Api = ft.current_api            
