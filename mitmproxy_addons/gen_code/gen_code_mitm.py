@@ -169,7 +169,8 @@ class GenCode(object):
         self.bodys = self.load_file(self.file_bodys, self.api_dir)
 
         self.app_fn_url = self.load_file(self.file_app_fn_url, self.api_dir)
- 
+
+        # 今日头条
         urls = [
             'score_task/v1/task/page_data/',
             'score_task/v1/task/sign_in/',
@@ -284,6 +285,7 @@ class GenCode(object):
         # 蚂蚁看点
         urls = [
             Api(r'article/treasure_chest', log='时段签到', f_b_enc={'p'}, content_type='multipart_form'),
+            Api(r'/user/shai_income_task_award',log='晒收'),
             r'TaskCenter/daily_sign',
             # r'WebApi/',
             r'WebApi/Stage/task_reward',
@@ -388,6 +390,7 @@ class GenCode(object):
             Api('/x/tree-game/gapp/add-plant',log='趣种菜 - 植物 - 种下'),
             Api('/x/tree-game/gapp/plant-ok',log='趣种菜 - 植物 - 收获'),
             Api('/x/tree-game/gapp/water-plants',log='趣种菜 - 植物 - 浇水'),
+            Api('/x/tree-game/gapp/remove-bug',log='趣种菜 - 植物 - 杀虫'),
             # 翻翻乐
             Api('/x/middle/flop/info',log='趣种菜 - 翻翻乐 - 信息'),
             Api('/x/middle/flop/start',log='趣种菜 - 翻翻乐 - 开始'),
@@ -401,7 +404,8 @@ class GenCode(object):
         self.qu_zhong_cai = NamedFilter(urls, 'qu-zhong-cai')
 
         urls = [
-            '/x/v1/goldpig/withdraw',
+            Api('/x/v1/goldpig/info',log='游戏盒子 - 金猪信息'),
+            Api('/x/v1/goldpig/withdraw',log='游戏盒子 - 金猪 - 双倍收金币'),
             '/x/task/v3/list',            
             Api('/x/task/v2/take-reward',log='领金币'),
         ]
