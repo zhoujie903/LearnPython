@@ -22,6 +22,7 @@ from jinja2 import Template
 mitmdump --flow-detail 0 --set session='huawei' -s "/Users/zhoujie/Documents/zhoujie903/LearnScrapy/mitmproxy_addons/gen_code/gen_code_mitm.py" 
 '''
 
+
 class Api(object):
     def __init__(self, url, f_name='', log='', params_as_all=False, p_as_all_limit=50, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
         self.url = url
@@ -45,39 +46,39 @@ class Api(object):
             self.f_b_arg.update(f_b_enc)
 
         self.f_p_kwarg = f_p_kwarg
-        self.f_b_kwarg = f_b_kwarg        
-        self.params_as_all = params_as_all 
+        self.f_b_kwarg = f_b_kwarg
+        self.params_as_all = params_as_all
         self.body_as_all = body_as_all
         self.p_as_all_limit = p_as_all_limit
         self.str_d = ''
         # content_type取值'json', 'multipart_form', 'urlencoded_form', 'get'
-        self.content_type = content_type 
+        self.content_type = content_type
 
     def __str__(self):
         return f'Api(url={self.url})'
-    
+
     def _str_fun_params(self):
         s = ''
         if self.f_p_arg and not self.params_as_all:
-            s +=", "
-            s +=", ".join(self.f_p_arg)
+            s += ", "
+            s += ", ".join(self.f_p_arg)
 
         if self.f_b_arg and not self.body_as_all:
-            s +=", "
-            s +=", ".join(self.f_b_arg)
+            s += ", "
+            s += ", ".join(self.f_b_arg)
 
         if self.f_p_kwarg and not self.params_as_all:
-            for k,v in self.f_p_kwarg.items():
+            for k, v in self.f_p_kwarg.items():
                 s += f', {k}={v!r}'
 
         if self.f_b_kwarg and not self.body_as_all:
-            for k,v in self.f_b_kwarg.items():
+            for k, v in self.f_b_kwarg.items():
                 s += f', {k}={v!r}'
 
         if self.params_as_all:
-            s +=', params_as_all'
+            s += ', params_as_all'
         if self.body_as_all:
-            s +=', body_as_all'
+            s += ', body_as_all'
         return s
 
     def str_fun_params(self):
@@ -88,12 +89,13 @@ class Api(object):
     @property
     def name(self):
         return self._name
-    
+
     @name.setter
     def name(self, name):
         self._name = name
         if not self.f_name:
             self.f_name = name
+
 
 class NamedFilter(object):
     def __init__(self, urls, app_name=''):
@@ -111,12 +113,13 @@ class NamedFilter(object):
         for flt, api in self.flts.items():
             if flt(f):
                 self.current_api = api
-                return True 
+                return True
         return False
 
     def add(self, api: Api):
         flt = flowfilter.parse(api.url)
         self.flts[flt] = api
+
 
 class GenCode(object):
     def __init__(self):
@@ -133,7 +136,7 @@ class GenCode(object):
         tfile = f'{self.template_dir}/api_template.j2.py'
         with open(tfile) as f:
             s = f.read()
-            self.api_template = Template(s) 
+            self.api_template = Template(s)
 
         self.file_params_keys = 'data-params-keys.json'
         self.file_bodys_keys = 'data-bodys-keys.json'
@@ -158,7 +161,6 @@ class GenCode(object):
         self.app_fn_url = {}
         self.session_hit = set()
 
-
         self.params_keys = self.load_file(self.file_params_keys, self.api_dir)
         self.bodys_keys = self.load_file(self.file_bodys_keys, self.api_dir)
 
@@ -178,27 +180,27 @@ class GenCode(object):
             Api('score_task/v1/task/new_excitation_ad/', {"score_source":None}),            
             'score_task/v1/task/get_read_bonus/',
             'score_task/v1/task/done_task/',
-            'score_task/v1/landing/add_amount/',             
+            'score_task/v1/landing/add_amount/',
             'score_task/v1/user/profit_detail/',
-            'score_task/v1/novel/bonus/', #读小说得金币
+            'score_task/v1/novel/bonus/',  # 读小说得金币
             'search/suggest/homepage_suggest/',
             'search/suggest/initial_page/',
-            Api(r'score_task/v1/walk/count/',{"count":None}),
+            Api(r'score_task/v1/walk/count/', {"count": None}),
             r'score_task/v1/walk/',
 
             'score_task/v1/sleep/status/',
             'score_task/v1/sleep/start/',
             'score_task/v1/sleep/stop/',
-            'score_task/v1/sleep/done_task/',#睡觉领金币
+            'score_task/v1/sleep/done_task/',  # 睡觉领金币
 
             r'ttgame/game_farm/',
 
             r'score_task/lite/v1/eat/eat_info/',
 
             'score_task/lite/v1/eat/done_eat/',
-            'api/news/feed/v47/',#安卓视频tab页
-            'api/news/feed/v64/',#ios视频tab页
-            'api/search/content/',           
+            'api/news/feed/v47/',  # 安卓视频tab页
+            'api/news/feed/v64/',  # ios视频tab页
+            'api/search/content/',
         ]
         self.toutiao = NamedFilter(urls, 'jin-ri-tou-tiao')
 
@@ -209,7 +211,7 @@ class GenCode(object):
             'luckycat/v1/task/open_treasure_box/',
             'luckycat/v1/task/done_task/',
             'luckycat/v1/landing/add_amount/',
-            'luckycat/v1/task/get_read_bonus/',            
+            'luckycat/v1/task/get_read_bonus/',
         ]
         self.huoshan = NamedFilter(urls, 'huo-shan')
 
@@ -222,11 +224,11 @@ class GenCode(object):
 
         # 趣头条
         urls = [
-            r'sign/sign',#每日签到
+            r'sign/sign',  # 每日签到
             Api(r'/mission/intPointReward', log='时段签到', params_as_all=True),
             r'/x/game-center/user/sign-in',
             r'/x/game-center/user/last-sign-coin',
-            r'/newuserline/activity/signRewardNew',#挑战签到
+            r'/newuserline/activity/signRewardNew',  # 挑战签到
             r'/mission/receiveTreasureBox',
             Api(r'/content/readV2',params_as_all=True),
             Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True, p_as_all_limit=1),
@@ -234,13 +236,12 @@ class GenCode(object):
             # r'api-coin-service.aiclk.com/coin/service',
             Api(r'/coin/service', body_as_all=True),
             r'readtimer/report',
-            Api(r'motivateapp/mtvcallback',params_as_all=True),
-            Api(r'x/feed/getReward',log='信息流-惊喜红包', params_as_all=True),
-            r'x/v1/goldpig/bubbleWithdraw', # 金猪 - 看视频
-            r'x/v1/goldpig/withdraw', #金猪 
-            r'finance/piggybank/taskReward',#存钱罐
+            Api(r'motivateapp/mtvcallback', params_as_all=True),
+            Api(r'x/feed/getReward', log='信息流-惊喜红包', params_as_all=True),
+            r'x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
+            r'x/v1/goldpig/withdraw',  # 金猪
+            r'finance/piggybank/taskReward',  # 存钱罐
 
-            r'x/tree-game/',
             r'x/tree-game/task-list',
             r'x/tree-game/left-plant-num',
             r'x/tree-game/plant-ok',
@@ -250,37 +251,38 @@ class GenCode(object):
             r'x/tree-game/water-plants',
             r'x/tree-game/my-gift-box/draw-lottery',
             r'x/tree-game/my-gift-box/receive-prize',
+            # r'x/tree-game/',
 
             r'x/open/game',
-            r'x/task/encourage/activity/grant',#游戏 - 瓜分
+            r'x/task/encourage/activity/grant',  # 游戏 - 瓜分
             r'/api/Login',
             r'api/loginGame',
             r'api/qttAddCoin',
-            r'api/AddCoin',# 游戏 - 成语
+            r'api/AddCoin',  # 游戏 - 成语
 
             #游戏 - 切菜
-            Api(r'/x/open/coin/add',body_as_all=True),
+            Api(r'/x/open/coin/add', body_as_all=True),
 
             # 金猪
             Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg={'tag'}),
             r'/actcenter/piggy/',
         ]
-        self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao') 
+        self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao')
 
         # 百度 - 好看
         urls = [
-            r'activity/acusercheckin', # 每日签到
-            r'signIn/new/sign', # 游戏中心签到
-            r'activity/acad/rewardad', #看视频
-            r'api/task/1/task/379/complete', #看视频
+            r'activity/acusercheckin',  # 每日签到
+            r'signIn/new/sign',  # 游戏中心签到
+            r'activity/acad/rewardad',  # 看视频
+            r'api/task/1/task/379/complete',  # 看视频
         ]
-        self.hao_kan = NamedFilter(urls, 'hao-kan') 
+        self.hao_kan = NamedFilter(urls, 'hao-kan')
 
-        # 百度 - 全民小视频 
+        # 百度 - 全民小视频
         urls = [
-            r'mvideo/api', # 每日签到
+            r'mvideo/api',  # 每日签到
         ]
-        self.quan_ming = NamedFilter(urls, 'quan-ming') 
+        self.quan_ming = NamedFilter(urls, 'quan-ming')
 
         # 蚂蚁看点
         urls = [
@@ -294,16 +296,20 @@ class GenCode(object):
             r'WebApi/RotaryTable/turn_reward',
             r'WebApi/RotaryTable/video_double',
             r'WebApi/RotaryTable/chestReward',
-            
+
             # 新版答题
             r'/v6/Answer/getData.json',
             r'/v5/answer/first_reward',
             r'/v6/Answer/answer_question.json',
             r'/v5/answer/answer_reward.json',
 
+            Api(r'/WebApi/sleep/sleep_start',log='睡觉 - 开始'),
+            Api(r' /WebApi/sleep/get_sleep_score',log='睡觉 - 醒来'),
+
             Api(r'article/haotu_video',log='看视频得金币', f_b_enc={'p'}, content_type='multipart_form'),
             Api(r'article/complete_article',log='读文章得金币', f_b_enc={'p'}, content_type='multipart_form'),
             Api(r'/v5/user/rewar_video_callback', log='视频广告 - 得金币', f_b_enc={'p'}, content_type='multipart_form'),
+            Api(r'/v5/article/complete_welfare_score.json', log='福袋 - 得金币', f_b_enc={'p'}, content_type='multipart_form'),
             Api(r'/v5/user/adlickstart.json',log='点击广告领金币 - 开始', f_b_enc={'p'}, content_type='multipart_form'),
             Api(r'/v5/user/adlickend.json',log='点击广告领金币 - 结束', f_b_enc={'p'}, content_type='multipart_form'),
 
@@ -314,11 +320,11 @@ class GenCode(object):
             r'WebApi/Answer/video_double',
             r'WebApi/Answer/fill_energy',
         ]
-        self.ma_yi_kd = NamedFilter(urls, 'ma-yi-kd') 
+        self.ma_yi_kd = NamedFilter(urls, 'ma-yi-kd')
 
         # 中青看点
         urls = [
-            Api(r'getTimingRedReward.json', f_name='hourly_sign',log='时段签到'),
+            Api(r'getTimingRedReward.json', f_name='hourly_sign', log='时段签到'),
             r'webApi/AnswerReward/',
             Api(r'/v5/Game/GameVideoReward.json'),
             Api(r'/taskCenter/getAdVideoReward',log='任务中心 - 看视频'),
@@ -328,7 +334,7 @@ class GenCode(object):
         ]
         self.zhong_qin_kd = NamedFilter(urls, 'zhong-qin-kd')
 
-        # 东方头条 
+        # 东方头条
         urls = [
             r'sign/news_take_s',
             r'timesaward/timesaward/get_award',
@@ -344,7 +350,7 @@ class GenCode(object):
         ]
         self.dftt = NamedFilter(urls, 'dong-fan-tt')
 
-        # 彩蛋视频 
+        # 彩蛋视频
         urls = [
             r'task/timer_submit',
             r'/h5/task/submit',
@@ -370,12 +376,12 @@ class GenCode(object):
 
             r'/gk/draw/info',
             r'/gk/draw/extract',
-            Api('/gk/draw/double',{"ticket":None}),
+            Api('/gk/draw/double', f_b_arg={'ticket'}),
             r'/gk/draw/package',
             r'/gk/draw/pkdouble',
 
-            Api('/gk/game/bianlidian/receiveBox',{"packageId": None}),
-            Api('/gk/game/bianlidian/draw/double',{"ticket":None}),
+            Api('/gk/game/bianlidian/receiveBox', f_b_arg={'packageId'}),
+            Api('/gk/game/bianlidian/draw/double', f_b_arg={'ticket'}),
             r'/gk/garbage/',
             r'/gk/game/dadishu/',
             r'/gk/game/bianlidian/',
@@ -383,40 +389,54 @@ class GenCode(object):
         ]
         self.qu_jian_pan = NamedFilter(urls, 'qu-jian-pan')
 
+        # 趣种菜
         urls = [
-            Api('/x/tree-game/gapp/info',log='趣种菜 - 信息'),
-            Api('/x/tree-game/gapp/box/my/rand-reward',log='趣种菜 - 拆礼物 - 点击'),
-            Api('/x/tree-game/gapp/box/my/take-reward',log='趣种菜 - 拆礼物 - 收获'),
-            Api('/x/tree-game/gapp/add-plant',log='趣种菜 - 植物 - 种下'),
-            Api('/x/tree-game/gapp/plant-ok',log='趣种菜 - 植物 - 收获'),
-            Api('/x/tree-game/gapp/water-plants',log='趣种菜 - 植物 - 浇水'),
-            Api('/x/tree-game/gapp/remove-bug',log='趣种菜 - 植物 - 杀虫'),
+            Api('/x/tree-game/gapp/info', log='趣种菜 - 信息'),
+            Api('/x/tree-game/gapp/box/my/rand-reward', log='趣种菜 - 拆礼物 - 点击'),
+            Api('/x/tree-game/gapp/box/my/take-reward', log='趣种菜 - 拆礼物 - 收获'),
+            Api('/x/tree-game/gapp/add-plant', log='趣种菜 - 植物 - 种下'),
+            Api('/x/tree-game/gapp/plant-ok', log='趣种菜 - 植物 - 收获'),
+            Api('/x/tree-game/gapp/water-plants', log='趣种菜 - 植物 - 浇水'),
+            Api('/x/tree-game/gapp/remove-bug', log='趣种菜 - 植物 - 杀虫'),
             # 翻翻乐
-            Api('/x/middle/flop/info',log='趣种菜 - 翻翻乐 - 信息'),
-            Api('/x/middle/flop/start',log='趣种菜 - 翻翻乐 - 开始'),
+            Api('/x/middle/flop/info', log='趣种菜 - 翻翻乐 - 信息'),
+            Api('/x/middle/flop/start', log='趣种菜 - 翻翻乐 - 开始'),
             '/x/middle/flop/',
             # 水池
-            '/x/tree-game/gapp/pool/',
+            Api('/x/tree-game/gapp/pool/info', log='趣种菜 - 水池 - 信息'),
+            Api('/x/tree-game/gapp/pool/with-draw', log='趣种菜 - 水池 - 存到水壶'),
+            # '/x/tree-game/gapp/pool/',
             # 兔子
             '/x/tree-game/gapp/activity/rabbit/',
-            Api('/x/tree-game/gapp/activity/carrot/take-reward',log='趣种菜 - 植物 - 点我'),
+            Api('/x/tree-game/gapp/activity/carrot/take-reward', log='趣种菜 - 植物 - 点我'),
         ]
         self.qu_zhong_cai = NamedFilter(urls, 'qu-zhong-cai')
 
+        # 金猪游戏盒子
         urls = [
-            Api('/x/v1/goldpig/info',log='游戏盒子 - 金猪信息'),
-            Api('/x/v1/goldpig/withdraw',log='游戏盒子 - 金猪 - 双倍收金币'),
-            '/x/task/v3/list',            
-            Api('/x/task/v2/take-reward',log='领金币'),
+            Api('/x/v1/goldpig/info', log='游戏盒子 - 金猪信息'),
+            Api('/x/v1/goldpig/withdraw', log='游戏盒子 - 金猪 - 双倍收金币'),
+            '/x/task/v3/list',
+            Api('/x/task/v2/take-reward', log='领金币'),
+            Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币'),
         ]
         self.you_xi_he_zi = NamedFilter(urls, 'you-xi-he-zi')
 
+        # 欢乐养鸡场
+        urls = [
+            Api('/x/chicken/info', log='欢乐养鸡场 - 信息'),
+            Api('/x/chicken/task/take-award', log='达标领奖励'),
+            Api('/x/chicken/feed', log='喂饲料'),
+            Api('/x/chicken/get-fodder', log='领饲料', f_b_arg={'id','pos','again'}),
+        ]
+        self.yang_ji_chang = NamedFilter(urls, 'yang-ji-chang')
+
         self.flowfilters = [
-            self.toutiao, 
-            self.huoshan, 
+            self.toutiao,
+            self.huoshan,
             self.qtt_video,
             self.qu_zhong_cai,
-            self.qu_tou_tiao, 
+            self.qu_tou_tiao,
             self.hao_kan,
             self.quan_ming,
             self.ma_yi_kd,
@@ -426,15 +446,16 @@ class GenCode(object):
             self.kai_xin_da_ti,
             self.qu_jian_pan,
             self.you_xi_he_zi,
-        ]      
+            self.yang_ji_chang,
+        ]
 
     def load(self, loader):
         ctx.log.info('event: load')
         loader.add_option(
-            name = 'session',
-            typespec = str,
-            default = 'default',
-            help = '若接口不能推断出session,则用这值来设定默认值', 
+            name='session',
+            typespec=str,
+            default='default',
+            help='若接口不能推断出session,则用这值来设定默认值',
         )
 
     def configure(self, updated):
@@ -451,16 +472,17 @@ class GenCode(object):
         try:
             print('session_hit')
             print(str(self.session_hit))
+
             def gen_app_data_to_file(data: dict, file_name):
                 for device, app in self.session_hit:
                     try:
                         dd = data[device][app]
-                        print(f"生成 App", end='\t')
+                        print(f"生成 App - {app}", end='\t')
                         self._gen_file(dd, f'{file_name}-{device}.json', f'{self.api_dir}{app}')
                     except:
                         pass
 
-            # 生成app下的 data-bodys-keys.json, data-params-keys.json, data-fn-url.json 
+            # 生成app下的 data-bodys-keys.json, data-params-keys.json, data-fn-url.json
             gen_app_data_to_file(self.bodys_keys, 'data-bodys-keys')
             gen_app_data_to_file(self.params_keys, 'data-params-keys')
             gen_app_data_to_file(self.app_fn_url, 'data-fn-url')
@@ -471,30 +493,28 @@ class GenCode(object):
             # 生成app下的 session_xxx.py
             for device, app in self.session_hit:
                 sessions_jinja_data = sessions_by_app.setdefault(app, list())
-                sessions_jinja_data.append({ 
+                sessions_jinja_data.append({
                     'file': f'session_{device}',
                     'session': device,
                 })
 
-
                 var_dict = dict()
 
                 def import_module(app, device):
-                    import sys
-                    path = self.api_dir + f'{app}/'
-                    sys.path.append(path)
+                    import importlib.util
                     try:
                         module_name = f'session_{device}'
-                        session_module = importlib.import_module(module_name)
+                        path = self.api_dir + f'{app}/' + module_name + '.py'  
+                        spec = importlib.util.spec_from_file_location(module_name, path)
+                        session_module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(session_module)
                         return session_module
                     except Exception as e:
-                        # traceback.print_exc()
-                        pass
-                    finally:
-                        importlib.invalidate_caches()
-                        sys.path.remove(path)
+                        logging.error(e)
+                        
 
                 session_module = import_module(app, device)
+
                 def get_old_data(session_module, var_name):
                     old_data = dict()
                     try:
@@ -505,24 +525,25 @@ class GenCode(object):
                     return old_data
 
                 def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
-                    for k,v in old_data.items():
+                    for k, v in old_data.items():
                         if isinstance(v, dict):
                             v.update(new_data[k])
-                        if isinstance(v, list):
+                        elif isinstance(v, list):
                             if list_append:
-                                old_data[k].extend(new_data.get(k,list()))    
+                                old_data[k].extend(new_data.get(k, list()))
                             else:
-                                old_data[k] = new_data.get(k,list())
+                                old_data[k] = new_data.get(k, list())
+                        else:
+                            old_data[k] = new_data.get(k, v)
                     new_data.update(old_data)
-
                     return new_data
-                
+
                 def abc(data: dict, var_name, var_dict: dict, mergehost=True, list_append: bool=False, limit=50):
                     try:
                         dd = data[device][app]
                         merge_hosts = {}
                         try:
-                            if mergehost:                            
+                            if mergehost:
                                 for host, ddd in dd.items():
                                     merge_hosts.update(ddd)
                             else:
@@ -558,7 +579,7 @@ class GenCode(object):
 
                 tfile = f'{self.template_dir}/code_template.j2.py'
                 gfile = f'{self.api_dir}{app}/code-{app}.py'
-                self.gen_file_from_jinja2(tfile,gfile,seq=seq)
+                self.gen_file_from_jinja2(tfile, gfile, seq=seq)
 
                 tfile = f'{self.template_dir}/sessions.j2.py'
                 gfile = f'{self.api_dir}{app}/sessions.py'
@@ -569,18 +590,18 @@ class GenCode(object):
             logging.error('有异常：')
             print(e)
             logging.error(e)
-            
 
     def response(self, flow: http.HTTPFlow):
         ft = None
-        for i, flt in enumerate( self.flowfilters ):
+        for i, flt in enumerate(self.flowfilters):
             if flt(flow):
                 ft = flt
-                self.flowfilters.pop(i)
-                self.flowfilters.insert(0,flt)
+                if not flt == self.flowfilters[0]:
+                    self.flowfilters.pop(i)
+                    self.flowfilters.insert(0, flt)
                 break
         if ft:
-            api: Api = ft.current_api            
+            api: Api = ft.current_api
             request: http.HTTPRequest = flow.request
 
             parse_result = urlparse(request.url)
@@ -589,13 +610,14 @@ class GenCode(object):
                 api = Api(url_path)
                 ft.add(api)
 
+            ctx.log.error(f'触发 App = {ft.app_name}')
             ctx.log.error(f'触发 api = {api}')
 
-            function_name = re.sub(r'[./-]','_', url_path).strip('_').lower()
-            api_url = f'{request.scheme}://{request.pretty_host}{url_path}' 
+            function_name = re.sub(r'[./-]', '_', url_path).strip('_').lower()
+            api_url = f'{request.scheme}://{request.pretty_host}{url_path}'
             headers_code = self.headers_string(flow)
             params_code = self.params_string(flow)
-            data_code = self.data_string(flow, api) 
+            data_code = self.data_string(flow, api)
 
             path = pathlib.Path(f'{self.api_dir}{ft.app_name}')
             if not path.exists():
@@ -619,7 +641,7 @@ class GenCode(object):
                 api.response = flow.response.text
 
                 code = self.api_template.render(request=api)
-                f.write(code)                
+                f.write(code)
 
                 device = self._guess_device(flow, api)
 
@@ -630,12 +652,9 @@ class GenCode(object):
                 fn_url = d_v.setdefault(ft.app_name, dict())
                 fn_url[url_path] = api_url
 
-
-
     def headers_string(self, flow: http.HTTPFlow, indent=1):
         d = dict(flow.request.headers)
         return 'headers = {'+json.dumps(d, indent='\t'*(indent+1)).strip('{}') + '\t}'
-
 
     def params_string(self, flow: http.HTTPFlow, indent=1):
         d = dict(flow.request.query)
@@ -647,15 +666,15 @@ class GenCode(object):
         d = self.dict_from_request_body(flow, api)
         if d:
             for key, value in d.items():
-                lines += f"\n\t\t'{key}': {value!r},"    
-        
-        s = f'''data = {{{lines}\n\t}}'''        
+                lines += f"\n\t\t'{key}': {value!r},"
+
+        s = f'''data = {{{lines}\n\t}}'''
         return s
 
     def gather_params_and_bodys(self, flow: http.HTTPFlow, api: Api, device='', app=''):
         '''
         request.multipart_form: Key and value are bytes. json序列化时会出错：键不能为bytes
-        ''' 
+        '''
         request: http.HTTPRequest = flow.request
 
         by_host_device = request.pretty_host
@@ -671,7 +690,7 @@ class GenCode(object):
 
         # 收集bodys
         bodys_keys = list()
-        d = self.inner(self.bodys, device=device, app=app, host=host) 
+        d = self.inner(self.bodys, device=device, app=app, host=host)
         body_dict = self.dict_from_request_body(flow, api)
         if body_dict:
             d.update(body_dict)
@@ -680,12 +699,11 @@ class GenCode(object):
         parse_result = urlparse(request.url)
         fname = parse_result.path
 
-        dd = self.inner(self.bodys_keys, device=device, app=app, host=host) 
+        dd = self.inner(self.bodys_keys, device=device, app=app, host=host)
         dd[fname] = bodys_keys
 
-        d = self.inner(self.params_keys, device=device, app=app, host=host) 
+        d = self.inner(self.params_keys, device=device, app=app, host=host)
         d[fname] = list(flow.request.query.keys())
-
 
         path = request.path
 
@@ -716,10 +734,10 @@ class GenCode(object):
                 l.append(body_dict[k])
 
     def _delete_some_headers(self, headers: dict):
-        for key in {'Host','Connection','Content-Length','Accept-Encoding','Cache-Control','Pragma'}:
+        for key in {'Host', 'Connection', 'Content-Length', 'Accept-Encoding', 'Cache-Control', 'Pragma'}:
             try:
                 headers.pop(key)
-            except :
+            except:
                 pass
 
     def _gen_file(self, o, f, fold, mode='w'):
@@ -744,30 +762,30 @@ class GenCode(object):
                     if r.search(v):
                         device = session
                         guess_by_data = v
-                        found = True 
+                        found = True
                         break
                 if found:
                     break
 
-        gass( itertools.chain(request.headers.items(), request.query.items()) )
+        gass(itertools.chain(request.headers.items(), request.query.items()))
         if not device:
             d = self.dict_from_request_body(flow, api)
-            if d: 
+            if d:
                 gass(d.items())
-        
+
         ctx.log.error(f'依据值：{guess_by_data}')
         ctx.log.error(f'猜测为：session = {device}')
         if device == '':
             ctx.log.error(f"not guess: {request.url}")
             device = ctx.options.session
-        return device 
+        return device
 
     def load_file(self, f, fold):
         try:
             with open(f'{fold}{f}', 'r') as fd:
                 o = json.load(fd)
                 ctx.log.info(f'load {f} success!')
-                return o 
+                return o
         except:
             ctx.log.error(f'load {f} fail!')
             return dict()
@@ -796,7 +814,7 @@ class GenCode(object):
         if api.content_type == 'json':
             try:
                 d = json.loads(flow.request.text)
-            except :
+            except:
                 pass
 
         elif api.content_type == 'urlencoded_form' or flow.request.urlencoded_form:
@@ -807,7 +825,7 @@ class GenCode(object):
         elif api.content_type == 'multipart_form' or flow.request.multipart_form:
             ctx.log.error('是multipart_form')
             d = dict()
-            for key,value in flow.request.multipart_form.items():                
+            for key, value in flow.request.multipart_form.items():
                 key = key.decode(encoding='utf-8')
                 value = value.decode(encoding='utf-8')
                 d[key] = value
@@ -817,7 +835,7 @@ class GenCode(object):
             pass
 
         else:
-            # api.content_type没有决定出来：1,没有设置且第1次击中api；2,body没有内容也无法决定content_type；3,get请求一般没有body 
+            # api.content_type没有决定出来：1,没有设置且第1次击中api；2,body没有内容也无法决定content_type；3,get请求一般没有body
 
             if flow.request.text:
                 ctx.log.error('有请求内容')
@@ -833,20 +851,95 @@ class GenCode(object):
             except:
                 pass
 
-        return d        
+        return d
+
+if not __name__ == "__main__": 
+    addons = [
+        GenCode()
+    ]
+
+def get_data(session_module, var_name):
+    old_data = dict()
+    try:
+        old_data = getattr(session_module, var_name)
+    except Exception as e:
+        # traceback.print_exc()
+        pass
+    return old_data
+
+def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
+    for k, v in old_data.items():
+        if isinstance(v, dict):
+            v.update(new_data[k])
+        elif isinstance(v, list):
+            if list_append:
+                old_data[k].extend(new_data.get(k, list()))
+            else:
+                old_data[k] = new_data.get(k, list())
+        else:
+            old_data[k] = new_data.get(k, v)
+    new_data.update(old_data)
+    return new_data
 
 
-addons = [
-    GenCode()
-]
+def import_module(path: pathlib.Path):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(path.stem,str(path))
+    session_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(session_module)
+    return session_module
 
+
+def merge_file(from_file: pathlib.Path, to_file: pathlib.Path):
+
+    from_module = import_module(from_file)
+    to_module = import_module(to_file)
+
+    vars = [
+        ('header_values',False),
+        ('fn_url',False),
+        ('params_keys',False),
+        ('bodys_keys',False),
+        ('param_values',False),
+        ('body_values',False),
+        ('params_as_all',True),
+        ('bodys_as_all',True),
+        ('params_encry',True),
+        ('bodys_encry',True),
+    ]
+    var_dict = dict()
+    for var in vars:
+        from_data = get_data(from_module,var[0])
+        to_data = get_data(to_module,var[0])
+        data = merge_data(from_data, to_data)
+        var_dict[var[0]] = json.dumps(data, indent=2, sort_keys=True)
+    pass
+
+    tfile = pathlib.Path(__file__).parent.joinpath('session_xxx.j2.py')
+    gfile = to_file.parent.joinpath(f'{to_file.stem}_merged{to_file.suffix}')
+    # self.gen_file_from_jinja2(tfile, gfile, seq=var_dict)
+
+    with open(tfile) as f:
+        s = f.read()
+        t = Template(s)
+        ss = t.render(seq=var_dict)
+        with open(gfile, mode='w') as ff:
+            ff.write(ss)
+    pass
+
+def test_merge_file():
+    from_file = pathlib.Path('/Users/zhoujie/Desktop/api/ma-yi-kd/session_xiaomi.py')
+    to_file = pathlib.Path('/Users/zhoujie/Desktop/dev/ma-yi-kd/session_xiaomi.py')
+    merge_file(from_file, to_file)
 
 if __name__ == "__main__":
-    import shlex, subprocess
+    import shlex
+    import subprocess
 
+    # test_merge_file()
+    
 
     print(__file__)
-    # subprocess.Popen(['mitmdump', '-s', __file__])
     
     api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'})#时段签到
     print(api.str_fun_params())
@@ -856,7 +949,7 @@ if __name__ == "__main__":
     print(api.str_fun_params())
     api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
     print(api.str_fun_params())
-    api =Api(r'/mission/intPointReward',f_p_enc={'p_enc'})
+    api = Api(r'/mission/intPointReward', f_p_enc={'p_enc'})
     print(api.str_fun_params())
 
     api.name = 'mission_intPointReward'
@@ -865,7 +958,7 @@ if __name__ == "__main__":
     api.fun_params = api.str_fun_params()
     # api.params_as_all = True
     # api.body_as_all = True
-    seq = [api]  
+    seq = [api]
 
     template_dir = os.path.dirname(__file__)
     tfile = f'{template_dir}/code_template.j2.py'

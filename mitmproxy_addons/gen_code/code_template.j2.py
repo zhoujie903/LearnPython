@@ -5,16 +5,17 @@
 代码模板
 '''
 
-import requests
-import re
-import time
 import json
-import sys
 import logging
-import random
 import pathlib
-from urllib.parse import urlparse
+import random
+import re
+import sys
+import time
 import traceback
+from urllib.parse import urlparse
+
+import requests
 
 from sessions import users
 
@@ -34,14 +35,13 @@ class User(object):
         self.bodys_as_all = session_data['bodys_as_all']
         self.params_encry = session_data['params_encry']
         self.bodys_encry = session_data['bodys_encry']
+        self.urlparsed = dict()
         self.session = requests.Session()
         self.session.headers = self._header()
 
 
     def _header(self):
         return {
-            # 'Host': '',
-            # 'Accept': 'application/json',
             'User-Agent': self.headers['User-Agent'],
             'user-agent': self.headers['user-agent'],
             # 'Cookie':self.headers['Cookie'],
@@ -81,16 +81,24 @@ class User(object):
         return result
 
     def _params_from(self, url):
-        parse_result = urlparse(url)
-        host = parse_result.netloc
-        path = parse_result.path
+        if self.urlparsed.get(url):
+            host, path = self.urlparsed[url]
+        else:
+            parse_result = urlparse(url)
+            host = parse_result.netloc
+            path = parse_result.path
+            self.urlparsed[url] = host, path
         params_keys = self.params_keys[host][path]
         return { k:v for k,v in self.params.items() if k in set(params_keys) }
 
     def _bodys_from(self, url):
-        parse_result = urlparse(url)
-        host = parse_result.netloc
-        path = parse_result.path
+        if self.urlparsed.get(url):
+            host, path = self.urlparsed[url]
+        else:
+            parse_result = urlparse(url)
+            host = parse_result.netloc
+            path = parse_result.path
+            self.urlparsed[url] = host, path
         params_keys = self.bodys_keys[host][path]
         return { k:v for k,v in self.bodys.items() if k in set(params_keys) }
 
