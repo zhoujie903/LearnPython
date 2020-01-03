@@ -498,6 +498,12 @@ class GenCode(object):
                     'session': device,
                 })
 
+
+                hosts = self.headers[device][app]
+                for h, d in hosts.items():
+                    self._delete_some_headers(d)
+
+
                 var_dict = dict()
 
                 def import_module(app, device):
@@ -734,7 +740,7 @@ class GenCode(object):
                 l.append(body_dict[k])
 
     def _delete_some_headers(self, headers: dict):
-        for key in {'Host', 'Connection', 'Content-Length', 'Accept-Encoding', 'Cache-Control', 'Pragma'}:
+        for key in {'Host', ':authority', 'Connection', 'Content-Length', 'Accept-Encoding', 'accept-encoding', 'Cache-Control', 'Pragma'}:
             try:
                 headers.pop(key)
             except:
