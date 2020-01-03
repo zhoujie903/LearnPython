@@ -35,6 +35,7 @@ class User(object):
         self.bodys_as_all = session_data['bodys_as_all']
         self.params_encry = session_data['params_encry']
         self.bodys_encry = session_data['bodys_encry']
+        self.session_id = session_data['session_id']
         self.urlparsed = dict()
         self.session = requests.Session()
         self.session.headers = self._header()
@@ -189,7 +190,7 @@ def genUsers():
 
 if __name__ == "__main__":
     for user in genUsers():
-        logging.info('\033[1;31m---------------------------\033[0m')
+        logging.info(f"\033[1;31m{'-'*10} {user.session_id} {'-'*10}\033[0m")
         try:
             pass
         except Exception as e:

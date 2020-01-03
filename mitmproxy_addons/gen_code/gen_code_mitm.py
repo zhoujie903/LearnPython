@@ -465,7 +465,7 @@ class GenCode(object):
 
     def running(self):
         ctx.log.info('event: running')
-        ctx.log.info('default session = ' + ctx.options.session)
+        ctx.log.error('default session = ' + ctx.options.session)
 
     def done(self):
         print('event: done')
@@ -505,6 +505,7 @@ class GenCode(object):
 
 
                 var_dict = dict()
+                var_dict['session_id'] = f'{device!r}'
 
                 def import_module(app, device):
                     import importlib.util
@@ -711,7 +712,6 @@ class GenCode(object):
         d = self.inner(self.params_keys, device=device, app=app, host=host)
         d[fname] = list(flow.request.query.keys())
 
-        path = request.path
 
         d = self.inner(self.params_as_all, device=device, app=app, host=host)
         if api.params_as_all:
@@ -725,7 +725,6 @@ class GenCode(object):
             if not api.url_path in d:
                 d[api.url_path] = []
             d[api.url_path].append(dict(body_dict))
-            ctx.log.error('self.bodys_as_all:')
 
         if api.f_p_enc and not api.params_as_all:
             d = self.inner_by_list(self.params_encry,[device, app, host, api.url_path])
@@ -740,7 +739,7 @@ class GenCode(object):
                 l.append(body_dict[k])
 
     def _delete_some_headers(self, headers: dict):
-        for key in {'Host', ':authority', 'Connection', 'Content-Length', 'Accept-Encoding', 'accept-encoding', 'Cache-Control', 'Pragma'}:
+        for key in {'Host', ':authority', 'Connection', 'Content-Length', 'accept', 'accept', 'accept-language', 'accept-encoding', 'Cache-Control', 'Pragma'}:
             try:
                 headers.pop(key)
             except:
