@@ -16,6 +16,7 @@ from mitmproxy import flowfilter
 from mitmproxy import http
 
 from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader
 
 '''
 生成接口python代码
@@ -132,19 +133,8 @@ class GenCode(object):
             huawei=re.compile(r'huawei', flags=re.IGNORECASE),
         )
 
-        self.template_dir = os.path.dirname(__file__)
-        tfile = f'{self.template_dir}/api_template.j2.py'
-        with open(tfile) as f:
-            s = f.read()
-            self.api_template = Template(s)
-
-        self.file_params_keys = 'data-params-keys.json'
-        self.file_bodys_keys = 'data-bodys-keys.json'
-        self.file_headers = 'data-headers.json'
-        self.file_params = 'data-params.json'
-        self.file_bodys = 'data-bodys.json'
-        self.file_app_hosts = 'data-app-hosts.json'
-        self.file_app_fn_url = 'data-fn-url.json'
+        self.env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
+        self.api_template = self.env.get_template('api_template.j2.py')
 
         self.headers = {}
         self.params = {}
@@ -160,17 +150,6 @@ class GenCode(object):
         self.app_apis = {}
         self.app_fn_url = {}
         self.session_hit = set()
-
-        self.params_keys = self.load_file(self.file_params_keys, self.api_dir)
-        self.bodys_keys = self.load_file(self.file_bodys_keys, self.api_dir)
-
-        self.headers = self.load_file(self.file_headers, self.api_dir)
-
-        self.params = self.load_file(self.file_params, self.api_dir)
-
-        self.bodys = self.load_file(self.file_bodys, self.api_dir)
-
-        self.app_fn_url = self.load_file(self.file_app_fn_url, self.api_dir)
 
         # 今日头条
         urls = [
@@ -423,7 +402,7 @@ class GenCode(object):
             Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
             Api('game-center-new.1sapp.com/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
             Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币',f_b_arg={'AddCoinNum','session_id'}),
-            Api('/x/open/coin/add', log='切菜 - 金币'),
+            Api('/x/open/coin/add', log='切菜 - 金币', body_as_all=True),
         ]
         self.you_xi_he_zi = NamedFilter(urls, 'you-xi-he-zi')
 
@@ -580,7 +559,7 @@ class GenCode(object):
                 abc(self.params_encry, 'params_encry', var_dict, list_append=True)
                 abc(self.bodys_encry, 'bodys_encry', var_dict, list_append=True)
 
-                tfile = f'{self.template_dir}/session_xxx.j2.py'
+                tfile = f'session_xxx.j2.py'
                 gfile = f'{self.api_dir}{app}/session_{device}.py'
                 self.gen_file_from_jinja2(tfile, gfile, seq=var_dict)
 
@@ -589,11 +568,11 @@ class GenCode(object):
                 print(f'生成code - {app}')
                 seq = apis.values()
 
-                tfile = f'{self.template_dir}/code_template.j2.py'
+                tfile = f'code_template.j2.py'
                 gfile = f'{self.api_dir}{app}/code-{app}.py'
                 self.gen_file_from_jinja2(tfile, gfile, seq=seq)
 
-                tfile = f'{self.template_dir}/sessions.j2.py'
+                tfile = f'sessions.j2.py'
                 gfile = f'{self.api_dir}{app}/sessions.py'
                 self.gen_file_from_jinja2(tfile, gfile, seq=sessions_by_app[app])
 
@@ -801,12 +780,10 @@ class GenCode(object):
             return dict()
 
     def gen_file_from_jinja2(self, tfile, gfile, **kwargs):
-        with open(tfile) as f:
-            s = f.read()
-            t = Template(s)
-            ss = t.render(**kwargs)
-            with open(gfile, mode='w') as ff:
-                ff.write(ss)
+        t = self.env.get_template(tfile)
+        ss = t.render(**kwargs)
+        with open(gfile, mode='w') as ff:
+            ff.write(ss)
 
     def inner(self, d, device='', app='', host=''):
         d = d.setdefault(device, dict())
@@ -927,7 +904,6 @@ def merge_file(from_file: pathlib.Path, to_file: pathlib.Path):
 
     tfile = pathlib.Path(__file__).parent.joinpath('session_xxx.j2.py')
     gfile = to_file.parent.joinpath(f'{to_file.stem}_merged{to_file.suffix}')
-    # self.gen_file_from_jinja2(tfile, gfile, seq=var_dict)
 
     with open(tfile) as f:
         s = f.read()
@@ -942,15 +918,24 @@ def test_merge_file():
     to_file = pathlib.Path('/Users/zhoujie/Desktop/dev/ma-yi-kd/session_xiaomi.py')
     merge_file(from_file, to_file)
 
+def test_jinja():
+    from jinja2 import Environment, FileSystemLoader
+    env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
+    t = env.get_template('code_template.j2.py')
+
+    api = Api(r'/mission/intPointReward', f_p_enc={'p_enc'})
+    seq = [api]
+    code = t.render(seq=seq)
+    print(code)
+
 if __name__ == "__main__":
     import shlex
     import subprocess
 
     # test_merge_file()
+    test_jinja()
     
 
-    print(__file__)
-    
     api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'})#时段签到
     print(api.str_fun_params())
     api =Api(r'/mission/intPointReward',f_name='hourly_sign', log='时段签到', params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
@@ -978,6 +963,5 @@ if __name__ == "__main__":
         t = Template(s)
         ss = t.render(seq=seq)
         # ss = t.render(request=api)
-        print(ss)
-
+        # print(ss)
     print('done')
