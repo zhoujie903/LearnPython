@@ -418,7 +418,12 @@ class GenCode(object):
             Api('/x/v1/goldpig/withdraw', log='游戏盒子 - 金猪 - 双倍收金币'),
             '/x/task/v3/list',
             Api('/x/task/v2/take-reward', log='领金币'),
-            Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币'),
+            Api('game-center-new.1sapp.com/x/open/game', log='1-打开游戏', f_name='open_game',f_p_arg={'app_id'}),
+            Api('qttgame.midsummer.top/api/Login', log='2-登录游戏', f_name='api_login', f_b_arg={'ticket','game_id'}),
+            Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
+            Api('game-center-new.1sapp.com/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
+            Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币',f_b_arg={'AddCoinNum','session_id'}),
+            Api('/x/open/coin/add', log='切菜 - 金币'),
         ]
         self.you_xi_he_zi = NamedFilter(urls, 'you-xi-he-zi')
 
