@@ -98,7 +98,7 @@ class Api(object):
             self.f_name = name
 
 
-class NamedFilter(object):
+class App(object):
     def __init__(self, urls, app_name=''):
         self.app_name = app_name
         self.flts = dict()
@@ -183,7 +183,7 @@ class GenCode(object):
             'api/news/feed/v64/',  # ios视频tab页
             'api/search/content/',
         ]
-        self.toutiao = NamedFilter(urls, 'jin-ri-tou-tiao')
+        self.toutiao = App(urls, 'jin-ri-tou-tiao')
 
         # 火山极速版
         urls = [
@@ -194,14 +194,14 @@ class GenCode(object):
             'luckycat/v1/landing/add_amount/',
             'luckycat/v1/task/get_read_bonus/',
         ]
-        self.huoshan = NamedFilter(urls, 'huo-shan')
+        self.huoshan = App(urls, 'huo-shan')
 
         # 趣头条小视频
         urls = [
             Api(r'seafood-api.1sapp.com/v1/readtimer/report',log='看视频得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'})
         ]
 
-        self.qtt_video = NamedFilter(urls, 'qtt-video')
+        self.qtt_video = App(urls, 'qtt-video')
 
         # 趣头条
         urls = [
@@ -248,7 +248,7 @@ class GenCode(object):
             Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg={'tag'}),
             r'/actcenter/piggy/',
         ]
-        self.qu_tou_tiao = NamedFilter(urls, 'qu-tou-tiao')
+        self.qu_tou_tiao = App(urls, 'qu-tou-tiao')
 
         # 百度 - 好看
         urls = [
@@ -257,13 +257,13 @@ class GenCode(object):
             r'activity/acad/rewardad',  # 看视频
             r'api/task/1/task/379/complete',  # 看视频
         ]
-        self.hao_kan = NamedFilter(urls, 'hao-kan')
+        self.hao_kan = App(urls, 'hao-kan')
 
         # 百度 - 全民小视频
         urls = [
             r'mvideo/api',  # 每日签到
         ]
-        self.quan_ming = NamedFilter(urls, 'quan-ming')
+        self.quan_ming = App(urls, 'quan-ming')
 
         # 蚂蚁看点
         urls = [
@@ -301,7 +301,7 @@ class GenCode(object):
             r'WebApi/Answer/video_double',
             r'WebApi/Answer/fill_energy',
         ]
-        self.ma_yi_kd = NamedFilter(urls, 'ma-yi-kd')
+        self.ma_yi_kd = App(urls, 'ma-yi-kd')
 
         # 中青看点
         urls = [
@@ -313,7 +313,7 @@ class GenCode(object):
             Api(r'/v5/article/complete.json',log='看视频得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='urlencoded_form'),
             Api(r'/WebApi/Task/receiveBereadRed',log='任务中心 - 领红包'),
         ]
-        self.zhong_qin_kd = NamedFilter(urls, 'zhong-qin-kd')
+        self.zhong_qin_kd = App(urls, 'zhong-qin-kd')
 
         # 东方头条
         urls = [
@@ -329,7 +329,7 @@ class GenCode(object):
             r'hit_susliks/hit_susliks/lucky_draw',
             r'turn_over_packet/packet/add_packet_bonus',
         ]
-        self.dftt = NamedFilter(urls, 'dong-fan-tt')
+        self.dftt = App(urls, 'dong-fan-tt')
 
         # 彩蛋视频
         urls = [
@@ -337,7 +337,7 @@ class GenCode(object):
             r'/h5/task/submit',
             r'/h5/bubble/prize',
         ]
-        self.cai_dan_sp = NamedFilter(urls, 'cai-dan-sp')
+        self.cai_dan_sp = App(urls, 'cai-dan-sp')
 
         urls = [
             r'/login/index',
@@ -346,7 +346,7 @@ class GenCode(object):
             r'/card/open',
             r'/card/doublereward',
         ]
-        self.kai_xin_da_ti = NamedFilter(urls, 'kai-xin-da-ti')
+        self.kai_xin_da_ti = App(urls, 'kai-xin-da-ti')
 
         # 趣键盘
         urls = [
@@ -368,7 +368,7 @@ class GenCode(object):
             r'/gk/game/bianlidian/',
             r'/qujianpan/',
         ]
-        self.qu_jian_pan = NamedFilter(urls, 'qu-jian-pan')
+        self.qu_jian_pan = App(urls, 'qu-jian-pan')
 
         # 趣种菜
         urls = [
@@ -391,7 +391,7 @@ class GenCode(object):
             '/x/tree-game/gapp/activity/rabbit/',
             Api('/x/tree-game/gapp/activity/carrot/take-reward', log='趣种菜 - 植物 - 点我'),
         ]
-        self.qu_zhong_cai = NamedFilter(urls, 'qu-zhong-cai')
+        self.qu_zhong_cai = App(urls, 'qu-zhong-cai')
 
         # 金猪游戏盒子
         urls = [
@@ -407,7 +407,7 @@ class GenCode(object):
             Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币',f_b_arg={'AddCoinNum','session_id'}),
             Api('/x/open/coin/add', log='切菜 - 金币', body_as_all=True),
         ]
-        self.you_xi_he_zi = NamedFilter(urls, 'you-xi-he-zi')
+        self.you_xi_he_zi = App(urls, 'you-xi-he-zi')
 
         # 欢乐养鸡场
         urls = [
@@ -416,7 +416,7 @@ class GenCode(object):
             Api('/x/chicken/feed', log='喂饲料'),
             Api('/x/chicken/get-fodder', log='领饲料', f_b_arg={'id','pos','again'}),
         ]
-        self.yang_ji_chang = NamedFilter(urls, 'yang-ji-chang')
+        self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
         self.flowfilters = [
             # self.toutiao,
