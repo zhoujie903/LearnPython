@@ -419,19 +419,19 @@ class GenCode(object):
         self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
         self.flowfilters = [
-            # self.toutiao,
-            # self.huoshan,
-            # self.qtt_video,
-            # self.qu_zhong_cai,
+            self.toutiao,
+            self.huoshan,
+            self.qtt_video,
+            self.qu_zhong_cai,
             self.qu_tou_tiao,
-            # self.hao_kan,
-            # self.quan_ming,
-            # self.ma_yi_kd,
-            # self.dftt,
-            # self.zhong_qin_kd,
-            # self.cai_dan_sp,
-            # self.kai_xin_da_ti,
-            # self.qu_jian_pan,
+            self.hao_kan,
+            self.quan_ming,
+            self.ma_yi_kd,
+            self.dftt,
+            self.zhong_qin_kd,
+            self.cai_dan_sp,
+            self.kai_xin_da_ti,
+            self.qu_jian_pan,
             self.you_xi_he_zi,
             self.yang_ji_chang,
         ]
@@ -439,20 +439,26 @@ class GenCode(object):
     def load(self, loader):
         ctx.log.info('event: load')
         loader.add_option(
-            name='session',
+            name='guess_as_session',
             typespec=str,
             default='default',
             help='若接口不能推断出session,则用这值来设定默认值',
         )
 
+        loader.add_option(
+            name='session',
+            typespec=str,
+            default='',
+            help='指定session的值, 不用代码推断',
+        )
+
     def configure(self, updated):
         ctx.log.info('event: configure')
-        if 'session' in updated:
-            self.default_session = ctx.options.session
 
     def running(self):
         ctx.log.info('event: running')
-        ctx.log.error('default session = ' + ctx.options.session)
+        ctx.log.error('session = ' + ctx.options.session)
+        ctx.log.error('guess-as-session = ' + ctx.options.guess_as_session)
 
     def done(self):
         print('event: done')
@@ -638,7 +644,7 @@ class GenCode(object):
                 code = self.api_template.render(request=api)
                 f.write(code)
 
-                device = self._guess_device(flow, api)
+                device = self._guess_session(flow, api)
 
                 self.gather_params_and_bodys(flow, api, device=device, app=ft.app_name)
                 self.session_hit.add((device, ft.app_name))
@@ -742,36 +748,41 @@ class GenCode(object):
             json.dump(o, fd, indent=2, sort_keys=True)
             print(f"生成 {f} 成功")
 
-    def _guess_device(self, flow: http.HTTPFlow, api: Api):
-        device = ''
+    def _guess_session(self, flow: http.HTTPFlow, api: Api):
+        session = ''
         guess_by_data = ''
         request = flow.request
 
-        def gass(data):
-            nonlocal guess_by_data, device
+        if ctx.options.session:
+            session = ctx.options.session
+            ctx.log.error(f'指定为：session = {session}')
+            return session
+
+        def guess(data):
+            nonlocal guess_by_data, session
             found = False
             for k, v in data:
-                for session, r in self.guess_session.items():
+                for s, r in self.guess_session.items():
                     if r.search(v):
-                        device = session
+                        session = s
                         guess_by_data = v
                         found = True
                         break
                 if found:
                     break
 
-        gass(itertools.chain(request.headers.items(), request.query.items()))
-        if not device:
+        guess(itertools.chain(request.headers.items(), request.query.items()))
+        if not session:
             d = self.dict_from_request_body(flow, api)
             if d:
-                gass(d.items())
+                guess(d.items())
 
         ctx.log.error(f'依据值：{guess_by_data}')
-        ctx.log.error(f'猜测为：session = {device}')
-        if device == '':
+        ctx.log.error(f'猜测为：session = {session}')
+        if session == '':
             ctx.log.error(f"not guess: {request.url}")
-            device = ctx.options.session
-        return device
+            session = ctx.options.guess_as_session
+        return session
 
     def load_file(self, f, fold):
         try:
