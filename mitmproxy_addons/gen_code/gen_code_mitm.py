@@ -103,16 +103,18 @@ class NamedFilter(object):
         self.app_name = app_name
         self.flts = dict()
         for u in urls:
-            a = u
-            if isinstance(u, str):
-                a = Api(u)
-            flt = flowfilter.parse(a.url)
-            self.flts[flt] = a
+            url = u
+            if isinstance(u, Api):
+                url = u.url
+            flt = flowfilter.parse(url)
+            self.flts[flt] = u
         self.current_api = None
 
     def __call__(self, f):
         for flt, api in self.flts.items():
             if flt(f):
+                if isinstance(api, str):
+                    api = Api(api)
                 self.current_api = api
                 return True
         return False
@@ -395,11 +397,12 @@ class GenCode(object):
         urls = [
             Api('/x/v1/goldpig/info', log='游戏盒子 - 金猪信息'),
             Api('/x/v1/goldpig/withdraw', log='游戏盒子 - 金猪 - 双倍收金币'),
-            '/x/task/v3/list',
+            Api('/x/task/v3/list',params_as_all=True),
             Api('/x/task/v2/take-reward', log='领金币'),
             Api('game-center-new.1sapp.com/x/open/game', log='1-打开游戏', f_name='open_game',f_p_arg={'app_id'}),
             Api('qttgame.midsummer.top/api/Login', log='2-登录游戏', f_name='api_login', f_b_arg={'ticket','game_id'}),
             Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
+            Api('game-center-new.1sapp.com/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
             Api('game-center-new.1sapp.com/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
             Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币',f_b_arg={'AddCoinNum','session_id'}),
             Api('/x/open/coin/add', log='切菜 - 金币', body_as_all=True),
@@ -416,19 +419,19 @@ class GenCode(object):
         self.yang_ji_chang = NamedFilter(urls, 'yang-ji-chang')
 
         self.flowfilters = [
-            self.toutiao,
-            self.huoshan,
-            self.qtt_video,
-            self.qu_zhong_cai,
+            # self.toutiao,
+            # self.huoshan,
+            # self.qtt_video,
+            # self.qu_zhong_cai,
             self.qu_tou_tiao,
-            self.hao_kan,
-            self.quan_ming,
-            self.ma_yi_kd,
-            self.dftt,
-            self.zhong_qin_kd,
-            self.cai_dan_sp,
-            self.kai_xin_da_ti,
-            self.qu_jian_pan,
+            # self.hao_kan,
+            # self.quan_ming,
+            # self.ma_yi_kd,
+            # self.dftt,
+            # self.zhong_qin_kd,
+            # self.cai_dan_sp,
+            # self.kai_xin_da_ti,
+            # self.qu_jian_pan,
             self.you_xi_he_zi,
             self.yang_ji_chang,
         ]
@@ -518,7 +521,7 @@ class GenCode(object):
                 def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
                     for k, v in old_data.items():
                         if isinstance(v, dict):
-                            v.update(new_data[k])
+                            v.update(new_data.get(k, v))
                         elif isinstance(v, list):
                             if list_append:
                                 old_data[k].extend(new_data.get(k, list()))
@@ -546,6 +549,7 @@ class GenCode(object):
                         var_dict[var_name] = json.dumps(merge_hosts, indent=2, sort_keys=True)
                         print(f"生成 App - {app:20} - session_{device}.py {var_name} 成功")
                     except Exception as e:
+                        # traceback.print_exc()
                         print(e)
                         var_dict[var_name] = '{}'
                 abc(self.headers, 'header_values', var_dict)
@@ -857,7 +861,7 @@ def get_data(session_module, var_name):
 def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
     for k, v in old_data.items():
         if isinstance(v, dict):
-            v.update(new_data[k])
+            v.update(new_data.get(k, v))
         elif isinstance(v, list):
             if list_append:
                 old_data[k].extend(new_data.get(k, list()))

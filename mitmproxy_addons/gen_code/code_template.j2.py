@@ -166,7 +166,7 @@ def {{ request.f_name }}(user: User):
 
 {%- if request.body_as_all and not request.params_as_all %}
 def {{ request.f_name }}(user: User):
-    for item in user.body_as_all['{{ request.url_path }}']:
+    for item in user.bodys_as_all['{{ request.url_path }}']:
         user.{{ request.name }}(item)
 {%- endif %}
 
@@ -190,8 +190,8 @@ def genUsers():
 
 if __name__ == "__main__":
     for user in genUsers():
-        logging.info(f"\033[1;31m{'-'*10} {user.session_id} {'-'*10}\033[0m")
         try:
+            logging.info(f"\033[1;31m{'-'*10} {user.session_id} {'-'*10}\033[0m")
             pass
         except Exception as e:
             traceback.print_exc()    
