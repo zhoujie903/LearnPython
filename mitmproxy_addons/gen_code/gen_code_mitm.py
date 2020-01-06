@@ -355,6 +355,8 @@ class GenCode(object):
             r'/gk/game/fanpai/awardDouble',
             r'/gk/game/fanpai/',
 
+            r'/gk/game/savingsBank/collectPigMoney',
+
             r'/gk/draw/info',
             r'/gk/draw/extract',
             Api('/gk/draw/double', f_b_arg={'ticket'}),
@@ -612,7 +614,7 @@ class GenCode(object):
                 ft.add(api)
 
             ctx.log.error(f'触发 App = {ft.app_name}')
-            ctx.log.error(f'触发 api = {api}')
+            ctx.log.error(f'触发 api = {api} {request.method}')
 
             function_name = re.sub(r'[./-]', '_', url_path).strip('_').lower()
             api_url = f'{request.scheme}://{request.pretty_host}{url_path}'
@@ -633,8 +635,9 @@ class GenCode(object):
                     api.method = request.method.lower()
                     api.content_type = 'json' if 'json' in request.headers.get('content-type','') else ''
                     api.fun_params = api.str_fun_params()
-                    app_apis[function_name] = api
-
+                    if not 'options' == api.method:
+                        app_apis[function_name] = api
+    
                 api.time = time.strftime('%m-%d %H:%M:%S')
                 api.headers_code = headers_code
                 api.params_code = params_code
