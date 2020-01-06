@@ -200,7 +200,6 @@ class GenCode(object):
         urls = [
             Api(r'seafood-api.1sapp.com/v1/readtimer/report',log='看视频得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'})
         ]
-
         self.qtt_video = App(urls, 'qtt-video')
 
         # 趣头条
@@ -356,6 +355,8 @@ class GenCode(object):
             r'/gk/game/fanpai/',
 
             r'/gk/game/savingsBank/collectPigMoney',
+            r'/gk/game/savingsBank/exchangePigMoney',
+            Api(r'/gk/game/savingsBank/unlockDouble',f_b_arg={'taskType'}, content_type='json'),
 
             r'/gk/draw/info',
             r'/gk/draw/extract',
@@ -363,8 +364,11 @@ class GenCode(object):
             r'/gk/draw/package',
             r'/gk/draw/pkdouble',
 
+            # 便利店
             Api('/gk/game/bianlidian/receiveBox', f_b_arg={'packageId'}),
             Api('/gk/game/bianlidian/draw/double', f_b_arg={'ticket'}),
+            Api('/gk/game/bianlidian/receiveGift', log='便利店 - xxx金币礼包碎片', f_b_arg={'ticket'}),
+            Api('/gk/game/bianlidian/receiveMediumCoin', log='便利店 - 随机金币奖励', f_b_arg={'ticket'}),
             r'/gk/garbage/',
             r'/gk/game/dadishu/',
             r'/gk/game/bianlidian/',
@@ -397,6 +401,11 @@ class GenCode(object):
 
         # 金猪游戏盒子
         urls = [
+            Api('/api/v1/tczyqtt/sign',log='填词小秀才 - 签到'),
+            Api('/api/v1/tczyqtt/lottery',log='填词小秀才 - lottery'),
+            Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成'),
+            Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币'),
+
             Api('/x/v1/goldpig/info', log='游戏盒子 - 金猪信息'),
             Api('/x/v1/goldpig/withdraw', log='游戏盒子 - 金猪 - 双倍收金币'),
             Api('/x/task/v3/list',params_as_all=True),
@@ -417,25 +426,26 @@ class GenCode(object):
             Api('/x/chicken/task/take-award', log='达标领奖励'),
             Api('/x/chicken/feed', log='喂饲料'),
             Api('/x/chicken/get-fodder', log='领饲料', f_b_arg={'id','pos','again'}),
+            '/x/chicken/video/accomplish',
         ]
         self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
         self.flowfilters = [
             self.toutiao,
-            self.huoshan,
-            self.qtt_video,
-            self.qu_zhong_cai,
-            self.qu_tou_tiao,
-            self.hao_kan,
-            self.quan_ming,
-            self.ma_yi_kd,
-            self.dftt,
-            self.zhong_qin_kd,
-            self.cai_dan_sp,
-            self.kai_xin_da_ti,
+            # self.huoshan,
+            # self.qtt_video,
+            # self.qu_zhong_cai,
+            # self.qu_tou_tiao,
+            # self.hao_kan,
+            # self.quan_ming,
+            # self.ma_yi_kd,
+            # self.dftt,
+            # self.zhong_qin_kd,
+            # self.cai_dan_sp,
+            # self.kai_xin_da_ti,
             self.qu_jian_pan,
             self.you_xi_he_zi,
-            self.yang_ji_chang,
+            # self.yang_ji_chang,
         ]
 
     def load(self, loader):
@@ -736,9 +746,16 @@ class GenCode(object):
                 l.append(body_dict[k])
 
     def _delete_some_headers(self, headers: dict):
-        for key in {'Host', ':authority', 'Connection', 'Content-Length', 'accept', 'accept', 'accept-language', 'accept-encoding', 'Cache-Control', 'Pragma'}:
+        h = {
+            ':authority', 'accept', 'accept-language', 'accept-encoding', 
+            'connection', 'content-Length', 'cache-control', 
+            'host', 'pragma'
+        }
+        for key in h:
             try:
-                headers.pop(key)
+                headers.pop(key.upper(), None)
+                headers.pop(key.lower(), None)
+                headers.pop(key.title(), None)
             except:
                 pass
 
@@ -786,16 +803,6 @@ class GenCode(object):
             ctx.log.error(f"not guess: {request.url}")
             session = ctx.options.guess_as_session
         return session
-
-    def load_file(self, f, fold):
-        try:
-            with open(f'{fold}{f}', 'r') as fd:
-                o = json.load(fd)
-                ctx.log.info(f'load {f} success!')
-                return o
-        except:
-            ctx.log.error(f'load {f} fail!')
-            return dict()
 
     def gen_file_from_jinja2(self, tfile, gfile, **kwargs):
         t = self.env.get_template(tfile)
