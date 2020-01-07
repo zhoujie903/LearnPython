@@ -115,6 +115,7 @@ class App(object):
             if flt(f):
                 if isinstance(api, str):
                     api = Api(api)
+                    self.flts[flt] = api
                 self.current_api = api
                 return True
         return False
@@ -128,7 +129,7 @@ class GenCode(object):
     def __init__(self):
         ctx.log.info('__init__')
         # 设置代码文件生成的目录\文件夹
-        self.api_dir = '/Users/zhoujie/Desktop/api/'
+        self.api_dir = pathlib.Path('/Users/zhoujie/Desktop/api/')
         self.guess_session = collections.OrderedDict(
             ios=re.compile(r'iphone|ios', flags=re.IGNORECASE),
             xiaomi=re.compile(r'xiaomi|mi\+5|miui', flags=re.IGNORECASE),
@@ -253,8 +254,12 @@ class GenCode(object):
         urls = [
             r'activity/acusercheckin',  # 每日签到
             r'signIn/new/sign',  # 游戏中心签到
-            r'activity/acad/rewardad',  # 看视频
-            r'api/task/1/task/379/complete',  # 看视频
+
+            '/activity/acad/bubblead',
+            Api(r'/activity/tasks/active', params_as_all=True, f_p_kwarg={'productid':1, 'tid':404}),
+            Api(r'activity/acad/rewardad', params_as_all=True, f_p_kwarg={'productid':1, 'tid':404} ),  # 看视频
+            Api(r'api/task/1/task/379/complete', f_p_arg={'rewardVideoPkg'}), # 看视频
+            '/activity/tasks/taskreward',
         ]
         self.hao_kan = App(urls, 'hao-kan')
 
@@ -308,7 +313,7 @@ class GenCode(object):
             r'webApi/AnswerReward/',
             Api(r'/v5/Game/GameVideoReward.json'),
             Api(r'/taskCenter/getAdVideoReward',log='任务中心 - 看视频'),
-            Api(r'/WebApi/invite/openHourRed',log='开宝箱'),
+            Api(r'/WebApi/invite/openHourRed',log='开宝箱', body_as_all=True),
             Api(r'/v5/article/complete.json',log='看视频得金币', f_b_enc={'p'}, f_b_arg={'p'}, content_type='urlencoded_form'),
             Api(r'/WebApi/Task/receiveBereadRed',log='任务中心 - 领红包'),
         ]
@@ -404,7 +409,7 @@ class GenCode(object):
             Api('/api/v1/tczyqtt/sign',log='填词小秀才 - 签到'),
             Api('/api/v1/tczyqtt/lottery',log='填词小秀才 - lottery'),
             Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成'),
-            Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币'),
+            Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币', params_as_all=True),
 
             Api('/x/v1/goldpig/info', log='游戏盒子 - 金猪信息'),
             Api('/x/v1/goldpig/withdraw', log='游戏盒子 - 金猪 - 双倍收金币'),
@@ -432,21 +437,23 @@ class GenCode(object):
 
         self.flowfilters = [
             self.toutiao,
-            # self.huoshan,
-            # self.qtt_video,
-            # self.qu_zhong_cai,
-            # self.qu_tou_tiao,
-            # self.hao_kan,
-            # self.quan_ming,
-            # self.ma_yi_kd,
-            # self.dftt,
-            # self.zhong_qin_kd,
-            # self.cai_dan_sp,
-            # self.kai_xin_da_ti,
+            self.huoshan,
+            self.qtt_video,
+            self.qu_zhong_cai,
+            self.qu_tou_tiao,
+            self.hao_kan,
+            self.quan_ming,
+            self.ma_yi_kd,
+            self.dftt,
+            self.zhong_qin_kd,
+            self.cai_dan_sp,
+            self.kai_xin_da_ti,
             self.qu_jian_pan,
             self.you_xi_he_zi,
-            # self.yang_ji_chang,
+            self.yang_ji_chang,
         ]
+
+        
 
     def load(self, loader):
         ctx.log.info('event: load')
@@ -483,7 +490,7 @@ class GenCode(object):
                     try:
                         dd = data[device][app]
                         print(f"生成 App - {app}", end='\t')
-                        self._gen_file(dd, f'{file_name}-{device}.json', f'{self.api_dir}{app}')
+                        self._gen_file(dd, f'{file_name}-{device}.json', self.api_dir.joinpath(app))
                     except:
                         pass
 
@@ -516,7 +523,7 @@ class GenCode(object):
                     import importlib.util
                     try:
                         module_name = f'session_{device}'
-                        path = self.api_dir + f'{app}/' + module_name + '.py'  
+                        path = self.api_dir.joinpath(app, f'{module_name}.py')  
                         spec = importlib.util.spec_from_file_location(module_name, path)
                         session_module = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(session_module)
@@ -582,7 +589,7 @@ class GenCode(object):
                 abc(self.bodys_encry, 'bodys_encry', var_dict, list_append=True)
 
                 tfile = f'session_xxx.j2.py'
-                gfile = f'{self.api_dir}{app}/session_{device}.py'
+                gfile = self.api_dir.joinpath(app, f'session_{device}.py')
                 self.gen_file_from_jinja2(tfile, gfile, seq=var_dict)
 
             # 生成app下的 code.py, sessions.py
@@ -591,11 +598,11 @@ class GenCode(object):
                 seq = apis.values()
 
                 tfile = f'code_template.j2.py'
-                gfile = f'{self.api_dir}{app}/code-{app}.py'
+                gfile = self.api_dir.joinpath(app, f'code-{app}.py')
                 self.gen_file_from_jinja2(tfile, gfile, seq=seq)
 
                 tfile = f'sessions.j2.py'
-                gfile = f'{self.api_dir}{app}/sessions.py'
+                gfile = self.api_dir.joinpath(app, 'sessions.py')
                 self.gen_file_from_jinja2(tfile, gfile, seq=sessions_by_app[app])
 
             print('done !!!')
@@ -614,6 +621,7 @@ class GenCode(object):
                     self.flowfilters.insert(0, flt)
                 break
         if ft:
+            ctx.log.error('|' + '-'*20 + '|') 
             api: Api = ft.current_api
             request: http.HTTPRequest = flow.request
 
@@ -665,6 +673,8 @@ class GenCode(object):
                 d_v = self.app_fn_url.setdefault(device, dict())
                 fn_url = d_v.setdefault(ft.app_name, dict())
                 fn_url[url_path] = api_url
+
+            ctx.log.error('|' + '-'*20 + '|')
 
     def headers_string(self, flow: http.HTTPFlow, indent=1):
         d = dict(flow.request.headers)
@@ -760,7 +770,7 @@ class GenCode(object):
                 pass
 
     def _gen_file(self, o, f, fold, mode='w'):
-        path = pathlib.Path(fold)
+        path = fold#pathlib.Path(fold)
         if not path.exists():
             path.mkdir(parents=True, exist_ok=True)
 
@@ -835,7 +845,7 @@ class GenCode(object):
             api.content_type = 'urlencoded_form'
 
         elif api.content_type == 'multipart_form' or flow.request.multipart_form:
-            ctx.log.error('是multipart_form')
+            ctx.log.error('content-type = multipart_form')
             d = dict()
             for key, value in flow.request.multipart_form.items():
                 key = key.decode(encoding='utf-8')
