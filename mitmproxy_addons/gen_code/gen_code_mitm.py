@@ -631,7 +631,7 @@ class GenCode(object):
             params_code = self.params_string(flow)
             data_code = self.data_string(flow, api)
 
-            path = pathlib.Path(f'{self.api_dir}{ft.app_name}')
+            path = self.api_dir.joinpath(ft.app_name) 
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
             with (path/f'{function_name}.text').open('a') as f:
