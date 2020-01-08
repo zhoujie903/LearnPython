@@ -147,7 +147,8 @@ class GenCode(object):
         self.params_encry = {}
         self.bodys_keys = {}
         self.bodys_encry = {}
-        self.params_as_all = {}
+        self.params_as_all = dict()
+        self.params_as_all_limit = dict()
         self.bodys_as_all = {}
 
         self.app_apis = {}
@@ -543,23 +544,13 @@ class GenCode(object):
                         pass
                     return old_data
 
-                def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
-                    for k, v in old_data.items():
-                        if isinstance(v, dict):
-                            v.update(new_data.get(k, v))
-                        elif isinstance(v, list):
-                            if list_append:
-                                old_data[k].extend(new_data.get(k, list()))
-                            else:
-                                old_data[k] = new_data.get(k, list())
-                        else:
-                            old_data[k] = new_data.get(k, v)
-                    new_data.update(old_data)
-                    return new_data
-
-                def abc(data: dict, var_name, var_dict: dict, mergehost=True, list_append: bool=False, limit=50):
+                def abc(data: dict, var_name, var_dict: dict, mergehost=True, list_append: bool=False, limit:dict=None):
                     try:
                         dd = data[device][app]
+                        try:
+                            l = limit[device][app]
+                        except :
+                            l = dict()
                         merge_hosts = {}
                         try:
                             if mergehost:
@@ -570,7 +561,7 @@ class GenCode(object):
                         except:
                             merge_hosts = dd
                         old_data = get_old_data(session_module, var_name)
-                        merge_hosts = merge_data(merge_hosts, old_data, list_append=list_append, limit=limit)
+                        merge_hosts = merge_data(merge_hosts, old_data, list_append=list_append, limit=l)
                         var_dict[var_name] = json.dumps(merge_hosts, indent=2, sort_keys=True)
                         print(f"生成 App - {app:20} - session_{device}.py {var_name} 成功")
                     except Exception as e:
@@ -583,7 +574,7 @@ class GenCode(object):
                 abc(self.bodys_keys, 'bodys_keys', var_dict, mergehost=False)
                 abc(self.params, 'param_values', var_dict)
                 abc(self.bodys, 'body_values', var_dict)
-                abc(self.params_as_all, 'params_as_all', var_dict, list_append=True)
+                abc(self.params_as_all, 'params_as_all', var_dict, list_append=True,limit=self.params_as_all_limit)
                 abc(self.bodys_as_all, 'bodys_as_all', var_dict, list_append=True)
                 abc(self.params_encry, 'params_encry', var_dict, list_append=True)
                 abc(self.bodys_encry, 'bodys_encry', var_dict, list_append=True)
@@ -705,16 +696,16 @@ class GenCode(object):
         host = request.pretty_host
 
         # 收集headers
-        d = self.inner(self.headers, device=device, app=app, host=host)
+        d = inner(self.headers, device=device, app=app, host=host)
         d.update(flow.request.headers)
 
         # 收集params
-        d = self.inner(self.params, device=device, app=app, host=host)
+        d = inner(self.params, device=device, app=app, host=host)
         d.update(flow.request.query)
 
         # 收集bodys
         bodys_keys = list()
-        d = self.inner(self.bodys, device=device, app=app, host=host)
+        d = inner(self.bodys, device=device, app=app, host=host)
         body_dict = self.dict_from_request_body(flow, api)
         if body_dict:
             d.update(body_dict)
@@ -723,34 +714,36 @@ class GenCode(object):
         parse_result = urlparse(request.url)
         fname = parse_result.path
 
-        dd = self.inner(self.bodys_keys, device=device, app=app, host=host)
+        dd = inner(self.bodys_keys, device=device, app=app, host=host)
         dd[fname] = bodys_keys
 
-        d = self.inner(self.params_keys, device=device, app=app, host=host)
+        d = inner(self.params_keys, device=device, app=app, host=host)
         d[fname] = list(flow.request.query.keys())
 
 
-        d = self.inner(self.params_as_all, device=device, app=app, host=host)
+        d = inner(self.params_as_all, device=device, app=app, host=host)
+        limit = inner_by_list(self.params_as_all_limit, [device, app])
         if api.params_as_all:
             if not api.url_path in d:
                 d[api.url_path] = []
+                limit[api.url_path] = api.p_as_all_limit
             if api.p_as_all_limit > len(d[api.url_path]):
                 d[api.url_path].append(dict(flow.request.query))
 
-        d = self.inner(self.bodys_as_all, device=device, app=app, host=host)
+        d = inner(self.bodys_as_all, device=device, app=app, host=host)
         if api.body_as_all:
             if not api.url_path in d:
                 d[api.url_path] = []
             d[api.url_path].append(dict(body_dict))
 
         if api.f_p_enc and not api.params_as_all:
-            d = self.inner_by_list(self.params_encry,[device, app, host, api.url_path])
+            d = inner_by_list(self.params_encry,[device, app, host, api.url_path])
             for k in api.f_p_enc:
                 l = d.setdefault(k, list())
                 l.append(flow.request.query[k])
 
         if api.f_b_enc and not api.body_as_all:
-            d = self.inner_by_list(self.bodys_encry,[device, app, host, api.url_path])
+            d = inner_by_list(self.bodys_encry,[device, app, host, api.url_path])
             for k in api.f_b_enc:
                 l = d.setdefault(k, list())
                 l.append(body_dict[k])
@@ -820,17 +813,6 @@ class GenCode(object):
         with open(gfile, mode='w') as ff:
             ff.write(ss)
 
-    def inner(self, d, device='', app='', host=''):
-        d = d.setdefault(device, dict())
-        d = d.setdefault(app, dict())
-        d = d.setdefault(host, dict())
-        return d
-
-    def inner_by_list(self, d, l: list):
-        for key in l:
-            d = d.setdefault(key, dict())
-        return d
-
     def dict_from_request_body(self, flow: http.HTTPFlow, api: Api):
         d = None
         if api.content_type == 'json':
@@ -889,13 +871,14 @@ def get_data(session_module, var_name):
         pass
     return old_data
 
-def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit=50):
+def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit:dict=None):
     for k, v in old_data.items():
         if isinstance(v, dict):
             v.update(new_data.get(k, v))
         elif isinstance(v, list):
             if list_append:
                 old_data[k].extend(new_data.get(k, list()))
+                old_data[k] = old_data[k][:limit.get(k, 50)]
             else:
                 old_data[k] = new_data.get(k, list())
         else:
@@ -911,6 +894,16 @@ def import_module(path: pathlib.Path):
     spec.loader.exec_module(session_module)
     return session_module
 
+def inner(d, device='', app='', host=''):
+    d = d.setdefault(device, dict())
+    d = d.setdefault(app, dict())
+    d = d.setdefault(host, dict())
+    return d
+
+def inner_by_list(d, l: list):
+    for key in l:
+        d = d.setdefault(key, dict())
+    return d
 
 def merge_file(from_file: pathlib.Path, to_file: pathlib.Path):
 
