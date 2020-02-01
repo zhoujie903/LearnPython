@@ -191,7 +191,11 @@ def genUsers():
 if __name__ == "__main__":
     for user in genUsers():
         try:
+            logging.info(f"\033[1;31m{' '*20}\033[0m")
             logging.info(f"\033[1;31m{'-'*10} {user.session_id} {'-'*10}\033[0m")
             pass
         except Exception as e:
             traceback.print_exc()    
+        finally:
+            logging.info(f"\033[1;31m{'^'*10} {user.session_id} {'^'*10}\033[0m")
+            logging.info(f"\033[1;31m{' '*20}\033[0m")

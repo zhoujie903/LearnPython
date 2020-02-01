@@ -410,6 +410,8 @@ class GenCode(object):
             Api('/api/v1/tczyqtt/sign',log='填词小秀才 - 签到'),
             Api('/api/v1/tczyqtt/lottery',log='填词小秀才 - lottery'),
             Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成'),
+            Api('/api/v1/tczyqtt/open_redpacket',log='填词小秀才 - 红包'),
+            Api('/api/v1/tczyqtt/draw_a_char',log='填词小秀才 - 抽字'),
             Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币', params_as_all=True),
 
             Api('/x/v1/goldpig/info', log='游戏盒子 - 金猪信息'),
@@ -432,7 +434,12 @@ class GenCode(object):
             Api('/x/chicken/task/take-award', log='达标领奖励'),
             Api('/x/chicken/feed', log='喂饲料'),
             Api('/x/chicken/get-fodder', log='领饲料', f_b_arg={'id','pos','again'}),
+            Api('/x/chicken/mood/use-object', log='打赏'),
             '/x/chicken/video/accomplish',
+            # 翻翻乐
+            Api('/x/middle/flop/info', log='欢乐养鸡场 - 翻翻乐 - 信息'),
+            Api('/x/middle/flop/start', log='欢乐养鸡场 - 翻翻乐 - 开始'),
+            '/x/middle/flop/',
         ]
         self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
@@ -510,7 +517,6 @@ class GenCode(object):
                     'file': f'session_{device}',
                     'session': device,
                 })
-
 
                 hosts = self.headers[device][app]
                 for h, d in hosts.items():
@@ -751,8 +757,8 @@ class GenCode(object):
     def _delete_some_headers(self, headers: dict):
         h = {
             ':authority', 'accept', 'accept-language', 'accept-encoding', 
-            'connection', 'content-Length', 'cache-control', 
-            'host', 'pragma'
+            'connection', 'content-Length', 'content-type', 'cache-control', 
+            'host', 'pragma', 'proxy-connection',
         }
         for key in h:
             try:
