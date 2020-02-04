@@ -44,18 +44,12 @@ colors = {
 # 账号变量
 # ------------------------------------------------
 # A_Token_Header的一些结论：
-# 1.每个账号不同；
-# 2.同一个账号每次登录时也是不一样的
-# 3.同一个账号，退出时，只要不登录，上次的A-Token-Header的值还有效，只有再登录时，上次的token值才失败
-A_Token_Header_zxg = 'PTtWUFdWUkBFHEVZCVcNdUtVWwdc'
-# A_Token_Header_her = 'Mi9bUFZRVUpGH0NfWwRWchpWBgA='
+# 1.由接口api/v1/sessions/create_oauth2返回
 
 
 # Cookie的一些结论：
 # 1.同一个账号，退出或再登录，都不用修改，一直有效
 # 2.值为空也可以
-Cookie_zxg = ''
-Cookie_her = 'UM_distinctid=1700a5542443e5-01f6778855caab-e2f295b-4a640-1700a5542457d7;'
 
 # UUID的一些结论：
 # 1.固定不变
@@ -93,10 +87,8 @@ class QuXiaoChuUser():
 
     SLEEP = 0.5
 
-    def __init__(self, uid, cookie, data):
-        self.uid = uid
+    def __init__(self, data):
         self.headers = dict(QuXiaoChuUser.headers)
-        self.headers['Cookie'] = cookie
         self.data = data
 
         self.session = requests.Session()
@@ -107,7 +99,7 @@ class QuXiaoChuUser():
         获取atoken: A-Token-Header	Oi9KUFdWU0pFH0INWlQMdRlVVVU=
         {"success":true,"msg":"操作成功","code":"200","codemsg":"操作成功","result":{"id":145696,"unionid":"wisedom-AF202DCF-F89A-4812-9A9F-A05A171477D2","nick":"新人77D2","acc":"","atoken":"MipcUFdWU0pFH0INWlQNIRcFAAY=","rtoken":"Z3cbRFxQFQQb","accesskey":null,"gift":null}}
         '''
-        print("获取atoken: A-Token-Header {}".format(self.uid))
+        print("获取atoken: A-Token-Header")
 
         # api = self._genapi('sessions/create_oauth2')
         api = 'https://mapi.hddgood.com/api/v1/sessions/create_oauth2'
@@ -117,7 +109,14 @@ class QuXiaoChuUser():
         atoken = result['result']['atoken']
         self.token_header = atoken
         self.session.headers['A-Token-Header'] = self.token_header
-        print(atoken)
+
+        uid = result['result']['id']
+        self.uid = uid
+        
+        nick = result['result']['nick']
+        self.nick = nick
+        print(f'uid = {uid} nick = {nick} atoken = {atoken}')
+
 
     def game_chengyu_join_game(self, rank):
         '''
@@ -147,7 +146,7 @@ class QuXiaoChuUser():
     def _post(self, api, data, p=logging.warning):
         time.sleep(QuXiaoChuUser.SLEEP)
 
-        res = self.session.post(api, data=data, verify=False)
+        res = self.session.post(api, data=data)
         print(res.url)
         result = res.text
         print(result)
@@ -466,7 +465,7 @@ def chengyu_auto_answer(user: QuXiaoChuUser):
 
 
 def genUsers():
-    yield QuXiaoChuUser(UUID_her, Cookie_her, data_her)
+    yield QuXiaoChuUser(data_her)
 
 g_rank = 15
 chengyu = Chengyu()
@@ -478,7 +477,7 @@ if __name__ == "__main__":
         start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         # 登录获取 token
         result = user.sessions_create_oauth2()
-        
+
         for _ in range(10):   
             coins = chengyu_auto_answer(user)
             time.sleep(1)

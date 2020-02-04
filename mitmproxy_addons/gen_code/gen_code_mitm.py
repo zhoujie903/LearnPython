@@ -189,12 +189,19 @@ class GenCode(object):
 
         # 火山极速版
         urls = [
-            'luckycat/v1/task/page/',
-            'luckycat/v1/task/sign_in/',
-            'luckycat/v1/task/open_treasure_box/',
-            'luckycat/v1/task/done_task/',
-            'luckycat/v1/landing/add_amount/',
-            'luckycat/v1/task/get_read_bonus/',
+            Api('/luckycat/hotsoon/v1/task/page', log='火山-获取任务状态'),
+            Api('/luckycat/hotsoon/v1/task/done/treasure_task', log='火山-开宝箱'),
+            Api('/luckycat/hotsoon/v1/task/done/show_money', log='火山-晒收入', params_as_all=True),
+            Api('/luckycat/hotsoon/v1/task/done/excitation_ad', log='火山-', params_as_all=True, body_as_all=True),
+            Api('/luckycat/hotsoon/v1/task/done/daily_read_1m', log='火山-1分钟', params_as_all=True),
+            Api('/luckycat/hotsoon/v1/task/done/daily_read_2m', log='火山-2分钟', params_as_all=True),
+            Api('luckycat/v1/task/page/', log='火山-获取任务状态', params_as_all=True),
+            Api('luckycat/v1/task/sign_in/', log='火山-每日签到', params_as_all=True),
+            Api('luckycat/v1/task/open_treasure_box/', log='火山-开宝箱', params_as_all=True),
+            Api('luckycat/v1/task/done_task/', log='火山-开宝箱-看视频', params_as_all=True, body_as_all=True),
+            Api('luckycat/v1/landing/add_amount/', log='火山-晒收入', params_as_all=True),
+            Api('luckycat/v1/task/get_read_bonus/',params_as_all=True),
+            Api('api/ad/v1/inspire/', log='火山-获取广告', params_as_all=True),
         ]
         self.huoshan = App(urls, 'huo-shan')
 
@@ -214,12 +221,13 @@ class GenCode(object):
             r'/mission/receiveTreasureBox',
             Api(r'/content/readV2',params_as_all=True),
             Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True, p_as_all_limit=1),
-            # r'taskcenter/getListV2',#旧版本 tab页：任务
-            # r'api-coin-service.aiclk.com/coin/service',
             Api(r'/coin/service', body_as_all=True),
             r'readtimer/report',
             Api(r'motivateapp/mtvcallback', params_as_all=True),
             Api(r'x/feed/getReward', log='信息流-惊喜红包', params_as_all=True),
+            Api(r'/lotteryGame/status', log='天天乐-信息'),
+            Api(r'/tiantianle/video', log='天天乐-增加机会', params_as_all=True),
+            Api(r'/lotteryGame/order', log='天天乐-投注'),
             r'x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
             r'x/v1/goldpig/withdraw',  # 金猪
             r'finance/piggybank/taskReward',  # 存钱罐
@@ -245,6 +253,9 @@ class GenCode(object):
             #游戏 - 切菜
             Api(r'/x/open/coin/add', body_as_all=True),
 
+            #游戏 - 糖果
+            Api(r'/happy/protocol', body_as_all=True),
+
             # 金猪
             Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg={'tag'}),
             r'/actcenter/piggy/',
@@ -264,9 +275,24 @@ class GenCode(object):
         ]
         self.hao_kan = App(urls, 'hao-kan')
 
+        # 百度 - 百度极速版
+        urls = [
+            '/activity/acad/bubblead',
+            Api(r'/activity/tasks/active', f_p_kwarg={'productid':2, 'tid':404}),
+            Api(r'/activity/acad/rewardad', f_p_kwarg={'productid':2, 'tid':404} ),  # 看视频
+            Api(r'/api/task/1/task/381/complete', f_p_arg={'rewardVideoPkg'}), # 看视频
+            '/activity/tasks/taskreward',
+        ]
+        self.bai_du_flash = App(urls, 'bai-du-flash')
+
         # 百度 - 全民小视频
         urls = [
             r'mvideo/api',  # 每日签到
+            '/activity/acad/bubblead',
+            Api(r'/activity/tasks/active', f_p_kwarg={'productid':4, 'tid':418}),
+            Api(r'/activity/acad/rewardad', f_p_kwarg={'productid':4, 'tid':418} ),  # 看视频
+            Api(r'/api/task/1/task/380/complete', f_p_arg={'rewardVideoPkg'}), # 看视频
+            '/activity/tasks/taskreward',
         ]
         self.quan_ming = App(urls, 'quan-ming')
 
@@ -283,14 +309,9 @@ class GenCode(object):
             r'WebApi/RotaryTable/video_double',
             r'WebApi/RotaryTable/chestReward',
 
-            # 新版答题
-            r'/v6/Answer/getData.json',
-            r'/v5/answer/first_reward',
-            r'/v6/Answer/answer_question.json',
-            r'/v5/answer/answer_reward.json',
 
             Api(r'/WebApi/sleep/sleep_start',log='睡觉 - 开始'),
-            Api(r' /WebApi/sleep/get_sleep_score',log='睡觉 - 醒来'),
+            Api(r'/WebApi/sleep/get_sleep_score',log='睡觉 - 醒来'),
 
             Api(r'article/haotu_video',log='看视频得金币', f_b_enc={'p'}, content_type='multipart_form'),
             Api(r'article/complete_article',log='读文章得金币', f_b_enc={'p'}, content_type='multipart_form'),
@@ -298,13 +319,20 @@ class GenCode(object):
             Api(r'/v5/article/complete_welfare_score.json', log='福袋 - 得金币', f_b_enc={'p'}, content_type='multipart_form'),
             Api(r'/v5/user/adlickstart.json',log='点击广告领金币 - 开始', f_b_enc={'p'}, content_type='multipart_form'),
             Api(r'/v5/user/adlickend.json',log='点击广告领金币 - 结束', f_b_enc={'p'}, content_type='multipart_form'),
+            Api(r'/v5/user/task_second_callback.json',f_b_enc={'p'}, content_type='multipart_form'),
+
+            # 新版答题
+            r'/v6/Answer/getData.json',
+            r'/v5/answer/first_reward',
+            r'/v6/Answer/answer_question.json',
+            r'/v5/answer/answer_reward.json',
 
             # 旧版答题
-            r'WebApi/Answer/getData',
-            r'WebApi/Answer/answer_question',
-            r'WebApi/Answer/answer_reward',
-            r'WebApi/Answer/video_double',
-            r'WebApi/Answer/fill_energy',
+            # r'WebApi/Answer/getData',
+            # r'WebApi/Answer/answer_question',
+            # r'WebApi/Answer/answer_reward',
+            # r'WebApi/Answer/video_double',
+            # r'WebApi/Answer/fill_energy',
         ]
         self.ma_yi_kd = App(urls, 'ma-yi-kd')
 
@@ -341,6 +369,7 @@ class GenCode(object):
             r'task/timer_submit',
             r'/h5/task/submit',
             r'/h5/bubble/prize',
+            Api('/h5/reward/prize',log='iphone免费抽'),
         ]
         self.cai_dan_sp = App(urls, 'cai-dan-sp')
 
@@ -384,6 +413,7 @@ class GenCode(object):
 
         # 趣种菜
         urls = [
+            Api('/x/tree-game/user', log='趣种菜 - 获取用户信息 - s_token'),
             Api('/x/tree-game/gapp/info', log='趣种菜 - 信息'),
             Api('/x/tree-game/gapp/box/my/rand-reward', log='趣种菜 - 拆礼物 - 点击'),
             Api('/x/tree-game/gapp/box/my/take-reward', log='趣种菜 - 拆礼物 - 收获'),
@@ -446,6 +476,7 @@ class GenCode(object):
         self.flowfilters = [
             self.toutiao,
             self.huoshan,
+            self.bai_du_flash,
             self.qtt_video,
             self.qu_zhong_cai,
             self.qu_tou_tiao,
@@ -757,7 +788,7 @@ class GenCode(object):
     def _delete_some_headers(self, headers: dict):
         h = {
             ':authority', 'accept', 'accept-language', 'accept-encoding', 
-            'connection', 'content-Length', 'content-type', 'cache-control', 
+            'connection', 'content-encoding', 'content-length', 'content-type', 'cache-control', 
             'host', 'pragma', 'proxy-connection',
         }
         for key in h:
