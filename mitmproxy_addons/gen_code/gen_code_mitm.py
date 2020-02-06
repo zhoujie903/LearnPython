@@ -213,8 +213,9 @@ class GenCode(object):
 
         # 趣头条
         urls = [
-            r'sign/sign',  # 每日签到
+            Api(r'/sign/sign', log='每日签到', params_as_all=True),
             Api(r'/mission/intPointReward', log='时段签到', params_as_all=True),
+            Api(r'/taskcenter/getReward', log='任务完成 - 领金币', params_as_all=True),
             r'/x/game-center/user/sign-in',
             r'/x/game-center/user/last-sign-coin',
             r'/newuserline/activity/signRewardNew',  # 挑战签到
@@ -223,7 +224,7 @@ class GenCode(object):
             Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True, p_as_all_limit=1),
             Api(r'/coin/service', body_as_all=True),
             r'readtimer/report',
-            Api(r'motivateapp/mtvcallback', params_as_all=True),
+            # Api(r'motivateapp/mtvcallback', params_as_all=True),
             Api(r'x/feed/getReward', log='信息流-惊喜红包', params_as_all=True),
             Api(r'/lotteryGame/status', log='天天乐-信息'),
             Api(r'/tiantianle/video', log='天天乐-增加机会', params_as_all=True),
@@ -244,8 +245,8 @@ class GenCode(object):
             # r'x/tree-game/',
 
             r'x/open/game',
-            r'x/task/encourage/activity/grant',  # 游戏 - 瓜分
             r'/api/Login',
+            r'x/task/encourage/activity/grant',  # 游戏 - 瓜分
             r'api/loginGame',
             r'api/qttAddCoin',
             r'api/AddCoin',  # 游戏 - 成语
@@ -256,9 +257,15 @@ class GenCode(object):
             #游戏 - 糖果
             Api(r'/happy/protocol', body_as_all=True),
 
+            Api(r'/press_trigger',log='幸运大转盘'),
+
             # 金猪
             Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg={'tag'}),
             r'/actcenter/piggy/',
+
+            Api(r'/member/getMemberIncome',log='收益详情', f_p_arg={'page','last_time'}),
+            Api(r'/search/searchContentNew',log='搜索内容得金币', params_as_all=True, p_as_all_limit=3),
+            
         ]
         self.qu_tou_tiao = App(urls, 'qu-tou-tiao')
 
@@ -366,7 +373,8 @@ class GenCode(object):
 
         # 彩蛋视频
         urls = [
-            r'task/timer_submit',
+            Api(r'task/timer_submit',log='看视频 - 得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'}),
+            Api(r'/h5/task/submit',log='日常福利 - 观看小视频'),
             r'/h5/task/submit',
             r'/h5/bubble/prize',
             Api('/h5/reward/prize',log='iphone免费抽'),
@@ -413,6 +421,7 @@ class GenCode(object):
 
         # 趣种菜
         urls = [
+            Api('/x/open/game', log='趣种菜 - 打开游戏 - ticket'),
             Api('/x/tree-game/user', log='趣种菜 - 获取用户信息 - s_token'),
             Api('/x/tree-game/gapp/info', log='趣种菜 - 信息'),
             Api('/x/tree-game/gapp/box/my/rand-reward', log='趣种菜 - 拆礼物 - 点击'),
@@ -474,22 +483,22 @@ class GenCode(object):
         self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
         self.flowfilters = [
-            self.toutiao,
-            self.huoshan,
-            self.bai_du_flash,
-            self.qtt_video,
-            self.qu_zhong_cai,
-            self.qu_tou_tiao,
-            self.hao_kan,
-            self.quan_ming,
-            self.ma_yi_kd,
-            self.dftt,
-            self.zhong_qin_kd,
-            self.cai_dan_sp,
-            self.kai_xin_da_ti,
-            self.qu_jian_pan,
+            # self.toutiao,
+            # self.huoshan,
+            # self.bai_du_flash,
+            # self.qtt_video,
+            # self.qu_zhong_cai,
+            # self.qu_tou_tiao,
+            # self.hao_kan,
+            # self.quan_ming,
+            # self.ma_yi_kd,
+            # self.dftt,
+            # self.zhong_qin_kd,
+            # self.cai_dan_sp,
+            # self.kai_xin_da_ti,
+            # self.qu_jian_pan,
             self.you_xi_he_zi,
-            self.yang_ji_chang,
+            # self.yang_ji_chang,
         ]
 
         
