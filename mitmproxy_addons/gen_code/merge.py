@@ -168,72 +168,17 @@ class MergerSession():
 
 if __name__ == "__main__":
     
-    from_file = pathlib.Path('/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py')
+    from_file = pathlib.Path('/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py')
+    from_session = AppSession(from_file)
 
-    session_module = import_module(from_file)
+    to_file = pathlib.Path('/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py')
+    to_seession = AppSession(to_file)
 
-    session_id = get_data(session_module, 'session_id')
-    header_values = get_data(session_module, 'header_values')
-    fn_url = get_data(session_module, 'fn_url')
-    params_keys = get_data(session_module, 'params_keys')
-    bodys_keys = get_data(session_module, 'bodys_keys')
-    param_values = get_data(session_module, 'param_values')
-    body_values = get_data(session_module, 'body_values')
-    params_as_all = get_data(session_module, 'params_as_all')
-    bodys_as_all = get_data(session_module, 'bodys_as_all')
-    params_encry = get_data(session_module, 'params_encry')
-    bodys_encry = get_data(session_module, 'bodys_encry')
-    session_data = get_data(session_module, 'session_data')
-
-    # -----------------------------
-    remove_unnecessary_headers(header_values)
-    remove_unnecessary_and_print_missing(param_values, params_keys)
-    remove_unnecessary_and_print_missing(body_values, bodys_keys)
-    # -----------------------------
-
-    # exist = set(['1', '2', '3'])
-    # alls = set(['1', '3', '4'])
-
-    # pprint.pprint('缺失：')
-    # pprint.pprint(alls - exist)
-
-    # pprint.pprint('多余：')
-    # pprint.pprint(exist - alls)
-
-    # pprint.pprint('删除多余：')
-    # exist &= alls
-    # pprint.pprint(exist)
-
-    # pprint.pprint('增加缺失：')
-    # exist |= alls
-    # pprint.pprint(exist)
-
-    
-    # exist ^= alls
-    # pprint.pprint(exist)
-
-    # alls ^= exist
-    # pprint.pprint(alls)
-
-    # -----------------------------
+    merge_tool = MergerSession(from_session, to_seession)
+    merge_tool.merge()
+    merge_tool.save_as_file()
+    print('done!!!')
 
 
-    var_dict = dict()
-    var_dict['session_id'] = f'{session_id!r}'
 
-    var_dict['header_values'] = json.dumps(header_values, indent=2, sort_keys=True)
-    var_dict['fn_url'] = json.dumps(fn_url, indent=2, sort_keys=True)
-    var_dict['params_keys'] = json.dumps(params_keys, indent=2, sort_keys=True)
-    var_dict['bodys_keys'] = json.dumps(bodys_keys, indent=2, sort_keys=True)
-    var_dict['param_values'] = json.dumps(param_values, indent=2, sort_keys=True)
-    var_dict['body_values'] = json.dumps(body_values, indent=2, sort_keys=True)
-    var_dict['params_as_all'] = json.dumps(params_as_all, indent=2, sort_keys=True)
-    var_dict['bodys_as_all'] = json.dumps(bodys_as_all, indent=2, sort_keys=True)
-    var_dict['params_encry'] = json.dumps(params_encry, indent=2, sort_keys=True)
-    var_dict['bodys_encry'] = json.dumps(bodys_encry, indent=2, sort_keys=True)
-
-
-    tfile = f'session_xxx.j2.py'
-    gfile = from_file.parent/f'session_{session_id}_format.py' 
-    gen_file_from_jinja2(tfile, gfile, seq=var_dict)
     pass
