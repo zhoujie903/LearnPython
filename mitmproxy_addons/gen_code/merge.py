@@ -121,7 +121,12 @@ class AppSession():
         self.session_data = get_data(self.session_module, 'session_data')
         pass
 
-    def save_as_file(self, name):
+    def format(self):
+        remove_unnecessary_headers(self.header_values)
+        remove_unnecessary_and_print_missing(self.param_values, self.params_keys)
+        remove_unnecessary_and_print_missing(self.body_values, self.bodys_keys)
+
+    def save_as_file(self, name='', inplace=False):
         var_dict = dict()
         var_dict['session_id'] = f'{self.session_id!r}'
 
@@ -138,7 +143,10 @@ class AppSession():
 
 
         tfile = f'session_xxx.j2.py'
-        gfile = self.file.parent/f'session_{self.session_id}_merge.py' 
+        if inplace:
+            gfile = self.file
+        else:
+            gfile = self.file.parent/f'session_{self.session_id}_{name}.py' 
         gen_file_from_jinja2(tfile, gfile, seq=var_dict)
         pass
 
@@ -150,8 +158,8 @@ class MergerSession():
     def merge(self):
         self.add_missing()
 
-    def save_as_file(self):
-        self.to_seession.save_as_file('')
+    def save_as_file(self, inplace=False):
+        self.to_seession.save_as_file('merge', inplace=inplace)
 
     def add_missing(self):
         for k in AppSession.keys:
@@ -165,13 +173,39 @@ class MergerSession():
             add_missing_level2(from_v, to_v)
 
 
+def main_merge_all(api_dir: str, dev_dir: str):
+    api_dir = pathlib.Path(api_dir)
+    dev_dir = pathlib.Path(dev_dir)
+
+    r = re.compile(r'session_[a-zA-Z]+\.py')
+    for item in sorted(api_dir.glob(r'*/session_huawei.py')):
+        if r.match(item.name):
+            part_path = item.relative_to(api_dir)
+            to_file: pathlib.Path = dev_dir / part_path
+            if to_file.exists():
+                print(part_path)
+                from_session = AppSession(item)
+                to_seession = AppSession(to_file)
+
+                merge_tool = MergerSession(from_session, to_seession)
+                merge_tool.merge()
+                merge_tool.save_as_file() 
+
+
 
 if __name__ == "__main__":
-    
-    from_file = pathlib.Path('/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py')
+    api_dir = '/Users/zhoujie/Desktop/api'
+    dev_dir = '/Users/zhoujie/Desktop/dev'
+    main_merge_all(api_dir, dev_dir)
+    exit()
+
+    file_name = 'session_huawei.py' 
+    from_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/yang-ji-chang/{file_name}')
+    from_file = pathlib.Path(f'/Users/zhoujie/Desktop/api/cai-dan-sp/session_huawei.py')
     from_session = AppSession(from_file)
 
-    to_file = pathlib.Path('/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py')
+    to_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/yang-ji-chang/{file_name}')
+    to_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/cai-dan-sp/session_huawei.py')
     to_seession = AppSession(to_file)
 
     merge_tool = MergerSession(from_session, to_seession)

@@ -56,7 +56,7 @@ class Api(object):
         self.content_type = content_type
 
     def __str__(self):
-        return f'Api(url={self.url})'
+        return f'{self.__class__.__name__}(url={self.url})'
 
     def _str_fun_params(self):
         s = ''
@@ -378,6 +378,7 @@ class GenCode(object):
             r'/h5/task/submit',
             r'/h5/bubble/prize',
             Api('/h5/reward/prize',log='iphone免费抽'),
+            Api('/withdraw/getCoinLog',log='彩蛋视频 - 金币明细', f_p_arg={'page','page_size'}),
         ]
         self.cai_dan_sp = App(urls, 'cai-dan-sp')
 
@@ -483,6 +484,7 @@ class GenCode(object):
         self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
         self.flowfilters = [
+            self.cai_dan_sp,
             # self.toutiao,
             # self.huoshan,
             # self.bai_du_flash,
@@ -491,10 +493,9 @@ class GenCode(object):
             # self.qu_tou_tiao,
             # self.hao_kan,
             # self.quan_ming,
-            # self.ma_yi_kd,
+            self.ma_yi_kd,
             # self.dftt,
             # self.zhong_qin_kd,
-            # self.cai_dan_sp,
             # self.kai_xin_da_ti,
             # self.qu_jian_pan,
             self.you_xi_he_zi,
