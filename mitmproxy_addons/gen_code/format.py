@@ -197,10 +197,10 @@ def main_merge_all(api_dir: str, dev_dir: str):
 if __name__ == "__main__":
     
     file_name = 'session_huawei.py' 
-    from_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/yang-ji-chang/{file_name}')
+    from_file = pathlib.Path(f'/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xsy.py')
     from_session = AppSession(from_file)
 
     from_session.format()
 
-    from_session.save_as_file('format')
+    from_session.save_as_file('format', inplace=True)
     pass

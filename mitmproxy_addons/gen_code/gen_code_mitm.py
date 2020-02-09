@@ -211,6 +211,23 @@ class GenCode(object):
         ]
         self.qtt_video = App(urls, 'qtt-video')
 
+        common = [
+            # 游戏
+            Api(r'/x/user/token', log='获取g_token'),
+            Api(r'/x/open/game', log='打开游戏 - 获取ticket', f_p_arg=['app_id']),
+        ]
+
+        c_tczyqtt = [
+            # 游戏 - 填词小秀才
+            Api('/api/v1/tczyqtt/login', log='填词小秀才 - 获取open_id', f_p_arg=['ticket']),
+            Api('/api/v1/tczyqtt/sign',log='填词小秀才 - 签到'),
+            Api('/api/v1/tczyqtt/lottery',log='填词小秀才 - lottery'),
+            Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成'),
+            Api('/api/v1/tczyqtt/open_redpacket',log='填词小秀才 - 红包'),
+            Api('/api/v1/tczyqtt/draw_a_char',log='填词小秀才 - 抽字'),
+            Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币', params_as_all=True),
+        ]
+
         # 趣头条
         urls = [
             Api(r'/sign/sign', log='每日签到', params_as_all=True),
@@ -233,6 +250,7 @@ class GenCode(object):
             r'x/v1/goldpig/withdraw',  # 金猪
             r'finance/piggybank/taskReward',  # 存钱罐
 
+            # 游戏 - 种菜
             r'x/tree-game/task-list',
             r'x/tree-game/left-plant-num',
             r'x/tree-game/plant-ok',
@@ -244,18 +262,20 @@ class GenCode(object):
             r'x/tree-game/my-gift-box/receive-prize',
             # r'x/tree-game/',
 
-            r'x/open/game',
-            r'/api/Login',
             r'x/task/encourage/activity/grant',  # 游戏 - 瓜分
             r'api/loginGame',
             r'api/qttAddCoin',
-            r'api/AddCoin',  # 游戏 - 成语
 
-            #游戏 - 切菜
+            # 游戏 - 成语
+            Api(r'/api/Login', log='猜成语赚钱 - 登录'),
+            r'api/AddCoin',  
+
+            # 游戏 - 切菜
             Api(r'/x/open/coin/add', body_as_all=True),
 
-            #游戏 - 糖果
-            Api(r'/happy/protocol', body_as_all=True),
+            # 游戏 - 糖果
+            Api(r'/happy/qtt/userinfo', log='游戏 - 糖果 - 获取open_id', f_p_arg=['ticket']),
+            Api(r'/happy/protocol', log='游戏 - 糖果 - 获取金币', f_b_arg={'data'}),            
 
             Api(r'/press_trigger',log='幸运大转盘'),
 
@@ -267,7 +287,78 @@ class GenCode(object):
             Api(r'/search/searchContentNew',log='搜索内容得金币', params_as_all=True, p_as_all_limit=3),
             
         ]
+        urls.extend(common)
+        urls.extend(c_tczyqtt)
         self.qu_tou_tiao = App(urls, 'qu-tou-tiao')
+
+        # 趣种菜
+        urls = [
+            Api('/x/tree-game/user', log='趣种菜 - 获取用户信息 - s_token'),
+            Api('/x/tree-game/gapp/info', log='趣种菜 - 信息'),
+            Api('/x/tree-game/gapp/box/my/rand-reward', log='趣种菜 - 拆礼物 - 点击'),
+            Api('/x/tree-game/gapp/box/my/take-reward', log='趣种菜 - 拆礼物 - 收获'),
+            Api('/x/tree-game/gapp/add-plant', log='趣种菜 - 植物 - 种下'),
+            Api('/x/tree-game/gapp/plant-ok', log='趣种菜 - 植物 - 收获'),
+            Api('/x/tree-game/gapp/water-plants', log='趣种菜 - 植物 - 浇水'),
+            Api('/x/tree-game/gapp/remove-bug', log='趣种菜 - 植物 - 杀虫'),
+            
+            # 翻翻乐
+            Api('/x/middle/flop/info', log='趣种菜 - 翻翻乐 - 信息'),
+            Api('/x/middle/flop/start', log='趣种菜 - 翻翻乐 - 开始'),
+            '/x/middle/flop/',
+
+            # 水池
+            Api('/x/tree-game/gapp/pool/info', log='趣种菜 - 水池 - 信息'),
+            Api('/x/tree-game/gapp/pool/with-draw', log='趣种菜 - 水池 - 存到水壶'),
+            # '/x/tree-game/gapp/pool/',
+
+            # 兔子
+            '/x/tree-game/gapp/activity/rabbit/',
+            Api('/x/tree-game/gapp/activity/carrot/take-reward', log='趣种菜 - 植物 - 点我'),
+
+            # Api('/x/tree-game/'),
+        ]
+        urls.extend(common)
+        self.qu_zhong_cai = App(urls, 'qu-zhong-cai')
+
+        # 金猪游戏盒子
+        urls = [
+            # 游戏           
+            Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
+            Api('game-center-new.1sapp.com/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
+            Api('game-center-new.1sapp.com/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
+
+            # 游戏 - 成语
+            Api('qttgame.midsummer.top/api/Login', log='2-登录游戏', f_name='api_login', f_b_arg={'ticket','game_id'}),
+            Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币',f_b_arg={'AddCoinNum','session_id'}),
+            
+            # 游戏 - 切菜
+            Api('/x/open/coin/add', log='切菜 - 金币', body_as_all=True),
+            
+            # 游戏 - 糖果
+            Api(r'/happy/qtt/userinfo', log='游戏 - 糖果 - 获取open_id', f_p_arg=['ticket']),
+            Api(r'/happy/protocol', log='游戏 - 糖果 - 获取金币', f_b_arg={'data'}),
+        ]
+        urls.extend(common)
+        urls.extend(c_tczyqtt)
+        self.you_xi_he_zi = App(urls, 'you-xi-he-zi')
+
+        # 欢乐养鸡场
+        urls = [
+            Api('/x/middle/open/user/ticket', log='欢乐养鸡场 - 获取s_token'),
+            Api('/x/chicken/info', log='欢乐养鸡场 - 信息'),
+            Api('/x/chicken/task/take-award', log='达标领奖励'),
+            Api('/x/chicken/feed', log='喂饲料'),
+            Api('/x/chicken/get-fodder', log='领饲料', f_b_arg={'id','pos','again'}),
+            Api('/x/chicken/mood/use-object', log='打赏'),
+            '/x/chicken/video/accomplish',
+            # 翻翻乐
+            Api('/x/middle/flop/info', log='欢乐养鸡场 - 翻翻乐 - 信息'),
+            Api('/x/middle/flop/start', log='欢乐养鸡场 - 翻翻乐 - 开始'),
+            '/x/middle/flop/',
+        ]
+        urls.extend(common)
+        self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
         # 百度 - 好看
         urls = [
@@ -421,85 +512,23 @@ class GenCode(object):
         ]
         self.qu_jian_pan = App(urls, 'qu-jian-pan')
 
-        # 趣种菜
-        urls = [
-            Api('/x/open/game', log='趣种菜 - 打开游戏 - ticket'),
-            Api('/x/tree-game/user', log='趣种菜 - 获取用户信息 - s_token'),
-            Api('/x/tree-game/gapp/info', log='趣种菜 - 信息'),
-            Api('/x/tree-game/gapp/box/my/rand-reward', log='趣种菜 - 拆礼物 - 点击'),
-            Api('/x/tree-game/gapp/box/my/take-reward', log='趣种菜 - 拆礼物 - 收获'),
-            Api('/x/tree-game/gapp/add-plant', log='趣种菜 - 植物 - 种下'),
-            Api('/x/tree-game/gapp/plant-ok', log='趣种菜 - 植物 - 收获'),
-            Api('/x/tree-game/gapp/water-plants', log='趣种菜 - 植物 - 浇水'),
-            Api('/x/tree-game/gapp/remove-bug', log='趣种菜 - 植物 - 杀虫'),
-            # 翻翻乐
-            Api('/x/middle/flop/info', log='趣种菜 - 翻翻乐 - 信息'),
-            Api('/x/middle/flop/start', log='趣种菜 - 翻翻乐 - 开始'),
-            '/x/middle/flop/',
-            # 水池
-            Api('/x/tree-game/gapp/pool/info', log='趣种菜 - 水池 - 信息'),
-            Api('/x/tree-game/gapp/pool/with-draw', log='趣种菜 - 水池 - 存到水壶'),
-            # '/x/tree-game/gapp/pool/',
-            # 兔子
-            '/x/tree-game/gapp/activity/rabbit/',
-            Api('/x/tree-game/gapp/activity/carrot/take-reward', log='趣种菜 - 植物 - 点我'),
-        ]
-        self.qu_zhong_cai = App(urls, 'qu-zhong-cai')
-
-        # 金猪游戏盒子
-        urls = [
-            Api('/api/v1/tczyqtt/sign',log='填词小秀才 - 签到'),
-            Api('/api/v1/tczyqtt/lottery',log='填词小秀才 - lottery'),
-            Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成'),
-            Api('/api/v1/tczyqtt/open_redpacket',log='填词小秀才 - 红包'),
-            Api('/api/v1/tczyqtt/draw_a_char',log='填词小秀才 - 抽字'),
-            Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币', params_as_all=True),
-
-            Api('/x/v1/goldpig/info', log='游戏盒子 - 金猪信息'),
-            Api('/x/v1/goldpig/withdraw', log='游戏盒子 - 金猪 - 双倍收金币'),
-            Api('/x/task/v3/list',params_as_all=True),
-            Api('/x/task/v2/take-reward', log='领金币'),
-            Api('game-center-new.1sapp.com/x/open/game', log='1-打开游戏', f_name='open_game',f_p_arg=['app_id']),
-            Api('qttgame.midsummer.top/api/Login', log='2-登录游戏', f_name='api_login', f_b_arg={'ticket','game_id'}),
-            Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
-            Api('game-center-new.1sapp.com/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
-            Api('game-center-new.1sapp.com/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
-            Api('qttgame.midsummer.top/api/AddCoin', log='成语 - 金币',f_b_arg={'AddCoinNum','session_id'}),
-            Api('/x/open/coin/add', log='切菜 - 金币', body_as_all=True),
-        ]
-        self.you_xi_he_zi = App(urls, 'you-xi-he-zi')
-
-        # 欢乐养鸡场
-        urls = [
-            Api('/x/chicken/info', log='欢乐养鸡场 - 信息'),
-            Api('/x/chicken/task/take-award', log='达标领奖励'),
-            Api('/x/chicken/feed', log='喂饲料'),
-            Api('/x/chicken/get-fodder', log='领饲料', f_b_arg={'id','pos','again'}),
-            Api('/x/chicken/mood/use-object', log='打赏'),
-            '/x/chicken/video/accomplish',
-            # 翻翻乐
-            Api('/x/middle/flop/info', log='欢乐养鸡场 - 翻翻乐 - 信息'),
-            Api('/x/middle/flop/start', log='欢乐养鸡场 - 翻翻乐 - 开始'),
-            '/x/middle/flop/',
-        ]
-        self.yang_ji_chang = App(urls, 'yang-ji-chang')
 
         self.flowfilters = [
-            self.cai_dan_sp,
+            # self.cai_dan_sp,
             # self.toutiao,
             # self.huoshan,
             # self.bai_du_flash,
             # self.qtt_video,
             # self.qu_zhong_cai,
-            # self.qu_tou_tiao,
+            self.qu_tou_tiao,
             # self.hao_kan,
             # self.quan_ming,
-            self.ma_yi_kd,
+            # self.ma_yi_kd,
             # self.dftt,
             # self.zhong_qin_kd,
             # self.kai_xin_da_ti,
             # self.qu_jian_pan,
-            self.you_xi_he_zi,
+            # self.you_xi_he_zi,
             # self.yang_ji_chang,
         ]
 
@@ -545,11 +574,11 @@ class GenCode(object):
                         pass
 
             # 生成app下的 data-bodys-keys.json, data-params-keys.json, data-fn-url.json
-            gen_app_data_to_file(self.bodys_keys, 'data-bodys-keys')
-            gen_app_data_to_file(self.params_keys, 'data-params-keys')
-            gen_app_data_to_file(self.app_fn_url, 'data-fn-url')
-            gen_app_data_to_file(self.params_as_all, 'data-params_as_all')
-            gen_app_data_to_file(self.bodys_as_all, 'data-bodys_as_all')
+            # gen_app_data_to_file(self.bodys_keys, 'data-bodys-keys')
+            # gen_app_data_to_file(self.params_keys, 'data-params-keys')
+            # gen_app_data_to_file(self.app_fn_url, 'data-fn-url')
+            # gen_app_data_to_file(self.params_as_all, 'data-params_as_all')
+            # gen_app_data_to_file(self.bodys_as_all, 'data-bodys_as_all')
 
             sessions_by_app = {}
             # 生成app下的 session_xxx.py

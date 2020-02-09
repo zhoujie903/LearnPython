@@ -189,6 +189,7 @@ def genUsers():
         yield User(session_data)
 
 if __name__ == "__main__":
+    sessions = []
     for user in genUsers():
         try:
             logging.info(f"\033[1;31m{' '*20}\033[0m")
@@ -197,5 +198,8 @@ if __name__ == "__main__":
         except Exception as e:
             traceback.print_exc()    
         finally:
+            sessions.append(user.session_id)
             logging.info(f"\033[1;31m{'^'*10} {user.session_id} {'^'*10}\033[0m")
             logging.info(f"\033[1;31m{' '*20}\033[0m")
+
+    logging.info(f"共运行: \033[1;31m{sessions}\033[0m")

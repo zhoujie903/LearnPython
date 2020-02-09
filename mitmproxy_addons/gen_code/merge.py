@@ -201,14 +201,15 @@ if __name__ == "__main__":
     # exit()
 
     file_name = 'session_huawei.py' 
-    from_file = pathlib.Path(f'/Users/zhoujie/Desktop/api/cai-dan-sp/session_huawei.py')
+    from_file = pathlib.Path(f'/Users/zhoujie/Desktop/api/qu-tou-tiao/session_csh.py')
     from_session = AppSession(from_file)
 
-    to_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/cai-dan-sp/session_huawei.py')
+    to_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_csh.py')
     to_seession = AppSession(to_file)
 
     merge_tool = MergerSession(from_session, to_seession)
     merge_tool.merge()
+    # merge_tool.save_as_file(inplace=False)
     merge_tool.save_as_file(inplace=True)
     print('done!!!')
 
