@@ -178,39 +178,38 @@ def main_merge_all(api_dir: str, dev_dir: str):
     dev_dir = pathlib.Path(dev_dir)
 
     r = re.compile(r'session_[a-zA-Z]+\.py')
-    for item in sorted(api_dir.glob(r'*/session_huawei.py')):
-        if r.match(item.name):
-            part_path = item.relative_to(api_dir)
-            to_file: pathlib.Path = dev_dir / part_path
-            if to_file.exists():
-                print(part_path)
-                from_session = AppSession(item)
-                to_seession = AppSession(to_file)
+    target = api_dir.glob(r'*/session_huawei.py')
+    target = [item for item in target if r.match(item.name)] 
+    for item in sorted(target):
+        part_path = item.relative_to(api_dir)
+        to_file: pathlib.Path = dev_dir / part_path
+        if to_file.exists():
+            print(part_path)
+            from_session = AppSession(item)
+            to_seession = AppSession(to_file)
 
-                merge_tool = MergerSession(from_session, to_seession)
-                merge_tool.merge()
-                merge_tool.save_as_file() 
+            merge_tool = MergerSession(from_session, to_seession)
+            merge_tool.merge()
+            merge_tool.save_as_file() 
 
 
 
 if __name__ == "__main__":
-    api_dir = '/Users/zhoujie/Desktop/api'
-    dev_dir = '/Users/zhoujie/Desktop/dev'
-    main_merge_all(api_dir, dev_dir)
-    exit()
+    # api_dir = '/Users/zhoujie/Desktop/api'
+    # dev_dir = '/Users/zhoujie/Desktop/dev'
+    # main_merge_all(api_dir, dev_dir)
+    # exit()
 
     file_name = 'session_huawei.py' 
-    from_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/yang-ji-chang/{file_name}')
     from_file = pathlib.Path(f'/Users/zhoujie/Desktop/api/cai-dan-sp/session_huawei.py')
     from_session = AppSession(from_file)
 
-    to_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/yang-ji-chang/{file_name}')
     to_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/cai-dan-sp/session_huawei.py')
     to_seession = AppSession(to_file)
 
     merge_tool = MergerSession(from_session, to_seession)
     merge_tool.merge()
-    merge_tool.save_as_file()
+    merge_tool.save_as_file(inplace=True)
     print('done!!!')
 
 

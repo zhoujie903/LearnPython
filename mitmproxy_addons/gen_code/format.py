@@ -173,23 +173,24 @@ class MergerSession():
             add_missing_level2(from_v, to_v)
 
 
-def main_merge_all(api_dir, dev_dir):
+def main_merge_all(api_dir: str, dev_dir: str):
     api_dir = pathlib.Path(api_dir)
     dev_dir = pathlib.Path(dev_dir)
 
     r = re.compile(r'session_[a-zA-Z]+\.py')
-    for item in sorted(api_dir.glob(r'*/session_huawei.py')):
-        if r.match(item.name):
-            part_path = item.relative_to(api_dir)
-            to_file: pathlib.Path = dev_dir / part_path
-            if to_file.exists():
-                print(part_path)
-                from_session = AppSession(item)
-                to_seession = AppSession(to_file)
+    target = api_dir.glob(r'*/session_huawei.py')
+    target = [item for item in target if r.match(item.name)] 
+    for item in sorted(target):
+        part_path = item.relative_to(api_dir)
+        to_file: pathlib.Path = dev_dir / part_path
+        if to_file.exists():
+            print(part_path)
+            from_session = AppSession(item)
+            to_seession = AppSession(to_file)
 
-                merge_tool = MergerSession(from_session, to_seession)
-                merge_tool.merge()
-                merge_tool.save_as_file() 
+            merge_tool = MergerSession(from_session, to_seession)
+            merge_tool.merge()
+            merge_tool.save_as_file() 
 
 
 

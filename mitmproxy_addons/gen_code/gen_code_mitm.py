@@ -25,7 +25,7 @@ mitmdump --flow-detail 0 --set session='huawei' -s "/Users/zhoujie/Documents/zho
 
 
 class Api(object):
-    def __init__(self, url, f_name='', log='', params_as_all=False, p_as_all_limit=50, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: set=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
+    def __init__(self, url, f_name='', log='', params_as_all=False, p_as_all_limit=50, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: list=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
         self.url = url
         self.url_path = ''
         self.f_name = f_name
@@ -36,8 +36,8 @@ class Api(object):
         self.f_p_enc = f_p_enc
         if f_p_enc:
             if self.f_p_arg == None:
-                self.f_p_arg = set()
-            self.f_p_arg.update(f_p_enc)
+                self.f_p_arg = list()
+            self.f_p_arg.extend(f_p_enc)
 
         self.f_b_arg = f_b_arg
         self.f_b_enc = f_b_enc
@@ -260,10 +260,10 @@ class GenCode(object):
             Api(r'/press_trigger',log='幸运大转盘'),
 
             # 金猪
-            Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg={'tag'}),
+            Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg=['tag']),
             r'/actcenter/piggy/',
 
-            Api(r'/member/getMemberIncome',log='收益详情', f_p_arg={'page','last_time'}),
+            Api(r'/member/getMemberIncome',log='收益详情', f_p_arg=['page','last_time']),
             Api(r'/search/searchContentNew',log='搜索内容得金币', params_as_all=True, p_as_all_limit=3),
             
         ]
@@ -277,7 +277,7 @@ class GenCode(object):
             '/activity/acad/bubblead',
             Api(r'/activity/tasks/active', params_as_all=True, f_p_kwarg={'productid':1, 'tid':404}),
             Api(r'activity/acad/rewardad', params_as_all=True, f_p_kwarg={'productid':1, 'tid':404} ),  # 看视频
-            Api(r'api/task/1/task/379/complete', f_p_arg={'rewardVideoPkg'}), # 看视频
+            Api(r'api/task/1/task/379/complete', f_p_arg=['rewardVideoPkg']), # 看视频
             '/activity/tasks/taskreward',
         ]
         self.hao_kan = App(urls, 'hao-kan')
@@ -287,7 +287,7 @@ class GenCode(object):
             '/activity/acad/bubblead',
             Api(r'/activity/tasks/active', f_p_kwarg={'productid':2, 'tid':404}),
             Api(r'/activity/acad/rewardad', f_p_kwarg={'productid':2, 'tid':404} ),  # 看视频
-            Api(r'/api/task/1/task/381/complete', f_p_arg={'rewardVideoPkg'}), # 看视频
+            Api(r'/api/task/1/task/381/complete', f_p_arg=['rewardVideoPkg']), # 看视频
             '/activity/tasks/taskreward',
         ]
         self.bai_du_flash = App(urls, 'bai-du-flash')
@@ -298,7 +298,7 @@ class GenCode(object):
             '/activity/acad/bubblead',
             Api(r'/activity/tasks/active', f_p_kwarg={'productid':4, 'tid':418}),
             Api(r'/activity/acad/rewardad', f_p_kwarg={'productid':4, 'tid':418} ),  # 看视频
-            Api(r'/api/task/1/task/380/complete', f_p_arg={'rewardVideoPkg'}), # 看视频
+            Api(r'/api/task/1/task/380/complete', f_p_arg=['rewardVideoPkg']), # 看视频
             '/activity/tasks/taskreward',
         ]
         self.quan_ming = App(urls, 'quan-ming')
@@ -374,11 +374,12 @@ class GenCode(object):
         # 彩蛋视频
         urls = [
             Api(r'task/timer_submit',log='看视频 - 得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'}),
-            Api(r'/h5/task/submit',log='日常福利 - 观看小视频'),
-            r'/h5/task/submit',
+            Api(r'/h5/task/submit',log='日常福利 - 观看小视频', body_as_all=True),
+            Api(r'/h5/reduce/reward',log='瓜分他人金币', body_as_all=True),
             r'/h5/bubble/prize',
             Api('/h5/reward/prize',log='iphone免费抽'),
-            Api('/withdraw/getCoinLog',log='彩蛋视频 - 金币明细', f_p_arg={'page','page_size'}),
+            Api('/qapptoken', log='获取access_token'),
+            Api('/withdraw/getCoinLog',log='彩蛋视频 - 金币明细', f_p_arg=['page','page_size']),
         ]
         self.cai_dan_sp = App(urls, 'cai-dan-sp')
 
@@ -458,7 +459,7 @@ class GenCode(object):
             Api('/x/v1/goldpig/withdraw', log='游戏盒子 - 金猪 - 双倍收金币'),
             Api('/x/task/v3/list',params_as_all=True),
             Api('/x/task/v2/take-reward', log='领金币'),
-            Api('game-center-new.1sapp.com/x/open/game', log='1-打开游戏', f_name='open_game',f_p_arg={'app_id'}),
+            Api('game-center-new.1sapp.com/x/open/game', log='1-打开游戏', f_name='open_game',f_p_arg=['app_id']),
             Api('qttgame.midsummer.top/api/Login', log='2-登录游戏', f_name='api_login', f_b_arg={'ticket','game_id'}),
             Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
             Api('game-center-new.1sapp.com/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
@@ -1011,11 +1012,11 @@ if __name__ == "__main__":
     test_jinja()
     
 
-    api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'})#时段签到
+    api =Api(r'/mission/intPointReward',params_as_all=False, body_as_all=False,f_p_arg=['p1','p2'], f_b_arg={'b1', 'b2'})#时段签到
     print(api.str_fun_params())
-    api =Api(r'/mission/intPointReward',f_name='hourly_sign', log='时段签到', params_as_all=False, body_as_all=False,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
+    api =Api(r'/mission/intPointReward',f_name='hourly_sign', log='时段签到', params_as_all=False, body_as_all=False,f_p_arg=['p1','p2'], f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
     print(api.str_fun_params())
-    # api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True,f_p_arg={'p1','p2'}, f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
+    # api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True,f_p_arg=['p1','p2'], f_b_arg={'b1', 'b2'},f_p_kwarg={"pkw1":1, "pkw2":'2'})#时段签到
     print(api.str_fun_params())
     api =Api(r'/mission/intPointReward',params_as_all=True, body_as_all=True)#时段签到
     print(api.str_fun_params())
