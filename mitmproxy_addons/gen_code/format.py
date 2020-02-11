@@ -106,19 +106,20 @@ class AppSession():
 
     def __init__(self, path):
         self.file = path
-        self.session_module = import_module(path)
-        self.session_id = get_data(self.session_module, 'session_id')
-        self.header_values = get_data(self.session_module, 'header_values')
-        self.fn_url = get_data(self.session_module, 'fn_url')
-        self.params_keys = get_data(self.session_module, 'params_keys')
-        self.bodys_keys = get_data(self.session_module, 'bodys_keys')
-        self.param_values = get_data(self.session_module, 'param_values')
-        self.body_values = get_data(self.session_module, 'body_values')
-        self.params_as_all = get_data(self.session_module, 'params_as_all')
-        self.bodys_as_all = get_data(self.session_module, 'bodys_as_all')
-        self.params_encry = get_data(self.session_module, 'params_encry')
-        self.bodys_encry = get_data(self.session_module, 'bodys_encry')
-        self.session_data = get_data(self.session_module, 'session_data')
+        if self.file.exists():
+            self.session_module = import_module(path)
+            self.session_id = get_data(self.session_module, 'session_id')
+            self.header_values = get_data(self.session_module, 'header_values')
+            self.fn_url = get_data(self.session_module, 'fn_url')
+            self.params_keys = get_data(self.session_module, 'params_keys')
+            self.bodys_keys = get_data(self.session_module, 'bodys_keys')
+            self.param_values = get_data(self.session_module, 'param_values')
+            self.body_values = get_data(self.session_module, 'body_values')
+            self.params_as_all = get_data(self.session_module, 'params_as_all')
+            self.bodys_as_all = get_data(self.session_module, 'bodys_as_all')
+            self.params_encry = get_data(self.session_module, 'params_encry')
+            self.bodys_encry = get_data(self.session_module, 'bodys_encry')
+            self.session_data = get_data(self.session_module, 'session_data')
         pass
 
     def format(self):
@@ -156,7 +157,13 @@ class MergerSession():
         self.to_seession = to_seession
 
     def merge(self):
-        self.add_missing()
+        if self.to_seession.file.exists():
+            self.add_missing()
+        else:
+            self.to_seession = AppSession(self.from_session.file)
+            self.to_seession.file = pathlib.Path(re.sub('/api/', '/dev/', str(self.from_session.file)))
+            pass
+
 
     def save_as_file(self, inplace=False):
         self.to_seession.save_as_file('merge', inplace=inplace)
@@ -192,7 +199,22 @@ def main_merge_all(api_dir: str, dev_dir: str):
             merge_tool.merge()
             merge_tool.save_as_file() 
 
+def helper_gen_from_and_to_appsessions(from_or_to_path: str):
+    if '/api/' in from_or_to_path:
+        fp = from_or_to_path
+        tp = re.sub('/api/', '/dev/', from_or_to_path)
+    else:
+        tp = from_or_to_path    
+        fp = re.sub('/dev/', '/api/', from_or_to_path)
+    
+        
+    from_file = pathlib.Path(fp)
+    from_session = AppSession(from_file)
 
+    to_file = pathlib.Path(tp)
+    to_seession = AppSession(to_file)    
+
+    return from_session, to_seession
 
 if __name__ == "__main__":
     

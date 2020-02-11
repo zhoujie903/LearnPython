@@ -238,7 +238,8 @@ class GenCode(object):
             r'/newuserline/activity/signRewardNew',  # 挑战签到
             r'/mission/receiveTreasureBox',
             Api(r'/content/readV2',params_as_all=True),
-            Api(r'/app/re/taskCenter/info/v1/get',params_as_all=True, p_as_all_limit=1),
+            Api(r'/app/re/taskCenter/info/v1/get', log='任务信息', params_as_all=True, p_as_all_limit=1),
+            Api(r'/app/user/info/personal/v1/get', log='用户信息', params_as_all=True, p_as_all_limit=1),
             Api(r'/coin/service', body_as_all=True),
             r'readtimer/report',
             # Api(r'motivateapp/mtvcallback', params_as_all=True),
