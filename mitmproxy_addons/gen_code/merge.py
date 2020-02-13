@@ -80,6 +80,14 @@ def add_missing_level2(from_values, to_values):
     common = p_keys_all & p_keys_exist
     for k in common:
         add_missing(from_values[k], to_values[k])
+
+def update_values_level2(from_values, to_values):
+    p_keys_exist = set(from_values.keys())
+    p_keys_all = set(to_values.keys())    
+
+    common = p_keys_all & p_keys_exist
+    for k in common:
+        to_values[k].update(from_values[k])
     
 
 env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
@@ -102,6 +110,22 @@ class AppSession():
     keys_level2 = [
         'params_keys', 'bodys_keys', 
         'params_encry', 'bodys_encry', 
+    ]
+
+    keys_u_level2 = [
+        'params_keys', 'bodys_keys',  
+    ]
+
+    keys_u_level1 = [
+        'header_values', 'fn_url', 'param_values', 'body_values',        
+    ]
+
+    keys_a_diff = [
+        'fn_url', 'params_keys', 'bodys_keys',
+    ]
+
+    keys_a_level2_diff = [
+        'params_keys', 'bodys_keys',
     ]
 
     def __init__(self, path):
@@ -156,28 +180,56 @@ class MergerSession():
         self.from_session = from_session
         self.to_seession = to_seession
 
-    def merge(self):
-        if self.to_seession.file.exists():
+    def merge(self, o=('a','u')):
+        '''
+        cuda:create, update, delete, append
+        '''
+        if 'u' in o:
+            self.update_values()
+
+        if 'a' in o:
             self.add_missing()
-        else:
-            self.to_seession = AppSession(self.from_session.file)
-            self.to_seession.file = pathlib.Path(re.sub('/api/', '/dev/', str(self.from_session.file)))
-            pass
+
 
 
     def save_as_file(self, inplace=False):
         self.to_seession.save_as_file('merge', inplace=inplace)
 
     def add_missing(self):
-        for k in AppSession.keys:
+        if self.to_seession.file.exists():
+            if self.to_seession.file.name == self.from_session.file.name:
+                level_1_keys, level_2_keys = AppSession.keys, AppSession.keys_level2
+            else:
+                level_1_keys, level_2_keys = AppSession.keys_a_diff, AppSession.keys_a_level2_diff
+
+            self._add_missing(level_1_keys, level_2_keys)
+        else:
+            self.to_seession = AppSession(self.from_session.file)
+            self.to_seession.file = pathlib.Path(re.sub('/api/', '/dev/', str(self.from_session.file)))
+            pass
+
+    def _add_missing(self, level_1_keys, level_2_keys):
+        for k in level_1_keys:
             from_v = getattr(self.from_session, k)
             to_v = getattr(self.to_seession, k)
             add_missing(from_v, to_v)
 
-        for k in AppSession.keys_level2:
+        for k in level_2_keys:
             from_v = getattr(self.from_session, k)
             to_v = getattr(self.to_seession, k)
             add_missing_level2(from_v, to_v)
+
+    def update_values(self):
+        for k in AppSession.keys_u_level1:
+            from_v = getattr(self.from_session, k)
+            to_v = getattr(self.to_seession, k)
+            to_v.update(from_v)
+
+        for k in AppSession.keys_u_level2:
+            from_v = getattr(self.from_session, k)
+            to_v = getattr(self.to_seession, k)
+            update_values_level2(from_v, to_v)
+            
 
 
 def main_merge_all(api_dir: str, dev_dir: str):
@@ -199,6 +251,38 @@ def main_merge_all(api_dir: str, dev_dir: str):
             merge_tool.merge()
             merge_tool.save_as_file() 
 
+
+def main_merge_to_other_session(from_path: str):
+
+    from_file = pathlib.Path(from_path)
+    name = from_file.name 
+
+    if '/dev/' in from_path:
+        folder = from_file.parent
+
+    if '/api/' in from_path:
+        temp = re.sub('/api/', '/dev/', from_path)
+        folder = pathlib.Path(temp).parent 
+
+    print(folder, name)
+
+    from_session = AppSession(from_file)
+
+    r = re.compile(r'session_[a-zA-Z]+\.py')
+    target = folder.glob(r'session_*.py')
+    target = [item for item in target if r.match(item.name)] 
+    for item in sorted(target):
+        # print(item)
+        if not from_file.samefile(item):
+            to_file = item
+            print(f'{name} -> {item.name}')        
+            to_seession = AppSession(to_file)
+
+            merge_tool = MergerSession(from_session, to_seession)
+            merge_tool.merge(o=('a'))
+            merge_tool.save_as_file(inplace=True)    
+
+
 def helper_gen_from_and_to_appsessions(from_or_to_path: str):
     if '/api/' in from_or_to_path:
         fp = from_or_to_path
@@ -216,7 +300,16 @@ def helper_gen_from_and_to_appsessions(from_or_to_path: str):
 
     return from_session, to_seession
 
+
+
 if __name__ == "__main__":
+
+    # 场景：不同session之间合并
+    from_path = '/Users/zhoujie/Desktop/test/api/session_huawei.py' 
+    main_merge_to_other_session(from_path)
+    exit()
+
+    # 场景：全部合并
     # api_dir = '/Users/zhoujie/Desktop/api'
     # dev_dir = '/Users/zhoujie/Desktop/dev'
     # main_merge_all(api_dir, dev_dir)
@@ -230,12 +323,12 @@ if __name__ == "__main__":
     # to_seession = AppSession(to_file)
     # merge_tool = MergerSession(*sessions)
 
-    sessions = helper_gen_from_and_to_appsessions('/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xxxx.py')
+    sessions = helper_gen_from_and_to_appsessions('/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py')
 
     merge_tool = MergerSession(*sessions)
     merge_tool.merge()
-    # merge_tool.save_as_file(inplace=False)
-    merge_tool.save_as_file(inplace=True)
+    merge_tool.save_as_file(inplace=False)
+    # merge_tool.save_as_file(inplace=True)
     print('done!!!')
 
 
