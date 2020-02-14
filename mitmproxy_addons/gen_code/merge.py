@@ -152,6 +152,34 @@ class AppSession():
         remove_unnecessary_and_print_missing(self.param_values, self.params_keys)
         remove_unnecessary_and_print_missing(self.body_values, self.bodys_keys)
 
+    def delelte(self):
+        '''
+        fn_url中没有对应的URL时，删除params_keys, bodys_keys中对应的值
+        '''
+        u = {}
+        for _, url in self.fn_url.items():
+            o = urlparse(url)
+            s = u.setdefault(o.netloc, set())
+            s.add(o.path)
+
+        uks = set(u.keys())
+        for field in [self.params_keys, self.bodys_keys]:
+            fks = set(field.keys())
+
+            no_need_keys = fks - uks
+            for k in no_need_keys:
+                del field[k]
+
+            common = fks & uks
+            for netloc in common:
+                pks = set(field[netloc].keys())
+                hks = set(u[netloc]) 
+                no_need_keys = pks - hks
+                for k in no_need_keys:
+                    del field[netloc][k]   
+
+
+
     def save_as_file(self, name='', inplace=False):
         var_dict = dict()
         var_dict['session_id'] = f'{self.session_id!r}'
@@ -235,6 +263,10 @@ class MergerSession():
 
 
 def main_merge_all(api_dir: str, dev_dir: str):
+    '''
+    场景：目录级内所有对应session合并
+    '''
+
     api_dir = pathlib.Path(api_dir)
     dev_dir = pathlib.Path(dev_dir)
 
@@ -254,7 +286,29 @@ def main_merge_all(api_dir: str, dev_dir: str):
             merge_tool.save_as_file() 
 
 
+def main_merge_new_added_apis(from_path: str):
+    '''
+    场景：有新增的接口录入时
+    操作：1. 合并到同名的session, 2. 并合并非同名session
+    '''
+
+    # 1：同名session从api同步到dev
+    sessions = helper_gen_from_and_to_appsessions(from_path)
+
+    merge_tool = MergerSession(*sessions)
+    merge_tool.merge()
+    merge_tool.save_as_file(inplace=True)
+
+
+    # 2. 并合并非同名session并
+    main_merge_to_other_session(from_path)
+    pass
+
 def main_merge_to_other_session(from_path: str):
+    '''
+    场景：从一个session合并到其它session
+    操作：只合并键，比如urls,params_keys,body_keys，不能合并值 
+    '''
 
     from_file = pathlib.Path(from_path)
     name = from_file.name 
@@ -273,17 +327,14 @@ def main_merge_to_other_session(from_path: str):
     r = re.compile(r'session_[a-zA-Z]+\.py')
     target = folder.glob(r'session_*.py')
     target = [item for item in target if r.match(item.name)] 
+    target = [item for item in target if not from_file.samefile(item)] 
     for item in sorted(target):
-        # print(item)
-        if not from_file.samefile(item):
-            to_file = item
-            print(f'{name} -> {item.name}')        
-            to_seession = AppSession(to_file)
+        print(f'{name} -> {item.name}')        
+        to_seession = AppSession(item)
 
-            merge_tool = MergerSession(from_session, to_seession)
-            merge_tool.merge(o=('a'))
-            # merge_tool.save_as_file(inplace=False)    
-            merge_tool.save_as_file(inplace=True)    
+        merge_tool = MergerSession(from_session, to_seession)
+        merge_tool.merge(o=('a'))
+        merge_tool.save_as_file(inplace=True)    
 
 
 def helper_gen_from_and_to_appsessions(from_or_to_path: str):
@@ -307,10 +358,13 @@ def helper_gen_from_and_to_appsessions(from_or_to_path: str):
 
 if __name__ == "__main__":
 
-    # 场景：不同session之间合并
-    from_path = '/Users/zhoujie/Desktop/dev/you-xi-he-zi/session_huawei.py' 
-    main_merge_to_other_session(from_path)
+    # 场景：删除
+    from_path = pathlib.Path('/Users/zhoujie/Documents/heroku/jason903/auto_app/qu-tou-tiao/session_xsy.py') 
+    from_session = AppSession(from_path)
+    from_session.delelte()
+    from_session.save_as_file()
     exit()
+
 
     # 场景：全部合并
     # api_dir = '/Users/zhoujie/Desktop/api'
@@ -326,12 +380,20 @@ if __name__ == "__main__":
     # to_seession = AppSession(to_file)
     # merge_tool = MergerSession(*sessions)
 
-    sessions = helper_gen_from_and_to_appsessions('/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py')
+    from_path = '/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py'
+
+    # 场景：同名session从api同步到dev
+    sessions = helper_gen_from_and_to_appsessions(from_path)
 
     merge_tool = MergerSession(*sessions)
     merge_tool.merge()
-    merge_tool.save_as_file(inplace=False)
-    # merge_tool.save_as_file(inplace=True)
+    merge_tool.save_as_file(inplace=True)
+
+
+    # 场景：不同session之间合并
+    # from_path = '/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_huawei.py' 
+    main_merge_to_other_session(from_path)
+
     print('done!!!')
 
 

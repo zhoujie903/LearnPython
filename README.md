@@ -28,6 +28,7 @@
 | --- | --- | --- |
 | weibo_pc.py | 登录PC端的微博, 获取登录用户的粉丝、关注的人、朋友[互相关注] |  |
 | qiandao.py | 趣消除App地自动化 |  |
+| liu-jiao-hero.py | 六角英雄App / 泡泡消消消App |  |
 | dev-toutiao.py | 今日头条极速版App地自动化 |  |
 | dftoutiao.py | 东方头条App地自动化 |  |
 
@@ -39,6 +40,7 @@ mitmproxy的一些addons
 | 代码 | 说明 |  |
 | --- | --- | --- |
 | chengyu目录 | [趣消除App自动化 - 成语消消乐-半自动化](https://www.jianshu.com/p/508c4169272d) |  |
+| gen_code目录 | [mitmproxy的应用-代码生成](https://www.jianshu.com/p/ea4e1418647f) |  |
 
 
 

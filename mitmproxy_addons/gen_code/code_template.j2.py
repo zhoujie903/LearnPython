@@ -73,7 +73,7 @@ class User(object):
                     p(j)
                 else:
                     self.api_errors[path] = j
-                    p(f"\033[1;31m {j} \033[0m")
+                    logging.error(f"\033[1;31m {j} \033[0m")
         except :
             p(result) 
         print()
