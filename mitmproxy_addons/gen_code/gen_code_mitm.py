@@ -25,12 +25,13 @@ mitmdump --flow-detail 0 --set session='huawei' -s "/Users/zhoujie/Documents/zho
 
 
 class Api(object):
-    def __init__(self, url, f_name='', log='', params_as_all=False, p_as_all_limit=50, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: list=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
+    def __init__(self, url, f_name='', log='', api_ok={}, params_as_all=False, p_as_all_limit=50, body_as_all=False, f_p_enc: set=None, f_b_enc: set=None, f_p_arg: list=None, f_p_kwarg: dict=None, f_b_arg: set=None, f_b_kwarg: dict=None, content_type=''):
         self.url = url
         self.url_path = ''
         self.f_name = f_name
         self._name = ''
         self.log = log
+        self.api_ok = api_ok
 
         self.f_p_arg = f_p_arg
         self.f_p_enc = f_p_enc
@@ -99,13 +100,17 @@ class Api(object):
 
 
 class App(object):
-    def __init__(self, urls, app_name=''):
+    def __init__(self, urls, app_name='', api_ok={'code':0}):
         self.app_name = app_name
+        self.api_ok = dict()
+        self.api_ok['app_ok'] = api_ok
         self.flts = dict()
         for u in urls:
             url = u
             if isinstance(u, Api):
                 url = u.url
+                if len(u.api_ok):                
+                    self.api_ok[url] = u.api_ok
             flt = flowfilter.parse(url)
             self.flts[flt] = u
         self.current_api = None
@@ -219,37 +224,38 @@ class GenCode(object):
 
         c_tczyqtt = [
             # 游戏 - 填词小秀才
-            Api('/api/v1/tczyqtt/login', log='填词小秀才 - 获取open_id', f_p_arg=['ticket']),
+            Api('/api/v1/tczyqtt/login', log='填词小秀才 - 获取open_id', f_p_arg=['ticket'], api_ok={'code':[1]}),
             Api('/api/v1/tczyqtt/sign',log='填词小秀才 - 签到'),
-            Api('/api/v1/tczyqtt/lottery',log='填词小秀才 - lottery'),
-            Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成'),
-            Api('/api/v1/tczyqtt/open_redpacket',log='填词小秀才 - 红包'),
-            Api('/api/v1/tczyqtt/draw_a_char',log='填词小秀才 - 抽字'),
+            Api('/api/v1/tczyqtt/lottery',log='填词小秀才 - lottery', api_ok={'code':[1]}),
+            Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成', f_p_arg=['activity_id'], api_ok={'code':[1]}),
+            Api('/api/v1/tczyqtt/open_redpacket',log='填词小秀才 - 红包', api_ok={'code':[1]}),
+            Api('/api/v1/tczyqtt/draw_a_char',log='填词小秀才 - 抽字', api_ok={'code':[1]}),
             Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币', params_as_all=True),
+            '/api/v1/tczyqtt/'
         ]
 
         # 趣头条
         urls = [
             Api(r'/sign/sign', log='每日签到', params_as_all=True),
-            Api(r'/mission/intPointReward', log='时段签到', params_as_all=True),
+            Api(r'/mission/intPointReward', log='时段签到', params_as_all=True, api_ok={'code':[-312]}),
             Api(r'/taskcenter/getReward', log='任务完成 - 领金币', params_as_all=True),
             r'/x/game-center/user/sign-in',
             r'/x/game-center/user/last-sign-coin',
             r'/newuserline/activity/signRewardNew',  # 挑战签到
-            r'/mission/receiveTreasureBox',
+            Api(r'/mission/receiveTreasureBox', log='趣头条-开宝箱', api_ok={'code':[-1710]}),
             Api(r'/content/readV2',params_as_all=True),
             Api(r'/app/re/taskCenter/info/v1/get', log='任务信息', params_as_all=True, p_as_all_limit=1),
             Api(r'/app/user/info/personal/v1/get', log='用户信息', params_as_all=True, p_as_all_limit=1),
             Api(r'/coin/service', body_as_all=True),
             r'readtimer/report',
             # Api(r'motivateapp/mtvcallback', params_as_all=True),
-            Api(r'x/feed/getReward', log='信息流-惊喜红包', params_as_all=True),
+            Api(r'/x/feed/getReward', log='信息流-惊喜红包', params_as_all=True, api_ok={'code':[-308]}),
             Api(r'/lotteryGame/status', log='天天乐-信息'),
             Api(r'/tiantianle/video', log='天天乐-增加机会', params_as_all=True),
             Api(r'/lotteryGame/order', log='天天乐-投注'),
             r'x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
             r'x/v1/goldpig/withdraw',  # 金猪
-            r'finance/piggybank/taskReward',  # 存钱罐
+            Api(r'finance/piggybank/taskReward',api_ok={'code':-2004}),  # 存钱罐
 
             # 游戏 - 种菜
             r'x/tree-game/task-list',
@@ -325,6 +331,7 @@ class GenCode(object):
         # 金猪游戏盒子
         urls = [
             # 游戏           
+            Api('/x/task/v3/list', log='游戏任务列表', params_as_all=True, p_as_all_limit=1),
             Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
             Api('game-center-new.1sapp.com/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
             Api('game-center-new.1sapp.com/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
@@ -357,9 +364,31 @@ class GenCode(object):
             Api('/x/middle/flop/info', log='欢乐养鸡场 - 翻翻乐 - 信息'),
             Api('/x/middle/flop/start', log='欢乐养鸡场 - 翻翻乐 - 开始'),
             '/x/middle/flop/',
+
+            # 砸蛋
+            Api('/x/chicken/add-hit-count', log='欢乐养鸡场 - 增加砸蛋机会'),
+            Api('/x/chicken/hit-egg/award', log='欢乐养鸡场 - 砸蛋 - 领奖', f_b_arg={'again'}),
+
+            '/x/chicken/'
         ]
         urls.extend(common)
         self.yang_ji_chang = App(urls, 'yang-ji-chang')
+
+        # 填词小秀才
+        urls = [
+            Api(r'/x/user/token', log='获取g_token', params_as_all=True),
+            Api(r'/x/open/game', log='打开游戏 - 获取ticket', params_as_all=True),
+            Api('/api/v1/tczyapp/login', log='填词小秀才 - 获取open_id', f_p_arg=['ticket']),
+            Api('/api/v1/tczyapp/sign',log='填词小秀才 - 签到'),
+            Api('/api/v1/tczyapp/lottery',log='填词小秀才 - lottery'),
+            Api('/api/v1/tczyapp/get_reward',log='填词小秀才 - 任务完成', f_p_arg=['activity_id']),
+            Api('/api/v1/tczyapp/open_redpacket',log='填词小秀才 - 红包'),
+            Api('/api/v1/tczyapp/draw_a_char',log='填词小秀才 - 抽字'),
+            Api('/api/v1/tczyapp/add_coin',log='填词小秀才 - 过关领金币', params_as_all=True),
+            '/api/v1/tczyapp/'
+        ]
+        urls.extend(common)
+        self.tian_chi_xiao_xiu_cai = App(urls, 'tian-chi-xiao-xiu-cai')
 
         # 百度 - 好看
         urls = [
@@ -472,6 +501,8 @@ class GenCode(object):
             Api('/h5/reward/prize',log='iphone免费抽'),
             Api('/qapptoken', log='获取access_token'),
             Api('/withdraw/getCoinLog',log='彩蛋视频 - 金币明细', f_p_arg=['page','page_size']),
+            Api('/withdraw/order/listApp',log='彩蛋视频 - 提现列表'),
+            Api('/withdraw/order/create',log='彩蛋视频 - 提现', f_b_arg=['sku_id']),
         ]
         self.cai_dan_sp = App(urls, 'cai-dan-sp')
 
@@ -521,7 +552,8 @@ class GenCode(object):
             # self.bai_du_flash,
             # self.qtt_video,
             # self.qu_zhong_cai,
-            self.qu_tou_tiao,
+            # self.qu_tou_tiao,
+            # self.tian_chi_xiao_xiu_cai,
             # self.hao_kan,
             # self.quan_ming,
             # self.ma_yi_kd,
@@ -529,7 +561,7 @@ class GenCode(object):
             # self.zhong_qin_kd,
             # self.kai_xin_da_ti,
             # self.qu_jian_pan,
-            # self.you_xi_he_zi,
+            self.you_xi_he_zi,
             # self.yang_ji_chang,
         ]
 
@@ -591,12 +623,18 @@ class GenCode(object):
                 })
 
                 hosts = self.headers[device][app]
-                for h, d in hosts.items():
+                for _, d in hosts.items():
                     self._delete_some_headers(d)
 
 
                 var_dict = dict()
                 var_dict['session_id'] = f'{device!r}'
+
+                # 设置var_dict['api_ok']
+                for item in self.flowfilters:
+                    if item.app_name == app:
+                        api_ok = item.api_ok
+                        var_dict['api_ok'] = json.dumps(api_ok, indent=2, sort_keys=True) 
 
                 def import_module(app, device):
                     import importlib.util
@@ -699,6 +737,9 @@ class GenCode(object):
             if api.url_path and (not api.url_path == url_path):
                 api = Api(url_path)
                 ft.add(api)
+
+            if len(api.api_ok):
+                ft.api_ok[url_path] = api.api_ok
 
             ctx.log.error(f'触发 App = {ft.app_name}')
             ctx.log.error(f'触发 api = {api} {request.method}')

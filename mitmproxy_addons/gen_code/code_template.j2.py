@@ -36,7 +36,9 @@ class User(object):
         self.params_encry = session_data['params_encry']
         self.bodys_encry = session_data['bodys_encry']
         self.session_id = session_data['session_id']
+        self.api_ok = session_data['api_ok']
         self.urlparsed = dict()
+        self.api_errors = dict()
         self.session = requests.Session()
         self.session.headers = self._header()
 
@@ -47,6 +49,35 @@ class User(object):
             'user-agent': self.headers['user-agent'],
             # 'Cookie':self.headers['Cookie'],
         }
+
+    def __urlparsed(self, url):
+        if self.urlparsed.get(url):
+            host, path = self.urlparsed[url]
+        else:
+            parse_result = urlparse(url)
+            host = parse_result.netloc
+            path = parse_result.path
+            self.urlparsed[url] = host, path
+        return host, path
+
+    def __parse(self, url, res, p):
+        result = res.text
+        try:
+            j = json.loads(result)
+            if self.api_ok['app_ok']['code'] == j['code']:
+                p(j)
+            else:
+                _, path = self.__urlparsed(url)
+
+                if j['code'] in self.api_ok.get(path, {'code':9999999})['code']:
+                    p(j)
+                else:
+                    self.api_errors[path] = j
+                    p(f"\033[1;31m {j} \033[0m")
+        except :
+            p(result) 
+        print()
+        return result
 
     def _post(self, url, p=logging.warning, **kwargs):
         r"""Sends a POST request.
@@ -63,43 +94,19 @@ class User(object):
         :rtype: str
         """
         res = self.session.post(url, **kwargs)
-        result = res.text
-        try:
-            p(json.loads(result))
-        except :
-            p(result) 
-        logging.info('')
-        return result
+        return self.__parse(url, res, p)
 
     def _get(self, url, p=logging.warning, **kwargs):
         res = self.session.get(url, **kwargs)
-        result = res.text
-        try:
-            p(json.loads(result))
-        except :
-            p(result)        
-        logging.info('')
-        return result
+        return self.__parse(url, res, p)
 
     def _params_from(self, url):
-        if self.urlparsed.get(url):
-            host, path = self.urlparsed[url]
-        else:
-            parse_result = urlparse(url)
-            host = parse_result.netloc
-            path = parse_result.path
-            self.urlparsed[url] = host, path
+        host, path = self.__urlparsed(url)
         params_keys = self.params_keys[host][path]
         return { k:v for k,v in self.params.items() if k in set(params_keys) }
 
     def _bodys_from(self, url):
-        if self.urlparsed.get(url):
-            host, path = self.urlparsed[url]
-        else:
-            parse_result = urlparse(url)
-            host = parse_result.netloc
-            path = parse_result.path
-            self.urlparsed[url] = host, path
+        host, path = self.__urlparsed(url)
         params_keys = self.bodys_keys[host][path]
         return { k:v for k,v in self.bodys.items() if k in set(params_keys) }
 
@@ -190,6 +197,7 @@ def genUsers():
 
 if __name__ == "__main__":
     sessions = []
+    api_errors = {}
     for user in genUsers():
         try:
             logging.info(f"\033[1;31m{' '*20}\033[0m")
@@ -199,7 +207,15 @@ if __name__ == "__main__":
             traceback.print_exc()    
         finally:
             sessions.append(user.session_id)
+            api_errors[user.session_id] = user.api_errors
             logging.info(f"\033[1;31m{'^'*10} {user.session_id} {'^'*10}\033[0m")
             logging.info(f"\033[1;31m{' '*20}\033[0m")
 
+    for session, v in api_errors.items():
+        if len(v):
+            logging.info(f"\033[1;31m {session} - 有如下问题: \033[0m")
+            for url, message in v.items():
+                logging.info(f"\033[1;31m\t{url} - {message}\033[0m")
+                print()
+            print()
     logging.info(f"共运行: \033[1;31m{sessions}\033[0m")

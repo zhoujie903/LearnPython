@@ -100,7 +100,7 @@ def gen_file_from_jinja2(tfile, gfile, **kwargs):
 
 class AppSession():
     keys = [
-        'header_values', 'fn_url', 
+        'header_values', 'fn_url', 'api_ok', 
         'params_keys', 'bodys_keys', 
         'param_values', 'body_values', 
         'params_as_all', 'bodys_as_all',
@@ -121,7 +121,7 @@ class AppSession():
     ]
 
     keys_a_diff = [
-        'fn_url', 'params_keys', 'bodys_keys',
+        'fn_url', 'params_keys', 'bodys_keys', 'api_ok'
     ]
 
     keys_a_level2_diff = [
@@ -133,6 +133,7 @@ class AppSession():
         if self.file.exists():
             self.session_module = import_module(path)
             self.session_id = get_data(self.session_module, 'session_id')
+            self.api_ok = get_data(self.session_module, 'api_ok')
             self.header_values = get_data(self.session_module, 'header_values')
             self.fn_url = get_data(self.session_module, 'fn_url')
             self.params_keys = get_data(self.session_module, 'params_keys')
@@ -165,6 +166,7 @@ class AppSession():
         var_dict['bodys_as_all'] = json.dumps(self.bodys_as_all, indent=2, sort_keys=True)
         var_dict['params_encry'] = json.dumps(self.params_encry, indent=2, sort_keys=True)
         var_dict['bodys_encry'] = json.dumps(self.bodys_encry, indent=2, sort_keys=True)
+        var_dict['api_ok'] = json.dumps(self.api_ok, indent=2, sort_keys=True)
 
 
         tfile = f'session_xxx.j2.py'
@@ -280,6 +282,7 @@ def main_merge_to_other_session(from_path: str):
 
             merge_tool = MergerSession(from_session, to_seession)
             merge_tool.merge(o=('a'))
+            # merge_tool.save_as_file(inplace=False)    
             merge_tool.save_as_file(inplace=True)    
 
 
@@ -305,7 +308,7 @@ def helper_gen_from_and_to_appsessions(from_or_to_path: str):
 if __name__ == "__main__":
 
     # 场景：不同session之间合并
-    from_path = '/Users/zhoujie/Desktop/test/api/session_huawei.py' 
+    from_path = '/Users/zhoujie/Desktop/dev/you-xi-he-zi/session_huawei.py' 
     main_merge_to_other_session(from_path)
     exit()
 
