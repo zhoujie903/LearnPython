@@ -790,6 +790,11 @@ class GenCode(object):
             logging.error(e)
 
     def response(self, flow: http.HTTPFlow):
+        # 不处理'options'方法的请求
+        method = flow.request.method.lower()
+        if method == 'options':
+            return 
+
         ft = None
         for i, flt in enumerate(self.flowfilters):
             if flt(flow):
