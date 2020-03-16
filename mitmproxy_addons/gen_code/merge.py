@@ -355,47 +355,72 @@ def helper_gen_from_and_to_appsessions(from_or_to_path: str):
     return from_session, to_seession
 
 
+def helper_all_sessions(api_dir: str) -> list:
+    '''
+    场景：目录级内所有对应session合并
+    '''
+
+    api_dir = pathlib.Path(api_dir)
+
+    r = re.compile(r'session_[a-zA-Z]+\.py')
+    target = api_dir.glob(r'*/session_*.py')
+    target = [item for item in target if r.match(item.name)] 
+    return sorted(target)
+
+
+
 
 if __name__ == "__main__":
 
+    api_dir = '/Users/zhoujie/Desktop/api'
+    dev_dir = '/Users/zhoujie/Desktop/dev'
+
+    # 场景：整理
+    # targets = helper_all_sessions(api_dir)
+    # for p in targets:
+    #     path = pathlib.Path(p)
+    #     session = AppSession(path)
+    #     session.format()
+    #     session.delelte()
+    #     session.save_as_file(inplace=True)
+    # exit()
+
+
     # 场景：删除
-    from_path = pathlib.Path('/Users/zhoujie/Documents/heroku/jason903/auto_app/qu-tou-tiao/session_xsy.py') 
-    from_session = AppSession(from_path)
-    from_session.delelte()
-    from_session.save_as_file()
-    exit()
+    # from_path = pathlib.Path('/Users/zhoujie/Documents/heroku/jason903/auto_app/qu-tou-tiao/session_xsy.py') 
+    # from_session = AppSession(from_path)
+    # from_session.delelte()
+    # from_session.save_as_file()
+    # exit()
+
+
+    # from_path = pathlib.Path('/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py') 
+    # from_session = AppSession(from_path)
+    # d = {}
+    # for k, url in from_session.fn_url.items():
+    #     l = d.setdefault(url, list())
+    #     l.append(k)
+    # for url, v in d.items():
+    #     if len(v) > 1:
+    #         pprint.pprint(v)
+    # exit()
 
 
     # 场景：全部合并
-    # api_dir = '/Users/zhoujie/Desktop/api'
-    # dev_dir = '/Users/zhoujie/Desktop/dev'
     # main_merge_all(api_dir, dev_dir)
     # exit()
 
-    # 方法一
-    # from_file = pathlib.Path(f'/Users/zhoujie/Desktop/api/qu-tou-tiao/session_csh.py')
-    # from_session = AppSession(from_file)
 
-    # to_file = pathlib.Path(f'/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_csh.py')
-    # to_seession = AppSession(to_file)
-    # merge_tool = MergerSession(*sessions)
-
-    from_path = '/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py'
-
-    # 场景：同名session从api同步到dev
+    from_path = '/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py'
     sessions = helper_gen_from_and_to_appsessions(from_path)
 
+    # 场景：同名session从api同步到dev
     merge_tool = MergerSession(*sessions)
     merge_tool.merge()
     merge_tool.save_as_file(inplace=True)
 
 
     # 场景：不同session之间合并
-    # from_path = '/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_huawei.py' 
-    main_merge_to_other_session(from_path)
+    # main_merge_to_other_session(from_path)
 
     print('done!!!')
-
-
-
-    pass
