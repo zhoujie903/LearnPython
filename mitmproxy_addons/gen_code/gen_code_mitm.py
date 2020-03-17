@@ -703,6 +703,12 @@ class GenCode(object):
             sessions_by_app = {}
             # 生成app下的 session_xxx.py
             for device, app in self.session_hit:
+                app_filter: App = None
+                for item in self.appfilters:
+                    if item.app_name == app:
+                        app_filter = item
+                        break
+
                 sessions_jinja_data = sessions_by_app.setdefault(app, list())
                 sessions_jinja_data.append({
                     'file': f'session_{device}',
@@ -716,12 +722,7 @@ class GenCode(object):
 
                 var_dict = dict()
                 var_dict['session_id'] = device 
-
-                # 设置var_dict['api_ok']
-                for item in self.appfilters:
-                    if item.app_name == app:
-                        api_ok = item.api_ok
-                        var_dict['api_ok'] = api_ok
+                var_dict['api_ok'] = app_filter.api_ok
 
                 def abc(data: dict, var_name, var_dict: dict, mergehost=True):
                     try:
@@ -759,6 +760,28 @@ class GenCode(object):
                 merge_tool = MergerSession(from_session, to_session)
                 merge_tool.merge()
                 merge_tool.save_as_file(path=session_xxx_py)
+
+                need_ = set()
+                for _, api in app_filter.flts.items():
+                    if isinstance(api, Api):
+                        to_session: AppSession = merge_tool.to_seession
+                        url_path = api.url_path if api.url_path else api.url
+                        if api.f_p_enc and (url_path not in to_session.params_encry):
+                            need_.add(url_path)
+
+                        if api.f_b_enc and (url_path not in to_session.bodys_encry):
+                            need_.add(url_path)
+
+                        if api.params_as_all and (url_path not in to_session.params_as_all):
+                            need_.add(url_path)
+
+                        if api.body_as_all and (url_path not in to_session.bodys_as_all):
+                            need_.add(url_path)
+                pprint.pprint(f'{device} - 下列Api需要采集')
+                pprint.pprint(need_)
+
+
+
 
             # 生成app下的 code.py, sessions.py
             for app, apis in self.app_apis.items():
@@ -823,15 +846,14 @@ class GenCode(object):
             with (path/f'{function_name}.text').open('a') as f:
 
                 app_apis = self.app_apis.setdefault(ft.app_name, dict())
-                if not function_name in app_apis:
+                if function_name not in app_apis:
                     api.name = function_name
                     api.url = api_url
                     api.url_path = url_path
                     api.method = request.method.lower()
                     api.content_type = 'json' if 'json' in request.headers.get('content-type','') else ''
                     api.fun_params = api.str_fun_params()
-                    if not 'options' == api.method:
-                        app_apis[function_name] = api
+                    app_apis[function_name] = api
     
                 api.time = time.strftime('%m-%d %H:%M:%S')
                 api.headers_code = headers_code
