@@ -14,6 +14,7 @@ import traceback
 from mitmproxy import ctx, flowfilter, http
 
 from jinja2 import Template, Environment, FileSystemLoader
+from merge import *
 
 '''
 生成接口python代码
@@ -58,10 +59,11 @@ def apps():
     quan_ming = App(urls, 'quan-ming')
 
     flowfilters = [
+        # self.bai_du_flash,
         # app_cai_dan_sp(),
+        # app_cheng_yu_qwx(),
         # self.toutiao,
         # self.huoshan,
-        # self.bai_du_flash,
         # self.qtt_video,
         # app_qu_zhong_cai(),
         app_qu_tou_tiao(),
@@ -126,6 +128,20 @@ def app_cai_dan_sp():
         Api('/withdraw/order/create',log='彩蛋视频 - 提现', f_b_arg=['sku_id']),
     ]
     return App(urls, 'cai-dan-sp')
+
+# ''' 成语趣味消
+def app_cheng_yu_qwx():
+    urls = [
+        Api('/chengyu_app/signin', log='签到'),
+        Api('/chengyu_app/draw_fuca', log='抽字'),
+        Api('/chengyu_app/addcoin', f_b_arg={'open_id','add_num'}),
+        Api('/chengyu_app/update_task', f_b_arg={'task_index'}),
+        Api('/chengyu_app/get_task_award', f_b_arg={'task_index'}),
+        Api('/chengyu_app/'),
+    ]
+    urls.extend(api_common())
+    urls.extend(api_sign())
+    return App(urls, 'cheng-yu-qu-wei-xiao')
 
 # ''' 东方头条 '''
 def app_dftt():
@@ -215,29 +231,29 @@ def app_qu_jian_pan():
 def app_qu_tou_tiao():
     ''' 趣头条 '''
     urls = [
-        # Api(r'/sign/sign', log='每日签到', params_as_all=True),
-        # Api(r'/mission/intPointReward', log='时段签到', params_as_all=True, api_ok={'code':[-312]}),
-        # Api(r'/taskcenter/getReward', log='任务完成 - 领金币', params_as_all=True),
-        # r'/x/game-center/user/sign-in',
-        # r'/x/game-center/user/last-sign-coin',
-        # Api('/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
-        # Api('/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
-        # Api('/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
-        # r'/newuserline/activity/signRewardNew',  # 挑战签到
-        # Api(r'/mission/receiveTreasureBox', log='趣头条-开宝箱', api_ok={'code':[-1710]}),
-        # Api(r'/content/readV2',params_as_all=True),
-        # Api(r'/app/re/taskCenter/info/v1/get', log='任务信息', params_as_all=True, p_as_all_limit=1),
-        # Api(r'/app/user/info/personal/v1/get', log='用户信息', params_as_all=True, p_as_all_limit=1),
-        # Api(r'/coin/service', body_as_all=True),
-        # r'readtimer/report',
-        # # Api(r'motivateapp/mtvcallback', params_as_all=True),
-        # Api(r'/x/feed/getReward', log='信息流-惊喜红包', params_as_all=True, api_ok={'code':[-308]}),
-        # Api(r'/lotteryGame/status', log='天天乐-信息'),
-        # Api(r'/tiantianle/video', log='天天乐-增加机会', params_as_all=True),
-        # Api(r'/lotteryGame/order', log='天天乐-投注'),
-        # r'x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
-        # r'x/v1/goldpig/withdraw',  # 金猪
-        # Api(r'finance/piggybank/taskReward',api_ok={'code':-2004}),  # 存钱罐
+        Api(r'/sign/sign', log='每日签到', params_as_all=True),
+        Api(r'/mission/intPointReward', log='时段签到', params_as_all=True, api_ok={'code':[-312]}),
+        Api(r'/taskcenter/getReward', log='任务完成 - 领金币', params_as_all=True),
+        r'/x/game-center/user/sign-in',
+        r'/x/game-center/user/last-sign-coin',
+        Api('/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
+        Api('/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
+        Api('/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
+        r'/newuserline/activity/signRewardNew',  # 挑战签到
+        Api(r'/mission/receiveTreasureBox', log='趣头条-开宝箱', api_ok={'code':[-1710]}),
+        Api(r'/content/readV2',params_as_all=True),
+        Api(r'/app/re/taskCenter/info/v1/get', log='任务信息', params_as_all=True, p_as_all_limit=1),
+        Api(r'/app/user/info/personal/v1/get', log='用户信息', params_as_all=True, p_as_all_limit=1),
+        Api(r'/coin/service', body_as_all=True),
+        r'readtimer/report',
+        # Api(r'motivateapp/mtvcallback', params_as_all=True),
+        Api(r'/x/feed/getReward', log='信息流-惊喜红包', params_as_all=True, api_ok={'code':[-308]}),
+        Api(r'/lotteryGame/status', log='天天乐-信息'),
+        Api(r'/tiantianle/video', log='天天乐-增加机会', params_as_all=True),
+        Api(r'/lotteryGame/order', log='天天乐-投注'),
+        r'x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
+        r'x/v1/goldpig/withdraw',  # 金猪
+        Api(r'finance/piggybank/taskReward',api_ok={'code':-2004}),  # 存钱罐
 
         # 游戏 - 种菜
         r'x/tree-game/task-list',
@@ -651,7 +667,7 @@ class GenCode(object):
         self.app_fn_url = {}
         self.session_hit = set()
 
-        self.flowfilters = apps()
+        self.appfilters = apps()
         
 
     def load(self, loader):
@@ -695,80 +711,54 @@ class GenCode(object):
 
                 hosts = self.headers[device][app]
                 for _, d in hosts.items():
-                    self._delete_some_headers(d)
+                    remove_unnecessary_headers(d)
 
 
                 var_dict = dict()
-                var_dict['session_id'] = f'{device!r}'
+                var_dict['session_id'] = device 
 
                 # 设置var_dict['api_ok']
-                for item in self.flowfilters:
+                for item in self.appfilters:
                     if item.app_name == app:
                         api_ok = item.api_ok
-                        var_dict['api_ok'] = json.dumps(api_ok, indent=2, sort_keys=True) 
+                        var_dict['api_ok'] = api_ok
 
-                def import_module(app, device):
-                    import importlib.util
-                    try:
-                        module_name = f'session_{device}'
-                        path = self.api_dir.joinpath(app, f'{module_name}.py')  
-                        spec = importlib.util.spec_from_file_location(module_name, path)
-                        session_module = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(session_module)
-                        return session_module
-                    except Exception as e:
-                        logging.error(e)
-                        
-
-                session_module = import_module(app, device)
-
-                def get_old_data(session_module, var_name):
-                    old_data = dict()
-                    try:
-                        old_data = getattr(session_module, var_name)
-                    except Exception as e:
-                        # traceback.print_exc()
-                        pass
-                    return old_data
-
-                def abc(data: dict, var_name, var_dict: dict, mergehost=True, list_append: bool=False, limit:dict=None):
+                def abc(data: dict, var_name, var_dict: dict, mergehost=True):
                     try:
                         dd = data[device][app]
-                        try:
-                            l = limit[device][app]
-                        except :
-                            l = dict()
                         merge_hosts = {}
                         try:
                             if mergehost:
-                                for host, ddd in dd.items():
+                                for _, ddd in dd.items():
                                     merge_hosts.update(ddd)
                             else:
                                 merge_hosts = dd
                         except:
                             merge_hosts = dd
-                        old_data = get_old_data(session_module, var_name)
-                        merge_hosts = merge_data(merge_hosts, old_data, list_append=list_append, limit=l)
-                        var_dict[var_name] = json.dumps(merge_hosts, indent=2, sort_keys=True)
+                        var_dict[var_name] = merge_hosts
                         print(f"生成 App - {app:20} - session_{device}.py {var_name} 成功")
                     except Exception as e:
                         # traceback.print_exc()
                         print(e)
-                        var_dict[var_name] = '{}'
+                        var_dict[var_name] = {}
                 abc(self.headers, 'header_values', var_dict)
                 abc(self.app_fn_url, 'fn_url', var_dict)
                 abc(self.params_keys, 'params_keys', var_dict, mergehost=False)
                 abc(self.bodys_keys, 'bodys_keys', var_dict, mergehost=False)
                 abc(self.params, 'param_values', var_dict)
                 abc(self.bodys, 'body_values', var_dict)
-                abc(self.params_as_all, 'params_as_all', var_dict, list_append=True,limit=self.params_as_all_limit)
-                abc(self.bodys_as_all, 'bodys_as_all', var_dict, list_append=True)
-                abc(self.params_encry, 'params_encry', var_dict, list_append=True)
-                abc(self.bodys_encry, 'bodys_encry', var_dict, list_append=True)
+                abc(self.params_as_all, 'params_as_all', var_dict)
+                abc(self.bodys_as_all, 'bodys_as_all', var_dict)
+                abc(self.params_encry, 'params_encry', var_dict)
+                abc(self.bodys_encry, 'bodys_encry', var_dict)
 
-                tfile = f'session_xxx.j2.py'
-                gfile = self.api_dir.joinpath(app, f'session_{device}.py')
-                self.gen_file_from_jinja2(tfile, gfile, seq=var_dict)
+                session_xxx_py = self.api_dir.joinpath(app, f'session_{device}.py') 
+                from_session = AppSession(var_dict)
+                to_session = AppSession(session_xxx_py)
+
+                merge_tool = MergerSession(from_session, to_session)
+                merge_tool.merge()
+                merge_tool.save_as_file(path=session_xxx_py)
 
             # 生成app下的 code.py, sessions.py
             for app, apis in self.app_apis.items():
@@ -786,8 +776,9 @@ class GenCode(object):
             print('done !!!')
         except Exception as e:
             logging.error('有异常：')
-            print(e)
-            logging.error(e)
+            # print(e)
+            # logging.error(e)
+            traceback.print_exc()
 
     def response(self, flow: http.HTTPFlow):
         # 不处理'options'方法的请求
@@ -796,12 +787,12 @@ class GenCode(object):
             return 
 
         ft = None
-        for i, flt in enumerate(self.flowfilters):
+        for i, flt in enumerate(self.appfilters):
             if flt(flow):
                 ft = flt
-                if not flt == self.flowfilters[0]:
-                    self.flowfilters.pop(i)
-                    self.flowfilters.insert(0, flt)
+                if not flt == self.appfilters[0]:
+                    self.appfilters.pop(i)
+                    self.appfilters.insert(0, flt)
                 break
         if ft:
             ctx.log.error('|' + '-'*20 + '|') 
@@ -943,20 +934,6 @@ class GenCode(object):
                 l = d.setdefault(k, list())
                 l.append(body_dict[k])
 
-    def _delete_some_headers(self, headers: dict):
-        h = {
-            ':authority', 'accept', 'accept-language', 'accept-encoding', 
-            'connection', 'content-encoding', 'content-length', 'content-type', 'cache-control', 
-            'host', 'pragma', 'proxy-connection',
-        }
-        for key in h:
-            try:
-                headers.pop(key.upper(), None)
-                headers.pop(key.lower(), None)
-                headers.pop(key.title(), None)
-            except:
-                pass
-
     def _gen_file(self, o, f, fold, mode='w'):
         path = fold#pathlib.Path(fold)
         if not path.exists():
@@ -1057,14 +1034,6 @@ if not __name__ == "__main__":
         GenCode()
     ]
 
-def get_data(session_module, var_name):
-    old_data = dict()
-    try:
-        old_data = getattr(session_module, var_name)
-    except Exception as e:
-        # traceback.print_exc()
-        pass
-    return old_data
 
 def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit:dict=None):
     # Todo: 需要修正，和增强
@@ -1082,13 +1051,6 @@ def merge_data(new_data: dict, old_data: dict, list_append: bool=False, limit:di
     new_data.update(old_data)
     return new_data
 
-
-def import_module(path: pathlib.Path):
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(path.stem,str(path))
-    session_module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(session_module)
-    return session_module
 
 def inner(d, device='', app='', host=''):
     d = d.setdefault(device, dict())

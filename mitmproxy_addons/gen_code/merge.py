@@ -17,18 +17,25 @@ from jinja2 import Environment, FileSystemLoader
 
 def import_module(path: pathlib.Path):
     import importlib.util
-    spec = importlib.util.spec_from_file_location(path.stem,str(path))
-    session_module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(session_module)
-    return session_module
+    try:
+        spec = importlib.util.spec_from_file_location(path.stem,str(path))
+        session_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(session_module)
+        return session_module
+    except Exception as e:
+        logging.error(e)
+
+    
 
 def get_data(session_module, var_name):
     old_data = dict()
     try:
         old_data = getattr(session_module, var_name)
     except Exception as e:
-        # traceback.print_exc()
-        pass
+        try:
+            old_data = session_module[var_name]
+        except:
+            pass        
     return old_data
 
 def remove_unnecessary_headers(headers):
@@ -95,6 +102,7 @@ env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
 def gen_file_from_jinja2(tfile, gfile, **kwargs):
     t = env.get_template(tfile)
     ss = t.render(**kwargs)
+    print('生成文件: ', gfile)
     with open(gfile, mode='w') as ff:
         ff.write(ss)
 
@@ -128,24 +136,38 @@ class AppSession():
         'params_keys', 'bodys_keys',
     ]
 
-    def __init__(self, path):
-        self.file = path
-        if self.file.exists():
-            self.session_module = import_module(path)
-            self.session_id = get_data(self.session_module, 'session_id')
-            self.api_ok = get_data(self.session_module, 'api_ok')
-            self.header_values = get_data(self.session_module, 'header_values')
-            self.fn_url = get_data(self.session_module, 'fn_url')
-            self.params_keys = get_data(self.session_module, 'params_keys')
-            self.bodys_keys = get_data(self.session_module, 'bodys_keys')
-            self.param_values = get_data(self.session_module, 'param_values')
-            self.body_values = get_data(self.session_module, 'body_values')
-            self.params_as_all = get_data(self.session_module, 'params_as_all')
-            self.bodys_as_all = get_data(self.session_module, 'bodys_as_all')
-            self.params_encry = get_data(self.session_module, 'params_encry')
-            self.bodys_encry = get_data(self.session_module, 'bodys_encry')
-            self.session_data = get_data(self.session_module, 'session_data')
-        pass
+    def __init__(self, path_or_vardict):
+        self.file = None
+        o = {}
+        if isinstance(path_or_vardict, str):
+            self.file = pathlib.Path(path_or_vardict)
+
+        if isinstance(path_or_vardict, pathlib.Path):
+            self.file = path_or_vardict
+
+        if isinstance(path_or_vardict, dict):
+            o = path_or_vardict
+
+        if (not self.file == None) and self.file.exists():
+            self.session_module = import_module(self.file)
+            o = self.session_module
+
+        self.__set_memebers(o)
+
+    def __set_memebers(self, o):
+        self.session_id = get_data(o, 'session_id')
+        self.api_ok = get_data(o, 'api_ok')
+        self.header_values = get_data(o, 'header_values')
+        self.fn_url = get_data(o, 'fn_url')
+        self.params_keys = get_data(o, 'params_keys')
+        self.bodys_keys = get_data(o, 'bodys_keys')
+        self.param_values = get_data(o, 'param_values')
+        self.body_values = get_data(o, 'body_values')
+        self.params_as_all = get_data(o, 'params_as_all')
+        self.bodys_as_all = get_data(o, 'bodys_as_all')
+        self.params_encry = get_data(o, 'params_encry')
+        self.bodys_encry = get_data(o, 'bodys_encry')
+        self.session_data = get_data(o, 'session_data')
 
     def format(self):
         remove_unnecessary_headers(self.header_values)
@@ -180,7 +202,21 @@ class AppSession():
 
 
 
-    def save_as_file(self, name='', inplace=False):
+    def save_as_file(self, name='', path=None, inplace=False):
+        var_dict = self.var_json_dict()
+        tfile = f'session_xxx.j2.py'
+
+        if path:
+            gfile = path
+        else:
+            if inplace:
+                gfile = self.file
+            else:
+                gfile = self.file.parent/f'session_{self.session_id}_{name}.py'
+        gen_file_from_jinja2(tfile, gfile, seq=var_dict)
+        pass
+
+    def var_json_dict(self):
         var_dict = dict()
         var_dict['session_id'] = f'{self.session_id!r}'
 
@@ -196,14 +232,25 @@ class AppSession():
         var_dict['bodys_encry'] = json.dumps(self.bodys_encry, indent=2, sort_keys=True)
         var_dict['api_ok'] = json.dumps(self.api_ok, indent=2, sort_keys=True)
 
+        return var_dict
 
-        tfile = f'session_xxx.j2.py'
-        if inplace:
-            gfile = self.file
-        else:
-            gfile = self.file.parent/f'session_{self.session_id}_{name}.py' 
-        gen_file_from_jinja2(tfile, gfile, seq=var_dict)
-        pass
+    def var_dict(self):
+        var_dict = dict()
+        var_dict['session_id'] = self.session_id
+
+        var_dict['header_values'] = self.header_values
+        var_dict['fn_url'] = self.fn_url
+        var_dict['params_keys'] = self.params_keys
+        var_dict['bodys_keys'] = self.bodys_keys
+        var_dict['param_values'] = self.param_values
+        var_dict['body_values'] = self.body_values
+        var_dict['params_as_all'] = self.params_as_all
+        var_dict['bodys_as_all'] = self.bodys_as_all
+        var_dict['params_encry'] = self.params_encry
+        var_dict['bodys_encry'] = self.bodys_encry
+        var_dict['api_ok'] = self.api_ok
+
+        return var_dict
 
 class MergerSession():
     def __init__(self, from_session: AppSession, to_seession: AppSession):
@@ -222,19 +269,19 @@ class MergerSession():
 
 
 
-    def save_as_file(self, inplace=False):
-        self.to_seession.save_as_file('merge', inplace=inplace)
+    def save_as_file(self, path=None, inplace=False):
+        self.to_seession.save_as_file(name='merge', path=path, inplace=inplace)
 
     def add_missing(self):
         if self.to_seession.file.exists():
-            if self.to_seession.file.name == self.from_session.file.name:
+            if self.to_seession.session_id == self.from_session.session_id:
                 level_1_keys, level_2_keys = AppSession.keys, AppSession.keys_level2
             else:
                 level_1_keys, level_2_keys = AppSession.keys_a_diff, AppSession.keys_a_level2_diff
 
             self._add_missing(level_1_keys, level_2_keys)
         else:
-            self.to_seession = AppSession(self.from_session.file)
+            self.to_seession = AppSession(self.from_session.var_dict())
             self.to_seession.file = pathlib.Path(re.sub('/api/', '/dev/', str(self.from_session.file)))
             pass
 
@@ -374,6 +421,16 @@ if __name__ == "__main__":
 
     api_dir = '/Users/zhoujie/Desktop/api'
     dev_dir = '/Users/zhoujie/Desktop/dev'
+
+    v = {}
+    v['session_id'] = 'xiaomi'
+    v['fn_url'] = {'/x':'http://www.xxx.com/x'}
+    print(get_data(v, 'session_id'))
+
+    from_path = pathlib.Path('/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py') 
+    from_session = AppSession(from_path)
+    print(from_session.session_id)
+    exit()
 
     # 场景：整理
     # targets = helper_all_sessions(api_dir)
