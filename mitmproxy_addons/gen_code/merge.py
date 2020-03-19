@@ -14,6 +14,7 @@ import traceback
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 
+from api_app import Api, App
 
 def import_module(path: pathlib.Path):
     import importlib.util
@@ -95,6 +96,23 @@ def update_values_level2(from_values, to_values):
     common = p_keys_all & p_keys_exist
     for k in common:
         to_values[k].update(from_values[k])
+
+def merge_enc_level1(from_values, to_values, merge_rules:dict):
+    for k, v in from_values.items():
+        if merge_rules and merge_rules.get(k, None):
+            merge = merge_rules[k]
+            merged_data = merge(v, to_values.get(k, []))
+            to_values[k] = merged_data
+
+def merge_enc_level2(from_values, to_values, merge_rules:dict):
+    for k, v in from_values.items():
+        if merge_rules and merge_rules.get(k, None):
+            merge = merge_rules[k]
+            for kk,vv in v.items():
+                a = to_values.setdefault(k, {})
+                merged_data = merge(vv, a.get(kk, []))
+                to_values[k][kk] = merged_data
+
     
 
 env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
@@ -134,6 +152,15 @@ class AppSession():
 
     keys_a_level2_diff = [
         'params_keys', 'bodys_keys',
+    ]
+
+    # 
+    keys_enc_level1 = [
+        'params_as_all', 'bodys_as_all',
+    ]
+
+    keys_enc_level2 = [
+        'params_encry', 'bodys_encry',
     ]
 
     def __init__(self, path_or_vardict):
@@ -257,7 +284,7 @@ class MergerSession():
         self.from_session = from_session
         self.to_seession = to_seession
 
-    def merge(self, o=('a','u')):
+    def merge(self, o=('a','u'), merge_rules:dict =None):
         '''
         cuda:create, update, delete, append
         '''
@@ -267,7 +294,7 @@ class MergerSession():
         if 'a' in o:
             self.add_missing()
 
-
+        self.merge_enc(merge_rules)
 
     def save_as_file(self, path=None, inplace=False):
         self.to_seession.save_as_file(name='merge', path=path, inplace=inplace)
@@ -306,7 +333,17 @@ class MergerSession():
             from_v = getattr(self.from_session, k)
             to_v = getattr(self.to_seession, k)
             update_values_level2(from_v, to_v)
-            
+
+    def merge_enc(self, app=None):
+        for k in AppSession.keys_enc_level1:
+            from_v = getattr(self.from_session, k)
+            to_v = getattr(self.to_seession, k)
+            merge_enc_level1(from_v, to_v, app)
+
+        for k in AppSession.keys_enc_level2:
+            from_v = getattr(self.from_session, k)
+            to_v = getattr(self.to_seession, k)
+            merge_enc_level2(from_v, to_v, app)
 
 
 def main_merge_all(api_dir: str, dev_dir: str):
@@ -416,21 +453,27 @@ def helper_all_sessions(api_dir: str) -> list:
 
 
 
+def test_merge_enc():
+    from data_api_app import app_qu_tou_tiao, app_cai_dan_sp
+    fs = AppSession('/Users/zhoujie/Desktop/test/api/qu-tou-tiao/session_huawei.py')
+    ts = AppSession('/Users/zhoujie/Desktop/test/dev/qu-tou-tiao/session_huawei.py')
+    app = app_qu_tou_tiao()
+
+    fs = AppSession('/Users/zhoujie/Desktop/test/api/cai-dan-sp/session_huawei.py')
+    ts = AppSession('/Users/zhoujie/Desktop/test/dev/cai-dan-sp/session_huawei.py')
+    app = app_cai_dan_sp()
+
+    merge_tool = MergerSession(fs, ts)
+    merge_tool.merge(merge_rules=app.merge_rules())
+    merge_tool.save_as_file()
 
 if __name__ == "__main__":
 
     api_dir = '/Users/zhoujie/Desktop/api'
     dev_dir = '/Users/zhoujie/Desktop/dev'
 
-    v = {}
-    v['session_id'] = 'xiaomi'
-    v['fn_url'] = {'/x':'http://www.xxx.com/x'}
-    print(get_data(v, 'session_id'))
-
-    from_path = pathlib.Path('/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py') 
-    from_session = AppSession(from_path)
-    print(from_session.session_id)
-    exit()
+    # test_merge_enc()
+    # exit()
 
     # 场景：整理
     # targets = helper_all_sessions(api_dir)
@@ -467,13 +510,13 @@ if __name__ == "__main__":
     # main_merge_all(api_dir, dev_dir)
     # exit()
 
-
-    from_path = '/Users/zhoujie/Desktop/dev/qu-tou-tiao/session_xiaomi.py'
+    from data_api_app import *
+    from_path = '/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py'
     sessions = helper_gen_from_and_to_appsessions(from_path)
 
     # 场景：同名session从api同步到dev
     merge_tool = MergerSession(*sessions)
-    merge_tool.merge()
+    merge_tool.merge(merge_rules=app_qu_tou_tiao().merge_rules())
     merge_tool.save_as_file(inplace=True)
 
 
