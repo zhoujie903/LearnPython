@@ -346,6 +346,29 @@ class MergerSession():
             merge_enc_level2(from_v, to_v, app)
 
 
+def main_mitm_merge_to(from_path: str, merge_to: int):
+    '''
+    session文件合并 
+    0: 不合并到其它文件, 
+    1: 合并到Api文件夹的其它文件, 
+    2: 合并到dev文件夹的同名文件, 
+    3: 合并到dev文件夹的所有文件 
+    '''
+    if merge_to == 0:
+        return
+
+    if merge_to == 1:
+        # Tudo:
+        return
+
+    if merge_to == 2:
+        main_merge_to_same_session(from_path)
+
+    if merge_to == 3:
+        main_merge_new_added_apis(from_path)
+        return
+
+
 def main_merge_all(api_dir: str, dev_dir: str):
     '''
     场景：目录级内所有对应session合并
@@ -376,17 +399,24 @@ def main_merge_new_added_apis(from_path: str):
     操作：1. 合并到同名的session, 2. 并合并非同名session
     '''
 
-    # 1：同名session从api同步到dev
+    main_merge_to_same_session(from_path)
+
+    # 2. 并合并非同名session
+    main_merge_to_other_session(from_path)
+
+
+def main_merge_to_same_session(from_path: str):
+    '''
+    场景：合并api文件夹到dev文件夹下的同名session
+    '''
+    from data_api_app import helper_app_from_path 
     sessions = helper_gen_from_and_to_appsessions(from_path)
+    app = helper_app_from_path(from_path) 
 
     merge_tool = MergerSession(*sessions)
-    merge_tool.merge()
+    merge_tool.merge(merge_rules=app.merge_rules())
     merge_tool.save_as_file(inplace=True)
 
-
-    # 2. 并合并非同名session并
-    main_merge_to_other_session(from_path)
-    pass
 
 def main_merge_to_other_session(from_path: str):
     '''
@@ -510,17 +540,12 @@ if __name__ == "__main__":
     # main_merge_all(api_dir, dev_dir)
     # exit()
 
-    from data_api_app import *
-    from_path = '/Users/zhoujie/Desktop/api/qu-tou-tiao/session_xiaomi.py'
-    sessions = helper_gen_from_and_to_appsessions(from_path)
+    from_path = '/Users/zhoujie/Desktop/dev/tian-chi-xiao-xiu-cai/session_huawei.py'
 
     # 场景：同名session从api同步到dev
-    merge_tool = MergerSession(*sessions)
-    merge_tool.merge(merge_rules=app_qu_tou_tiao().merge_rules())
-    merge_tool.save_as_file(inplace=True)
-
+    main_merge_to_same_session(from_path)
 
     # 场景：不同session之间合并
-    # main_merge_to_other_session(from_path)
+    main_merge_to_other_session(from_path)
 
     print('done!!!')

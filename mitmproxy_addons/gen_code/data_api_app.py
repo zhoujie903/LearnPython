@@ -63,7 +63,7 @@ def apps():
         # self.kai_xin_da_ti,
         # self.qu_jian_pan,
         # self.yang_ji_chang,
-        # app_you_xi_he_zhi(),
+        # app_you_xi_he_zi(),
         # self.zhong_qin_kd,
         # app_zhu_lai_le(),
     ]
@@ -88,15 +88,23 @@ def apps():
 def api_common():
     common = [
         # 游戏
-        Api(r'/x/user/token', log='获取g_token'),
-        Api(r'/x/open/game', log='打开游戏 - 获取ticket', f_p_arg=['app_id']),
+        Api(r'/x/user/token', log='/x/user/token - 获取g_token'),
+        Api(r'/x/open/game', log='/x/open/game - 获取ticket', f_p_arg=['app_id']),
+
+        # report_type={round,level} 
+        Api('/x/game-report/special_report', log='special_report', f_name='game_special_report',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
+        Api('/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
+        
+        Api('/x/gapp/task/list',log='游戏 - 任务列表', f_b_arg={'app_id', 'app'}),
+        Api('/x/gapp/task/take-reward',log='游戏 - take-reward - 领金币', f_b_arg={'task_id', 'app_id', 'app'}),
 
         # 金币-取现-账户
-        Api('/qapptoken', log='获取access_token', f_name='get_access_token', f_p_arg=['app_id']),
+        Api('/qapptoken', log='/qapptoken - 获取access_token', f_name='get_access_token', f_p_arg=['app_id']),
         Api('/withdraw/getCoinLog',log='金币明细', f_p_arg=['page','page_size']),
         Api('/withdraw/getBindInfo',log='取现 - 用户账户信息'),
         Api('/withdraw/sku/list',log='取现 - 可取现金额列表'),
         Api('/withdraw/order/create',log='取现 - 取现', f_b_arg={'sku_id'}),
+        Api('/withdraw/order/listApp',log='取现 - 提现列表'),
         Api('/user/withdraw/days',log='取现 - 条件'),
     ]
     return common
@@ -127,7 +135,7 @@ def app_cai_dan_sp():
     return App(urls, 'cai-dan-sp')
 
 # ''' 成语趣味消
-def app_cheng_yu_qwx():
+def app_cheng_yu_qu_wei_xiao():
     urls = [
         Api('/chengyu_app/signin', log='签到'),
         Api('/chengyu_app/draw_fuca', log='抽字'),
@@ -141,7 +149,7 @@ def app_cheng_yu_qwx():
     return App(urls, 'cheng-yu-qu-wei-xiao')
 
 # ''' 东方头条 '''
-def app_dftt():
+def app_dong_fan_tt():
     ''' 东方头条 '''
     urls = [
         r'sign/news_take_s',
@@ -156,7 +164,7 @@ def app_dftt():
         r'hit_susliks/hit_susliks/lucky_draw',
         r'turn_over_packet/packet/add_packet_bonus',
     ]
-    dftt = App(urls, 'dong-fan-tt')
+    return App(urls, 'dong-fan-tt')
     
 # ''' 火山极速版 '''
 def app_huo_shan():
@@ -228,13 +236,18 @@ def app_qu_jian_pan():
 def app_qu_tou_tiao():
     ''' 趣头条 '''
     urls = [
+        # 金币-账号-提现
+        Api(r'/member/getMemberIncome',log='收益详情', f_p_arg=['page','last_time']),
+        Api(r'/cash/order/list',log='取现 - 提现列表'),
+        Api(r'/member/getMemberInfo',log='取现 - 用户账户信息'),
+        Api(r'/mall/item/ItemList',log='取现 - 可取现金额列表'),
+
+
         Api(r'/sign/sign', log='每日签到', params_as_all=True),
         Api(r'/mission/intPointReward', log='时段签到', params_as_all=True, api_ok={'code':[-312]}, f_merge_key=r_c_l1),
         Api(r'/taskcenter/getReward', log='任务完成 - 领金币', params_as_all=True, f_merge_key=r_c_l1),
         r'/x/game-center/user/sign-in',
         r'/x/game-center/user/last-sign-coin',
-        Api('/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
-        Api('/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
         Api('/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
         r'/newuserline/activity/signRewardNew',  # 挑战签到
         Api(r'/mission/receiveTreasureBox', log='趣头条-开宝箱', api_ok={'code':[-1710]}),
@@ -300,7 +313,6 @@ def app_qu_tou_tiao():
         Api(r'/actcenter/piggy/videoConfirm',log='合成金猪 - 气泡', f_p_arg=['tag']),
         r'/actcenter/piggy/',
 
-        Api(r'/member/getMemberIncome',log='收益详情', f_p_arg=['page','last_time']),
         Api(r'/search/searchContentNew',log='搜索内容得金币', params_as_all=True, p_as_all_limit=3, f_merge_key=chain_rule(r_c, limit_rule(3))),
         
     ]
@@ -343,7 +355,7 @@ def app_qu_zhong_cai():
     return App(urls, 'qu-zhong-cai')
 
 # ''' 金猪游戏盒子 '''
-def app_you_xi_he_zhi():
+def app_you_xi_he_zi():
     ''' 金猪游戏盒子 '''
     urls = [
         # 游戏           
@@ -352,9 +364,7 @@ def app_you_xi_he_zhi():
         Api('/x/cash/time-bonus/get', log='时段金币 - 领取', f_b_arg={'index'}),
         # Api('/x/cash/task-bonus/amount', log='红包 - 领取', f_p_arg={'cnt'}),
         Api('/x/cash/task-bonus/get', log='红包 - 领取', f_p_arg={'cnt'}),
-        Api('game-center-new.1sapp.com/x/game-report/special_report', log='special_report', f_name='game_do_task',f_b_arg={'app_id'},f_b_kwarg={'report_type':'round'}),
-        Api('game-center-new.1sapp.com/x/game-report/duration_report', log='duration_report', f_name='game_duration_report',f_b_arg={'start_ts','duration'},f_b_kwarg={'report_type':'duration_addition'}),
-        Api('game-center-new.1sapp.com/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
+        Api('/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
 
         # 游戏 - 成语大富豪
         Api('qttgame.midsummer.top/api/Login', log='2-登录游戏', f_name='api_login', f_b_arg={'ticket','game_id'}),
@@ -381,7 +391,7 @@ def app_you_xi_he_zhi():
     return App(urls, 'you-xi-he-zi')
 
 # ''' 今日头条 '''
-def app_toutiao():
+def app_jin_ri_tou_tiao():
     ''' 今日头条 '''
     urls = [
         'score_task/v1/task/page_data/',
@@ -466,6 +476,7 @@ def app_tian_chi_xiao_xiu_cai():
         Api('/api/v1/tczyapp/login', log='填词小秀才 - 获取open_id', f_p_arg=['ticket']),
         Api('/api/v1/tczyapp/sign',log='填词小秀才 - 签到'),
         Api('/api/v1/tczyapp/lottery',log='填词小秀才 - lottery'),
+        Api('/api/v1/tczyapp/exchange',log='填词小秀才 - 红包满20元兑换成金币'),
         Api('/api/v1/tczyapp/get_reward',log='填词小秀才 - 任务完成', f_p_arg=['activity_id']),
         Api('/api/v1/tczyapp/open_redpacket',log='填词小秀才 - 红包'),
         Api('/api/v1/tczyapp/draw_a_char',log='填词小秀才 - 抽字'),
@@ -480,7 +491,7 @@ def app_tian_chi_xiao_xiu_cai():
     urls.extend(api_sign())
     return App(urls, 'tian-chi-xiao-xiu-cai')
 
-def app_yang_ji_change():
+def app_yang_ji_chang():
     ''' 欢乐养鸡场 '''
     urls = [
         Api('/x/middle/open/user/ticket', log='欢乐养鸡场 - 获取s_token'),
@@ -505,7 +516,7 @@ def app_yang_ji_change():
     return App(urls, 'yang-ji-chang')
 
 # ''' 中青看点 '''
-def app_zhong_qin_kd(parameter_list):
+def app_zhong_qin_kd():
     ''' 中青看点 '''
     urls = [
         Api(r'getTimingRedReward.json', f_name='hourly_sign', log='时段签到'),
@@ -524,3 +535,17 @@ def app_zhu_lai_le():
         Api(r'/pig/protocol', log='猪来了'),
     ]
     return App(urls, 'zhu-lai-le')
+
+
+def helper_app_from_path(from_or_to_path: str) -> App:
+    
+    for k, v in globals().items():
+        if k.startswith('app_') and isinstance(v, type(apps)):
+            new_name = k.replace('app_', '')
+            new_name = new_name.replace('_', '-')
+            if new_name in from_or_to_path:
+                return v()
+
+
+if __name__ == "__main__":
+    helper_app_from_path('/Users/zhoujie/Desktop/dev/tian-chi-xiao-xiu-cai/session_huawei.py')

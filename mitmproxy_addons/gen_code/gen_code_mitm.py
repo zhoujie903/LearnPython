@@ -72,6 +72,17 @@ class GenCode(object):
             help='指定session的值, 不用代码推断',
         )
 
+        loader.add_option(
+            "mergeto", int, 0,
+            """
+            session文件合并 
+            0: 不合并到其它文件, 
+            1: 合并到Api文件夹的其它文件, 
+            2: 合并到dev文件夹的同名文件, 
+            3: 合并到dev文件夹的所有文件 
+            """
+        )
+
     def configure(self, updated):
         ctx.log.info('event: configure')
 
@@ -154,21 +165,21 @@ class GenCode(object):
                         to_session: AppSession = merge_tool.to_seession
                         url_path = api.url_path if api.url_path else api.url
                         if api.f_p_enc and (url_path not in to_session.params_encry):
-                            need_.add(url_path)
+                            need_.add((url_path, api.log))
 
                         if api.f_b_enc and (url_path not in to_session.bodys_encry):
-                            need_.add(url_path)
+                            need_.add((url_path, api.log))
 
                         if api.params_as_all and (url_path not in to_session.params_as_all):
-                            need_.add(url_path)
+                            need_.add((url_path, api.log))
 
                         if api.body_as_all and (url_path not in to_session.bodys_as_all):
-                            need_.add(url_path)
+                            need_.add((url_path, api.log))
                 pprint.pprint(f'{device} - 下列Api需要采集')
                 pprint.pprint(need_)
                 # ----------- 报告 - 加密数据未采集 ----------- #
 
-
+                main_mitm_merge_to(str(session_xxx_py), ctx.options.mergeto)
 
 
             # 生成app下的 code.py, sessions.py
