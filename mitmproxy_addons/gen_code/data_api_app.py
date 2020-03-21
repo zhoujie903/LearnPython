@@ -196,7 +196,7 @@ def api_tczyqtt():
         Api('/api/v1/tczyqtt/get_reward',log='填词小秀才 - 任务完成', f_p_arg=['activity_id'], api_ok={'code':[1]}),
         Api('/api/v1/tczyqtt/open_redpacket',log='填词小秀才 - 红包', api_ok={'code':[1]}),
         Api('/api/v1/tczyqtt/draw_a_char',log='填词小秀才 - 抽字', api_ok={'code':[1]}),
-        Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - 过关领金币'),
+        Api('/api/v1/tczyqtt/add_coin',log='填词小秀才 - add_coin'),
         '/api/v1/tczyqtt/'
     ]
     return c_tczyqtt
@@ -241,6 +241,7 @@ def app_qu_tou_tiao():
         Api(r'/cash/order/list',log='取现 - 提现列表'),
         Api(r'/member/getMemberInfo',log='取现 - 用户账户信息'),
         Api(r'/mall/item/ItemList',log='取现 - 可取现金额列表'),
+        Api(r'/cash_order/create',log='取现 - 提现', params_as_all=True, f_merge_key=r_u),
 
 
         Api(r'/sign/sign', log='每日签到', params_as_all=True),
@@ -480,7 +481,7 @@ def app_tian_chi_xiao_xiu_cai():
         Api('/api/v1/tczyapp/get_reward',log='填词小秀才 - 任务完成', f_p_arg=['activity_id']),
         Api('/api/v1/tczyapp/open_redpacket',log='填词小秀才 - 红包'),
         Api('/api/v1/tczyapp/draw_a_char',log='填词小秀才 - 抽字'),
-        Api('/api/v1/tczyapp/add_coin',log='填词小秀才 - 过关领金币', params_as_all=True),
+        Api('/api/v1/tczyapp/add_coin',log='填词小秀才 - add_coin', params_as_all=True),
         
         Api('/api/v1/tczyapp/get_rank',log='填词小秀才 - 判案比赛-排行信息'),
         Api('/api/v1/tczyapp/get_rank_reward',log='填词小秀才 - 判案比赛-领奖'),

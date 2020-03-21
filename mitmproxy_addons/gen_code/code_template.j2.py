@@ -190,7 +190,30 @@ def {{ request.f_name }}(user: User):
 {%- endif %}
 {% endfor %}
 
+def demo_func(user: User):
+    # user.login
+    return 'demo_func_result'
 
+def demo_exception(user: User):
+    1/0
+    return 'demo_exception_result'
+
+exc_info = dict()
+def run(user: User):
+    def xxx(user: User):
+        pass
+    r = xxx
+    r = yield
+    while True:
+        try:
+            r = yield r(user)
+        except StopIteration as e:
+            print('StopIteration', e)
+        except Exception as e:
+            exc_info[user.session_id].append(sys.exc_info())
+            r = yield sys.exc_info()
+
+            
 def genUsers():
     for session_data in users:
         yield User(session_data)
@@ -198,11 +221,24 @@ def genUsers():
 if __name__ == "__main__":
     sessions = []
     api_errors = {}
+    exc_info = {}
     for user in genUsers():
         try:
             logging.info(f"\033[1;31m{' '*20}\033[0m")
             logging.info(f"\033[1;31m{'-'*10} {user.session_id} {'-'*10}\033[0m")
-            pass
+            exc_info[user.session_id] = []
+
+            runner = run(user)
+            runner.send(None)
+
+            tasks = [
+                demo_func,
+                demo_exception,
+            ]
+
+            for t in tasks:
+                result = runner.send(demo_func)
+            
         except Exception as e:
             traceback.print_exc()    
         finally:
@@ -218,4 +254,11 @@ if __name__ == "__main__":
                 logging.info(f"\033[1;31m\t{url} - {message}\033[0m")
                 print()
             print()
+
+    for session, v in exc_info.items():
+        if len(v):
+            for info in v:
+                traceback.print_exception(*info, limit=None, file=None, chain=True)
+        print()
+
     logging.info(f"共运行: \033[1;31m{sessions}\033[0m")
