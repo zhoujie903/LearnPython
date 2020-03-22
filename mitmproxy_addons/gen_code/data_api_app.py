@@ -47,25 +47,21 @@ def apps():
     quan_ming = App(urls, 'quan-ming')
 
     flowfilters = [
-        # self.bai_du_flash,
-        # app_cai_dan_sp(),
-        # app_cheng_yu_qwx(),
-        # self.toutiao,
-        # self.huoshan,
-        # self.qtt_video,
-        # app_qu_zhong_cai(),
+        app_cai_dan_sp(),
+        app_cheng_yu_qu_wei_xiao(),
+        app_dong_fan_tt(),
+        app_huo_shan(),
+        app_jin_ri_tou_tiao(),
+        app_ma_yi_kd(),
+        app_qu_jian_pan(),
         app_qu_tou_tiao(),
-        # app_tian_chi_xiao_xiu_cai(),
-        # self.hao_kan,
-        # self.quan_ming,
-        # app_ma_yi_kd(),
-        # self.dftt,
-        # self.kai_xin_da_ti,
-        # self.qu_jian_pan,
-        # self.yang_ji_chang,
-        # app_you_xi_he_zi(),
-        # self.zhong_qin_kd,
-        # app_zhu_lai_le(),
+        app_qu_zhong_cai(),
+        app_tian_chi_xiao_xiu_cai(),
+        app_wan_zhe_da_nao(),
+        app_yang_ji_chang(),
+        app_you_xi_he_zi(),
+        app_zhong_qin_kd(),
+        app_zhu_lai_le(),
     ]
 
     return flowfilters
@@ -122,7 +118,7 @@ def app_cai_dan_sp():
     urls = [
         Api(r'/task/sign',log='sign - 签到、金币信息'),
         Api(r'/task/timer_submit',log='看视频 - 得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'}, f_merge_key=r_d),
-        Api(r'/h5/task/submit',log='日常福利 - 观看小视频', body_as_all=True),
+        Api(r'/h5/task/submit',log='日常福利 - 观看小视频', body_as_all=True, f_merge_key=r_d),
         Api(r'/h5/reduce/reward',log='瓜分他人金币', body_as_all=True),
         r'/h5/bubble/prize',
         Api('/h5/reward/prize',log='iphone免费抽'),
@@ -176,8 +172,8 @@ def app_huo_shan():
         Api('/luckycat/hotsoon/v1/task/done/excitation_ad', log='火山-', params_as_all=True, body_as_all=True),
         Api('/luckycat/hotsoon/v1/task/done/daily_read_1m', log='火山-1分钟', params_as_all=True),
         Api('/luckycat/hotsoon/v1/task/done/daily_read_2m', log='火山-2分钟', params_as_all=True),
-        Api('luckycat/v1/task/page/', log='火山-获取任务状态', params_as_all=True),
-        Api('luckycat/v1/task/sign_in/', log='火山-每日签到', params_as_all=True),
+        Api('luckycat/v1/task/page/', log='火山-获取任务状态', params_as_all=True, f_merge_key=r_c_l1),
+        Api('luckycat/v1/task/sign_in/', log='火山-每日签到', params_as_all=True, f_merge_key=r_c_l1),
         Api('luckycat/v1/task/open_treasure_box/', log='火山-开宝箱', params_as_all=True),
         Api('luckycat/v1/task/done_task/', log='火山-开宝箱-看视频', params_as_all=True, body_as_all=True),
         Api('luckycat/v1/landing/add_amount/', log='火山-晒收入', params_as_all=True),
@@ -244,7 +240,7 @@ def app_qu_tou_tiao():
         Api(r'/cash_order/create',log='取现 - 提现', params_as_all=True, f_merge_key=r_u),
 
 
-        Api(r'/sign/sign', log='每日签到', params_as_all=True),
+        Api(r'/sign/sign', log='每日签到', params_as_all=True, f_merge_key=r_c_l1),
         Api(r'/mission/intPointReward', log='时段签到', params_as_all=True, api_ok={'code':[-312]}, f_merge_key=r_c_l1),
         Api(r'/taskcenter/getReward', log='任务完成 - 领金币', params_as_all=True, f_merge_key=r_c_l1),
         r'/x/game-center/user/sign-in',
@@ -252,18 +248,19 @@ def app_qu_tou_tiao():
         Api('/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
         r'/newuserline/activity/signRewardNew',  # 挑战签到
         Api(r'/mission/receiveTreasureBox', log='趣头条-开宝箱', api_ok={'code':[-1710]}),
-        Api(r'/content/readV2',params_as_all=True),
+        Api(r'/content/readV2',params_as_all=True, f_merge_key=r_u),
         Api(r'/app/re/taskCenter/info/v1/get', log='任务信息', params_as_all=True, p_as_all_limit=1, f_merge_key=r_c_l1),
         Api(r'/app/user/info/personal/v1/get', log='用户信息', params_as_all=True, p_as_all_limit=1, f_merge_key=r_c_l1),
-        Api(r'/coin/service', body_as_all=True),
+        Api(r'/coin/service', body_as_all=True, f_merge_key=r_u),
         r'readtimer/report',
         # Api(r'motivateapp/mtvcallback', params_as_all=True),
         Api(r'/x/feed/getReward', log='信息流-惊喜红包', params_as_all=True, api_ok={'code':[-308]}, f_merge_key=r_c_l1),
         Api(r'/lotteryGame/status', log='天天乐-信息'),
         Api(r'/tiantianle/video', log='天天乐-增加机会', params_as_all=True, f_merge_key=r_c_l1),
         Api(r'/lotteryGame/order', log='天天乐-投注'),
-        r'x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
-        r'x/v1/goldpig/withdraw',  # 金猪
+        r'/x/v1/goldpig/foundLostPig', # 金猪 - 找回金猪
+        r'/x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
+        r'/x/v1/goldpig/withdraw',  # 金猪
         Api(r'finance/piggybank/taskReward',api_ok={'code':-2004}),  # 存钱罐
 
         # 游戏 - 种菜
@@ -278,6 +275,10 @@ def app_qu_tou_tiao():
         r'x/tree-game/my-gift-box/receive-prize',
         r'/x/tree-game/task-update',
         r'/x/tree-game/add-task-drips',
+        Api(r'/x/tree-game/task/pop/take-reward',f_b_arg={'task_id'}),#task_id=10,11,12
+        
+        r'/x/tree-game/truck/sold',
+        r'/x/tree-game/truck/ad-award',
         # r'x/tree-game/',
 
         r'x/task/encourage/activity/grant',  # 游戏 - 瓜分
@@ -377,7 +378,7 @@ def app_you_xi_he_zi():
         Api('/chengyu/update_red_packet', log='成语消消乐 - 过关得现金', f_b_arg={'level'}),
         
         # 游戏 - 切菜
-        Api('/x/open/coin/add', log='切菜 - 金币', body_as_all=True),
+        Api('/x/open/coin/add', log='切菜 - 金币', body_as_all=True, f_merge_key=chain_rule(sort_rule(lambda item: int(item['coin_num']), reverse=True),r_u)),
         
         # 游戏 - 糖果
         Api(r'/happy/qtt/userinfo', log='游戏 - 糖果 - 获取open_id', f_p_arg=['ticket']),
@@ -472,8 +473,6 @@ def app_ma_yi_kd():
 def app_tian_chi_xiao_xiu_cai():
     ''' 填词小秀才 '''
     urls = [
-        Api(r'/x/user/token', log='获取g_token', params_as_all=True),
-        Api(r'/x/open/game', log='打开游戏 - 获取ticket', params_as_all=True),
         Api('/api/v1/tczyapp/login', log='填词小秀才 - 获取open_id', f_p_arg=['ticket']),
         Api('/api/v1/tczyapp/sign',log='填词小秀才 - 签到'),
         Api('/api/v1/tczyapp/lottery',log='填词小秀才 - lottery'),
@@ -481,7 +480,7 @@ def app_tian_chi_xiao_xiu_cai():
         Api('/api/v1/tczyapp/get_reward',log='填词小秀才 - 任务完成', f_p_arg=['activity_id']),
         Api('/api/v1/tczyapp/open_redpacket',log='填词小秀才 - 红包'),
         Api('/api/v1/tczyapp/draw_a_char',log='填词小秀才 - 抽字'),
-        Api('/api/v1/tczyapp/add_coin',log='填词小秀才 - add_coin', params_as_all=True),
+        Api('/api/v1/tczyapp/add_coin',log='填词小秀才 - add_coin', params_as_all=True, f_merge_key=r_u),
         
         Api('/api/v1/tczyapp/get_rank',log='填词小秀才 - 判案比赛-排行信息'),
         Api('/api/v1/tczyapp/get_rank_reward',log='填词小秀才 - 判案比赛-领奖'),
@@ -492,6 +491,27 @@ def app_tian_chi_xiao_xiu_cai():
     urls.extend(api_sign())
     return App(urls, 'tian-chi-xiao-xiu-cai')
 
+# ''' 王者大脑app '''
+def app_wan_zhe_da_nao():
+    urls = [
+        Api('/api/v1/z6qtt/login', log='王者大脑 - 获取open_id', f_p_arg=['ticket']),
+        Api('/api/v1/z6qtt/sign',log='王者大脑 - 签到'),
+        Api('/api/v1/z6qtt/lottery',log='王者大脑 - lottery'),
+        Api('/api/v1/z6qtt/exchange',log='王者大脑 - 红包满20元兑换成金币'),
+        Api('/api/v1/z6qtt/get_reward',log='王者大脑 - 任务完成', f_p_arg=['activity_id']),
+        Api('/api/v1/z6qtt/open_redpacket',log='王者大脑 - 红包'),
+        Api('/api/v1/z6qtt/add_coin',log='王者大脑 - add_coin', params_as_all=True, f_merge_key=r_u),
+        
+        Api('/api/v1/z6qtt/get_rank',log='王者大脑 - 判案比赛-排行信息'),
+        Api('/api/v1/z6qtt/get_rank_reward',log='王者大脑 - 判案比赛-领奖'),
+        Api('/api/v1/z6qtt/upload_rank',log='王者大脑 - 判案比赛 - 排行', f_p_arg={'score'}),
+        '/api/v1/z6qtt/'
+    ]
+    urls.extend(api_common())
+    urls.extend(api_sign())
+    return App(urls, 'wan-zhe-da-nao')
+
+# ''' 欢乐养鸡场app '''
 def app_yang_ji_chang():
     ''' 欢乐养鸡场 '''
     urls = [
@@ -547,6 +567,24 @@ def helper_app_from_path(from_or_to_path: str) -> App:
             if new_name in from_or_to_path:
                 return v()
 
+def helper_health_check():
+    pass
+    print('没有配置 f_merge_key')
+    for app in apps():
+        a: App = app
+        it = filter(lambda item: isinstance(item[1], Api), a.flts.items())
+        for _, apii in it:
+            api: Api = apii            
+            if api.f_b_enc or api.f_p_enc or api.params_as_all or api.body_as_all:
+                if api.f_merge_key == None:
+                    print(f'\t{a.app_name}\t{api.url}\t\t') 
+
 
 if __name__ == "__main__":
-    helper_app_from_path('/Users/zhoujie/Desktop/dev/tian-chi-xiao-xiu-cai/session_huawei.py')
+    # helper_app_from_path('/Users/zhoujie/Desktop/dev/tian-chi-xiao-xiu-cai/session_huawei.py')
+
+    # 场景: apps()排序
+    # for k, v in sorted(globals().items(), key=lambda item: item[0]):
+    #     print(f'{k}(),')
+
+    helper_health_check()
