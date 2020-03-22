@@ -219,7 +219,7 @@ def genUsers():
     for session_data in users:
         yield User(session_data)
 
-def run(runner)
+def run(runner, user: User):
     '''
     用户代码
     '''
@@ -230,7 +230,7 @@ def framework_main():
             runner = genRunner(user)
             runner.send(None)
 
-            run(runner)
+            run(runner, user)
         except Exception as e:
             traceback.print_exc()
 

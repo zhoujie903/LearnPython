@@ -47,21 +47,21 @@ def apps():
     quan_ming = App(urls, 'quan-ming')
 
     flowfilters = [
-        app_cai_dan_sp(),
-        app_cheng_yu_qu_wei_xiao(),
-        app_dong_fan_tt(),
-        app_huo_shan(),
-        app_jin_ri_tou_tiao(),
-        app_ma_yi_kd(),
-        app_qu_jian_pan(),
-        app_qu_tou_tiao(),
-        app_qu_zhong_cai(),
-        app_tian_chi_xiao_xiu_cai(),
+        # app_cai_dan_sp(),
+        # app_cheng_yu_qu_wei_xiao(),
+        # app_dong_fan_tt(),
+        # app_huo_shan(),
+        # app_jin_ri_tou_tiao(),
+        # app_ma_yi_kd(),
+        # app_qu_jian_pan(),
+        # app_qu_tou_tiao(),
+        # app_qu_zhong_cai(),
+        # app_tian_chi_xiao_xiu_cai(),
         app_wan_zhe_da_nao(),
-        app_yang_ji_chang(),
-        app_you_xi_he_zi(),
-        app_zhong_qin_kd(),
-        app_zhu_lai_le(),
+        # app_yang_ji_chang(),
+        # app_you_xi_he_zi(),
+        # app_zhong_qin_kd(),
+        # app_zhu_lai_le(),
     ]
 
     return flowfilters
@@ -252,7 +252,7 @@ def app_qu_tou_tiao():
         Api(r'/app/re/taskCenter/info/v1/get', log='任务信息', params_as_all=True, p_as_all_limit=1, f_merge_key=r_c_l1),
         Api(r'/app/user/info/personal/v1/get', log='用户信息', params_as_all=True, p_as_all_limit=1, f_merge_key=r_c_l1),
         Api(r'/coin/service', body_as_all=True, f_merge_key=r_u),
-        r'readtimer/report',
+        r'/readtimer/report',
         # Api(r'motivateapp/mtvcallback', params_as_all=True),
         Api(r'/x/feed/getReward', log='信息流-惊喜红包', params_as_all=True, api_ok={'code':[-308]}, f_merge_key=r_c_l1),
         Api(r'/lotteryGame/status', log='天天乐-信息'),
@@ -261,27 +261,27 @@ def app_qu_tou_tiao():
         r'/x/v1/goldpig/foundLostPig', # 金猪 - 找回金猪
         r'/x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
         r'/x/v1/goldpig/withdraw',  # 金猪
-        Api(r'finance/piggybank/taskReward',api_ok={'code':-2004}),  # 存钱罐
+        Api(r'/finance/piggybank/taskReward',api_ok={'code':-2004}),  # 存钱罐
 
         # 游戏 - 种菜
-        r'x/tree-game/task-list',
-        r'x/tree-game/left-plant-num',
-        r'x/tree-game/plant-ok',
-        r'x/tree-game/add-plant',
-        r'x/tree-game/fertilizer/add',
-        r'x/tree-game/fertilizer/use',
-        r'x/tree-game/water-plants',
-        r'x/tree-game/my-gift-box/draw-lottery',
-        r'x/tree-game/my-gift-box/receive-prize',
+        r'/x/tree-game/task-list',
+        r'/x/tree-game/left-plant-num',
+        r'/x/tree-game/plant-ok',
+        r'/x/tree-game/add-plant',
+        r'/x/tree-game/fertilizer/add',
+        r'/x/tree-game/fertilizer/use',
+        r'/x/tree-game/water-plants',
+        r'/x/tree-game/my-gift-box/draw-lottery',
+        r'/x/tree-game/my-gift-box/receive-prize',
         r'/x/tree-game/task-update',
         r'/x/tree-game/add-task-drips',
         Api(r'/x/tree-game/task/pop/take-reward',f_b_arg={'task_id'}),#task_id=10,11,12
         
         r'/x/tree-game/truck/sold',
         r'/x/tree-game/truck/ad-award',
-        # r'x/tree-game/',
+        # r'/x/tree-game/',
 
-        r'x/task/encourage/activity/grant',  # 游戏 - 瓜分
+        r'/x/task/encourage/activity/grant',  # 游戏 - 瓜分
         r'api/loginGame',
         r'api/qttAddCoin',
 
@@ -541,7 +541,7 @@ def app_zhong_qin_kd():
     ''' 中青看点 '''
     urls = [
         Api(r'getTimingRedReward.json', f_name='hourly_sign', log='时段签到'),
-        r'webApi/AnswerReward/',
+        r'/webApi/AnswerReward/',
         Api(r'/v5/Game/GameVideoReward.json'),
         Api(r'/taskCenter/getAdVideoReward',log='任务中心 - 看视频'),
         Api(r'/WebApi/invite/openHourRed',log='开宝箱', body_as_all=True),
@@ -569,15 +569,42 @@ def helper_app_from_path(from_or_to_path: str) -> App:
 
 def helper_health_check():
     pass
-    print('没有配置 f_merge_key')
+    
+    no_merge_rule = {}
+    no_start_root = {}
     for app in apps():
         a: App = app
+
+        for _, apii in a.flts.items():
+            api: Api = apii
+            s: str = '/'
+            if isinstance(api, str):
+                s = apii
+            else:
+                s = api.url
+            if not s.startswith('/'):
+                l = no_start_root.setdefault(a.app_name, [])
+                l.append(s)
+
         it = filter(lambda item: isinstance(item[1], Api), a.flts.items())
         for _, apii in it:
             api: Api = apii            
             if api.f_b_enc or api.f_p_enc or api.params_as_all or api.body_as_all:
                 if api.f_merge_key == None:
-                    print(f'\t{a.app_name}\t{api.url}\t\t') 
+                    l = no_merge_rule.setdefault(a.app_name, [])                    
+                    l.append(api)
+
+    if len(no_merge_rule):
+        print('没有配置 f_merge_key')
+        for app_name, apis in no_merge_rule.items():
+            for api in apis:
+                print(f'\t{app_name}\t{api.url}')
+
+    if len(no_start_root):
+        print('没有以 / 开头的URL')
+        for app_name, apis in no_start_root.items():
+            for url in apis:
+                print(f'\t{app_name}\t{url}')
 
 
 if __name__ == "__main__":
