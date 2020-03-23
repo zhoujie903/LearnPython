@@ -47,21 +47,21 @@ def apps():
     quan_ming = App(urls, 'quan-ming')
 
     flowfilters = [
-        # app_cai_dan_sp(),
-        # app_cheng_yu_qu_wei_xiao(),
-        # app_dong_fan_tt(),
-        # app_huo_shan(),
-        # app_jin_ri_tou_tiao(),
-        # app_ma_yi_kd(),
-        # app_qu_jian_pan(),
-        # app_qu_tou_tiao(),
-        # app_qu_zhong_cai(),
-        # app_tian_chi_xiao_xiu_cai(),
+        app_cai_dan_sp(),
+        app_cheng_yu_qu_wei_xiao(),
+        app_dong_fan_tt(),
+        app_huo_shan(),
+        app_jin_ri_tou_tiao(),
+        app_ma_yi_kd(),
+        app_qu_jian_pan(),
+        app_qu_tou_tiao(),
+        app_qu_zhong_cai(),
+        app_tian_chi_xiao_xiu_cai(),
         app_wan_zhe_da_nao(),
-        # app_yang_ji_chang(),
-        # app_you_xi_he_zi(),
-        # app_zhong_qin_kd(),
-        # app_zhu_lai_le(),
+        app_yang_ji_chang(),
+        app_you_xi_he_zi(),
+        app_zhong_qin_kd(),
+        app_zhu_lai_le(),
     ]
 
     return flowfilters
@@ -237,7 +237,7 @@ def app_qu_tou_tiao():
         Api(r'/cash/order/list',log='取现 - 提现列表'),
         Api(r'/member/getMemberInfo',log='取现 - 用户账户信息'),
         Api(r'/mall/item/ItemList',log='取现 - 可取现金额列表'),
-        Api(r'/cash_order/create',log='取现 - 提现', params_as_all=True, f_merge_key=r_u),
+        Api(r'/cash_order/create',log='取现 - 提现', f_p_enc={'qdata'}, f_merge_key=r_u),
 
 
         Api(r'/sign/sign', log='每日签到', params_as_all=True, f_merge_key=r_c_l1),
@@ -253,15 +253,23 @@ def app_qu_tou_tiao():
         Api(r'/app/user/info/personal/v1/get', log='用户信息', params_as_all=True, p_as_all_limit=1, f_merge_key=r_c_l1),
         Api(r'/coin/service', body_as_all=True, f_merge_key=r_u),
         r'/readtimer/report',
+
         # Api(r'motivateapp/mtvcallback', params_as_all=True),
         Api(r'/x/feed/getReward', log='信息流-惊喜红包', params_as_all=True, api_ok={'code':[-308]}, f_merge_key=r_c_l1),
+        
+        # 天天乐 
         Api(r'/lotteryGame/status', log='天天乐-信息'),
         Api(r'/tiantianle/video', log='天天乐-增加机会', params_as_all=True, f_merge_key=r_c_l1),
         Api(r'/lotteryGame/order', log='天天乐-投注'),
+
+        # 金猪 withdraw:(从银行)取钱 
         r'/x/v1/goldpig/foundLostPig', # 金猪 - 找回金猪
         r'/x/v1/goldpig/bubbleWithdraw',  # 金猪 - 看视频
         r'/x/v1/goldpig/withdraw',  # 金猪
+
+        # 存钱罐 
         Api(r'/finance/piggybank/taskReward',api_ok={'code':-2004}),  # 存钱罐
+        Api(r'/finance/piggybank/draw', log='存钱罐 - 活期金币转出到钱包', f_b_arg={'amount'}),
 
         # 游戏 - 种菜
         r'/x/tree-game/task-list',
@@ -571,22 +579,10 @@ def helper_health_check():
     pass
     
     no_merge_rule = {}
-    no_start_root = {}
     for app in apps():
         a: App = app
 
-        for _, apii in a.flts.items():
-            api: Api = apii
-            s: str = '/'
-            if isinstance(api, str):
-                s = apii
-            else:
-                s = api.url
-            if not s.startswith('/'):
-                l = no_start_root.setdefault(a.app_name, [])
-                l.append(s)
-
-        it = filter(lambda item: isinstance(item[1], Api), a.flts.items())
+        it = filter(lambda item: isinstance(item[1], Api), a.url_a_dict.items())
         for _, apii in it:
             api: Api = apii            
             if api.f_b_enc or api.f_p_enc or api.params_as_all or api.body_as_all:
@@ -599,12 +595,6 @@ def helper_health_check():
         for app_name, apis in no_merge_rule.items():
             for api in apis:
                 print(f'\t{app_name}\t{api.url}')
-
-    if len(no_start_root):
-        print('没有以 / 开头的URL')
-        for app_name, apis in no_start_root.items():
-            for url in apis:
-                print(f'\t{app_name}\t{url}')
 
 
 if __name__ == "__main__":

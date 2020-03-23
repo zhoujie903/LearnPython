@@ -1,6 +1,8 @@
 __all__ = ['Api', 'App']
 
-from mitmproxy import ctx, flowfilter, http
+from collections import OrderedDict
+
+from mitmproxy import flowfilter, http
 
 
 class Api(object):
@@ -22,7 +24,7 @@ class Api(object):
             f_b_kwarg: dict = None, 
             content_type=''
         ):
-        self.url = url
+        self.url = url if url[0] == '/' else '/'+url
         self.url_path = ''
         self.f_name = f_name
         self._name = ''
@@ -99,32 +101,48 @@ class Api(object):
 class App(object):
     def __init__(self, urls, app_name='', api_ok={'code': 0}):
         self.app_name = app_name
+        self.current_api = None
         self.api_ok = dict()
         self.api_ok['app_ok'] = api_ok
         self.flts = dict()
-        self.url_api_dict = dict()
+        self.url_a_dict = OrderedDict()
         for u in urls:
-            url = u
             if isinstance(u, Api):
                 url = u.url
+                self.url_a_dict[url] = u
                 if len(u.api_ok):
-                    # Todu:
                     self.api_ok[url] = u.api_ok
-                self.url_api_dict[url] = u.f_merge_key
-            flt = flowfilter.parse(url)
-            self.flts[flt] = u
-        self.current_api = None
 
-    def __call__(self, f):
+            elif isinstance(u, str):
+                url = u if u[0] == '/' else '/' + u
+                self.url_a_dict[url] = u
+
+        self.__temp = list(self.url_a_dict.keys()) 
+
+    def __call__(self, f: http.HTTPFlow):
         for flt, api in self.flts.items():
             if flt(f):
-                if isinstance(api, str):
-                    api = Api(api)
-                    self.flts[flt] = api
                 self.current_api = api
-                # Todu
-                # self.url_api_dict[] = api
                 return True
+        if len(self.__temp) == 0:
+            print('*'*100)
+            return False
+
+        for path in self.__temp:
+            a = self.url_a_dict[path]
+            r = f.request
+            api = a
+            if isinstance(a, str):
+                api = Api(a)
+            
+            self.__temp.remove(path)
+            flt = flowfilter.parse(api.url)
+            self.flts[flt] = api
+
+            if r.path.startswith(path):
+                self.current_api = api
+                return True
+            
         return False
 
     def add(self, api: Api):
@@ -133,4 +151,9 @@ class App(object):
 
 
     def merge_rules(self):
-        return self.url_api_dict
+        url_api_dict = dict()
+        for url, a in self.url_a_dict.items():
+            if isinstance(a, Api):
+                api: Api = a
+                url_api_dict[url] = api.f_merge_key
+        return url_api_dict
