@@ -47,21 +47,21 @@ def apps():
     quan_ming = App(urls, 'quan-ming')
 
     flowfilters = [
-        app_cai_dan_sp(),
-        app_cheng_yu_qu_wei_xiao(),
-        app_dong_fan_tt(),
-        app_huo_shan(),
-        app_jin_ri_tou_tiao(),
-        app_ma_yi_kd(),
-        app_qu_jian_pan(),
+        # app_cai_dan_sp(),
+        # app_cheng_yu_qu_wei_xiao(),
+        # app_dong_fan_tt(),
+        # app_huo_shan(),
+        # app_jin_ri_tou_tiao(),
+        # app_ma_yi_kd(),
+        # app_qu_jian_pan(),
         app_qu_tou_tiao(),
-        app_qu_zhong_cai(),
-        app_tian_chi_xiao_xiu_cai(),
-        app_wan_zhe_da_nao(),
-        app_yang_ji_chang(),
-        app_you_xi_he_zi(),
-        app_zhong_qin_kd(),
-        app_zhu_lai_le(),
+        # app_qu_zhong_cai(),
+        # app_tian_chi_xiao_xiu_cai(),
+        # app_wan_zhe_da_nao(),
+        # app_yang_ji_chang(),
+        # app_you_xi_he_zi(),
+        # app_zhong_qin_kd(),
+        # app_zhu_lai_le(),
     ]
 
     return flowfilters
@@ -314,8 +314,20 @@ def app_qu_tou_tiao():
         Api(r'/qtt/coin/withdraw', log='游戏 - 钓鱼 - 获取金币'),            
 
         # 游戏 - 大脑
-        Api(r'/api/v1/z6h5/sign', log='游戏 - 大脑 - 签到'),            
-        Api(r'/api/v1/z6h5/lottery', log='游戏 - 大脑 - 获取红包'),            
+        Api('/api/v1/z6h5/sign', log='游戏 - 大脑 - 签到'),            
+        Api('/api/v1/z6h5/lottery', log='游戏 - 大脑 - 获取红包'),            
+        Api('/api/v1/z6h5/login', log='王者大脑 - 获取open_id', f_p_arg=['ticket']),
+        Api('/api/v1/z6h5/sign',log='王者大脑 - 签到'),
+        Api('/api/v1/z6h5/lottery',log='王者大脑 - lottery'),
+        Api('/api/v1/z6h5/exchange',log='王者大脑 - 红包满20元兑换成金币'),
+        Api('/api/v1/z6h5/get_reward',log='王者大脑 - 任务完成', f_p_arg=['activity_id']),
+        Api('/api/v1/z6h5/open_redpacket',log='王者大脑 - 红包'),
+        Api('/api/v1/z6h5/add_coin',log='王者大脑 - add_coin', params_as_all=True, f_merge_key=r_u),
+        
+        Api('/api/v1/z6h5/get_rank',log='王者大脑 - 判案比赛-排行信息'),
+        Api('/api/v1/z6h5/get_rank_reward',log='王者大脑 - 判案比赛-领奖'),
+        Api('/api/v1/z6h5/upload_rank',log='王者大脑 - 判案比赛 - 排行', f_p_arg={'score'}),
+        '/api/v1/z6h5/',
 
         Api(r'/press_trigger',log='幸运大转盘'),
 

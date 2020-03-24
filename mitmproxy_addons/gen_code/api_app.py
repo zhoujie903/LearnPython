@@ -104,7 +104,7 @@ class App(object):
         self.current_api = None
         self.api_ok = dict()
         self.api_ok['app_ok'] = api_ok
-        self.flts = dict()
+        self.flts = []
         self.url_a_dict = OrderedDict()
         for u in urls:
             if isinstance(u, Api):
@@ -120,12 +120,12 @@ class App(object):
         self.__temp = list(self.url_a_dict.keys()) 
 
     def __call__(self, f: http.HTTPFlow):
-        for flt, api in self.flts.items():
+        for flt, api in self.flts:
             if flt(f):
                 self.current_api = api
                 return True
         if len(self.__temp) == 0:
-            print('*'*100)
+            # print('*'*100)
             return False
 
         for path in self.__temp:
@@ -137,7 +137,7 @@ class App(object):
             
             self.__temp.remove(path)
             flt = flowfilter.parse(api.url)
-            self.flts[flt] = api
+            self.flts.append((flt, api))
 
             if r.path.startswith(path):
                 self.current_api = api
@@ -147,7 +147,8 @@ class App(object):
 
     def add(self, api: Api):
         flt = flowfilter.parse(api.url)
-        self.flts[flt] = api
+        # self.flts[flt] = api
+        self.flts.append((flt, api))
 
 
     def merge_rules(self):

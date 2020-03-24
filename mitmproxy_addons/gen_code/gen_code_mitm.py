@@ -160,7 +160,7 @@ class GenCode(object):
 
                 # ----------- 报告 - 加密数据未采集 ----------- #
                 need_ = set()
-                for _, api in app_filter.flts.items():
+                for _, api in app_filter.flts:
                     if isinstance(api, Api):
                         to_session: AppSession = merge_tool.to_seession
                         url_path = api.url_path if api.url_path else api.url
