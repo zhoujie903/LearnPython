@@ -1,18 +1,21 @@
 __all__ = ['Api', 'App']
 
 from collections import OrderedDict
+from typing import List, Tuple, Dict
+from typing import Callable, Mapping, Optional, Sequence, Type, Union
 
 from mitmproxy import flowfilter, http
+from mitmproxy.flowfilter import TFilter
 
 
 class Api(object):
     def __init__(
             self, 
-            url, 
-            f_name='', 
-            log='', 
-            api_ok={}, 
-            f_merge_key=None, 
+            url: str, 
+            f_name: str='', 
+            log: str='', 
+            api_ok: Mapping[str, Sequence[int or str]]={}, 
+            f_merge_key: Callable=None, 
             params_as_all=False, 
             p_as_all_limit=50, 
             body_as_all=False, 
@@ -30,7 +33,7 @@ class Api(object):
         self._name = ''
         self.log = log
         self.api_ok = api_ok
-        self.f_merge_key = f_merge_key
+        self.f_merge_key: Callable = f_merge_key
 
         self.f_p_arg = f_p_arg
         self.f_p_enc = f_p_enc
@@ -104,8 +107,8 @@ class App(object):
         self.current_api = None
         self.api_ok = dict()
         self.api_ok['app_ok'] = api_ok
-        self.flts = []
-        self.url_a_dict = OrderedDict()
+        self.flts: List[Tuple[TFilter, Api]] = []
+        self.url_a_dict: Mapping[str, Union[str, Api]] = OrderedDict()
         for u in urls:
             if isinstance(u, Api):
                 url = u.url
@@ -147,11 +150,10 @@ class App(object):
 
     def add(self, api: Api):
         flt = flowfilter.parse(api.url)
-        # self.flts[flt] = api
         self.flts.append((flt, api))
 
 
-    def merge_rules(self):
+    def merge_rules(self) -> Dict[str, Callable[[list, list], list]]:
         url_api_dict = dict()
         for url, a in self.url_a_dict.items():
             if isinstance(a, Api):

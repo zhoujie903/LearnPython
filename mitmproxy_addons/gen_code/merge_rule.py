@@ -1,7 +1,7 @@
-
+from typing import List, Callable
 
 class MergeRule(object):
-    def __call__(self, from_data, to_data):
+    def __call__(self, from_data: list, to_data: list) -> list:
         merged_data = []
         merged_data.extend(to_data)
         merged_data.extend(from_data)
@@ -12,7 +12,7 @@ class NumLimitRule(MergeRule):
     def __init__(self, num_limit):
         self.num_limit = num_limit
 
-    def __call__(self, from_data, to_data):
+    def __call__(self, from_data: list, to_data: list) -> list:
         merged_data = super().__call__(from_data, to_data)
         return merged_data[:self.num_limit]
 
@@ -22,13 +22,13 @@ class SortRule(MergeRule):
         self.key = key
         self.reverse = reverse
 
-    def __call__(self, from_data, to_data):
+    def __call__(self, from_data: list, to_data: list) -> list:
         merged_data = super().__call__(from_data, to_data)
         merged_data.sort(key=self.key, reverse=self.reverse)
         return merged_data
 
 
-def common_rule():
+def common_rule() -> Callable[[list, list], list]:
     '''
     1. 合并全部数据
     2. 以新到旧顺序
@@ -44,7 +44,7 @@ def common_rule():
     return merge
 
 
-def limit_rule(limit=50):
+def limit_rule(limit=50) -> Callable[[list, list], list]:
     '''
     限制数据数量
     '''
@@ -60,7 +60,7 @@ def limit_rule(limit=50):
     return merge
 
 
-def sort_rule(key=None, reverse=False):
+def sort_rule(key=None, reverse=False) -> Callable[[list, list], list]:
     '''
     合并后数据排序
     '''
@@ -76,7 +76,7 @@ def sort_rule(key=None, reverse=False):
     return merge
 
 
-def unique_rule():
+def unique_rule() -> Callable[[list, list], list]:
     '''
     去除重复的数据
     '''
@@ -95,7 +95,7 @@ def unique_rule():
     return merge
 
 
-def chain_rule(*rules):
+def chain_rule(*rules) -> Callable[[list, list], list]:
     def merge(from_data, to_data):
         f = from_data
         t = to_data

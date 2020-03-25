@@ -540,10 +540,10 @@ if __name__ == "__main__":
     # main_merge_all(api_dir, dev_dir)
     # exit()
 
-    from_path = '/Users/zhoujie/Desktop/dev/tian-chi-xiao-xiu-cai/session_huawei.py'
+    from_path = '/Users/zhoujie/Desktop/dev/qu-jian-pan/session_huawei.py'
 
     # 场景：同名session从api同步到dev
-    main_merge_to_same_session(from_path)
+    # main_merge_to_same_session(from_path)
 
     # 场景：不同session之间合并
     main_merge_to_other_session(from_path)

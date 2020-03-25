@@ -47,14 +47,14 @@ def apps():
     quan_ming = App(urls, 'quan-ming')
 
     flowfilters = [
-        # app_cai_dan_sp(),
+        app_cai_dan_sp(),
         # app_cheng_yu_qu_wei_xiao(),
         # app_dong_fan_tt(),
         # app_huo_shan(),
         # app_jin_ri_tou_tiao(),
         # app_ma_yi_kd(),
         # app_qu_jian_pan(),
-        app_qu_tou_tiao(),
+        # app_qu_tou_tiao(),
         # app_qu_zhong_cai(),
         # app_tian_chi_xiao_xiu_cai(),
         # app_wan_zhe_da_nao(),
@@ -116,16 +116,11 @@ def api_sign():
 def app_cai_dan_sp():
     ''' 彩蛋视频 '''
     urls = [
-        Api(r'/task/sign',log='sign - 签到、金币信息'),
-        Api(r'/task/timer_submit',log='看视频 - 得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'}, f_merge_key=r_d),
-        Api(r'/h5/task/submit',log='日常福利 - 观看小视频', body_as_all=True, f_merge_key=r_d),
-        Api(r'/h5/reduce/reward',log='瓜分他人金币', body_as_all=True),
-        r'/h5/bubble/prize',
+        Api('/task/sign',log='sign - 签到、金币信息'),
+        Api('/task/timer_submit',log='看视频 - 得金币', f_b_enc={'qdata'}, f_b_arg={'qdata'}, f_merge_key=r_d),
+        Api('/h5/task/submit',log='日常福利 - 观看小视频', body_as_all=True, f_merge_key=r_d),
+        Api('/h5/reduce/reward',log='瓜分他人金币', body_as_all=True),
         Api('/h5/reward/prize',log='iphone免费抽'),
-        Api('/qapptoken', log='获取access_token'),
-        Api('/withdraw/getCoinLog',log='彩蛋视频 - 金币明细', f_p_arg=['page','page_size']),
-        Api('/withdraw/order/listApp',log='彩蛋视频 - 提现列表'),
-        Api('/withdraw/order/create',log='彩蛋视频 - 提现', f_b_arg=['sku_id']),
     ]
     urls.extend(api_common())
     return App(urls, 'cai-dan-sp')
@@ -210,6 +205,7 @@ def app_qu_jian_pan():
         r'/gk/game/savingsBank/exchangePigMoney',
         Api(r'/gk/game/savingsBank/unlockDouble',f_b_arg={'taskType'}, content_type='json'),
 
+        #  大转盘
         r'/gk/draw/info',
         r'/gk/draw/extract',
         Api('/gk/draw/double', f_b_arg={'ticket'}),
@@ -221,10 +217,12 @@ def app_qu_jian_pan():
         Api('/gk/game/bianlidian/draw/double', f_b_arg={'ticket'}),
         Api('/gk/game/bianlidian/receiveGift', log='便利店 - xxx金币礼包碎片', f_b_arg={'ticket'}),
         Api('/gk/game/bianlidian/receiveMediumCoin', log='便利店 - 随机金币奖励', f_b_arg={'ticket'}),
-        r'/gk/garbage/',
         r'/gk/game/dadishu/',
         r'/gk/game/bianlidian/',
         r'/qujianpan/',
+
+        # 已没有入口
+        # r'/gk/garbage/',
     ]
     return App(urls, 'qu-jian-pan')
 
@@ -326,7 +324,7 @@ def app_qu_tou_tiao():
         
         Api('/api/v1/z6h5/get_rank',log='王者大脑 - 判案比赛-排行信息'),
         Api('/api/v1/z6h5/get_rank_reward',log='王者大脑 - 判案比赛-领奖'),
-        Api('/api/v1/z6h5/upload_rank',log='王者大脑 - 判案比赛 - 排行', f_p_arg={'score'}),
+        Api('/api/v1/z6h5/upload_rank',log='王者大脑 - 判案比赛 - 排行', f_p_arg=['score']),
         '/api/v1/z6h5/',
 
         Api(r'/press_trigger',log='幸运大转盘'),
@@ -384,8 +382,8 @@ def app_you_xi_he_zi():
         Api('/x/task/v3/list', log='游戏任务列表'),
         Api('/x/cash/time-bonus/info', log='时段金币 - 信息'),
         Api('/x/cash/time-bonus/get', log='时段金币 - 领取', f_b_arg={'index'}),
-        # Api('/x/cash/task-bonus/amount', log='红包 - 领取', f_p_arg={'cnt'}),
-        Api('/x/cash/task-bonus/get', log='红包 - 领取', f_p_arg={'cnt'}),
+        # Api('/x/cash/task-bonus/amount', log='红包 - 领取', f_p_arg=['cnt']),
+        Api('/x/cash/task-bonus/get', log='红包 - 领取', f_p_arg=['cnt']),
         Api('/x/task/v2/take-reward', log='任务完成 - 领金币', f_name='game_take_reward',f_b_arg={'task_id'}),
 
         # 游戏 - 成语大富豪
@@ -416,11 +414,14 @@ def app_you_xi_he_zi():
 def app_jin_ri_tou_tiao():
     ''' 今日头条 '''
     urls = [
+        'score_task/v2',
         'score_task/v1/task/page_data/',
         'score_task/v1/task/sign_in/',
         'score_task/v1/task/open_treasure_box/',
-        Api('score_task/v1/task/new_excitation_ad/', {"score_source":None}),            
-        'score_task/v1/task/get_read_bonus/',
+        Api('/score_task/v1/task/open_treasure_box', f_name='task_open_treasure_box'),            
+        # Api('score_task/v1/task/new_excitation_ad/', {"score_source":None}),            
+        Api('/score_task/v1/task/new_excitation_ad', f_name='task_new_excitation_ad', f_b_arg={'task_id'}),            
+        Api('/score_task/v1/task/get_read_bonus', f_name='task_get_read_bonus', f_p_arg=['group_id']),            
         'score_task/v1/task/done_task/',
         'score_task/v1/landing/add_amount/',
         'score_task/v1/user/profit_detail/',
@@ -443,6 +444,7 @@ def app_jin_ri_tou_tiao():
         'api/news/feed/v47/',  # 安卓视频tab页
         'api/news/feed/v64/',  # ios视频tab页
         'api/search/content/',
+        'score_task/v1',
     ]
     return App(urls, 'jin-ri-tou-tiao')
 
@@ -504,7 +506,7 @@ def app_tian_chi_xiao_xiu_cai():
         
         Api('/api/v1/tczyapp/get_rank',log='填词小秀才 - 判案比赛-排行信息'),
         Api('/api/v1/tczyapp/get_rank_reward',log='填词小秀才 - 判案比赛-领奖'),
-        Api('/api/v1/tczyapp/upload_rank',log='填词小秀才 - 判案比赛 - 排行', f_p_arg={'score'}),
+        Api('/api/v1/tczyapp/upload_rank',log='填词小秀才 - 判案比赛 - 排行', f_p_arg=['score']),
         '/api/v1/tczyapp/'
     ]
     urls.extend(api_common())
@@ -524,7 +526,7 @@ def app_wan_zhe_da_nao():
         
         Api('/api/v1/z6qtt/get_rank',log='王者大脑 - 判案比赛-排行信息'),
         Api('/api/v1/z6qtt/get_rank_reward',log='王者大脑 - 判案比赛-领奖'),
-        Api('/api/v1/z6qtt/upload_rank',log='王者大脑 - 判案比赛 - 排行', f_p_arg={'score'}),
+        Api('/api/v1/z6qtt/upload_rank',log='王者大脑 - 判案比赛 - 排行', f_p_arg=['score']),
         '/api/v1/z6qtt/'
     ]
     urls.extend(api_common())
