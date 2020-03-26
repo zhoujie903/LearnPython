@@ -64,23 +64,32 @@ class User(object):
 
     def __parse(self, url, res, p):
         result = res.text
+        j = ""
         try:
             j = json.loads(result)
-            if self.api_ok['app_ok']['code'] == j['code']:
-                p(j)
-            else:
-                _, path = self.__urlparsed(url)
-
-                if j['code'] in self.api_ok.get(path, {'code':9999999})['code']:
+            app_ok_key = self.api_ok['app_ok_key']
+            for k in app_ok_key:
+                if j.get(k, 9999999) in self.api_ok['app_ok']:
                     p(j)
-                else:
-                    self.api_errors[path] = j
-                    logging.error(f"\033[1;31m {j} \033[0m")
-        except :
-            p(result) 
-        print()
-        return result
+                    return result
 
+            _, path = self.__urlparsed(url)
+            for k in app_ok_key:
+                codes = self.api_ok.get(path, {k:[88888888]})[k]
+                if j.get(k, 9999999) in codes:
+                    p(j)
+                    return result
+
+            self.api_errors[path] = j
+            logging.error(f"\033[1;31m {j} \033[0m")
+        except json.JSONDecodeError:
+            p(result)
+        except :
+            logging.error(f"\033[1;31m {j} \033[0m")
+        finally:
+            print()
+        return result
+        
     def _post(self, url, p=logging.warning, **kwargs):
         r"""Sends a POST request.
 

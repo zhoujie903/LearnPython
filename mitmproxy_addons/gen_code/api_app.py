@@ -102,11 +102,12 @@ class Api(object):
 
 
 class App(object):
-    def __init__(self, urls, app_name='', api_ok={'code': 0}):
+    def __init__(self, urls, app_name='', api_ok=[0], api_ok_key=['code']):
         self.app_name = app_name
         self.current_api = None
         self.api_ok = dict()
         self.api_ok['app_ok'] = api_ok
+        self.api_ok['app_ok_key'] = api_ok_key
         self.flts: List[Tuple[TFilter, Api]] = []
         self.url_a_dict: Mapping[str, Union[str, Api]] = OrderedDict()
         for u in urls:

@@ -240,6 +240,9 @@ class AppSession():
                 gfile = self.file
             else:
                 gfile = self.file.parent/f'session_{self.session_id}_{name}.py'
+
+        if not gfile.parent.exists():
+            gfile.parent.mkdir(parents=True, exist_ok=True)
         gen_file_from_jinja2(tfile, gfile, seq=var_dict)
         pass
 
