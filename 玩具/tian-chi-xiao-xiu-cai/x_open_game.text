@@ -1,0 +1,135 @@
+# 02-12 20:02:05---------------------
+
+def x_open_game(self, app_id):
+
+    headers = {
+		":authority": "newidea4-gamecenter-backend.1sapp.com",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"oaid": "ef8a43971141a8c5",
+		"accept-encoding": "gzip",
+		"user-agent": "okhttp/3.11.0"
+	}
+
+    params = {
+		"dtu": "10530",
+		"sign": "571ff924767e9e4d675ff9444966818a",
+		"lon": "0.0",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"deviceCode": "869161028541084",
+		"source": "287001",
+		"versionName": "1.2.0.000.0208.1421",
+		"uuid": "2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"version": "10200000",
+		"platform": "gapp",
+		"network": "wifi",
+		"app_name": "game_tcxxc",
+		"g_token": "2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7ANDsBfL6nRAGCJWvWgr6KNrjKUr6xJ9ftUr7x1uGl3rvlGWvK89jTk98KJcp==",
+		"v": "10200000",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"vn": "1.2.0.000.0208.1421",
+		"OSVersion": "8.0.0",
+		"time": "1581508925372",
+		"app_id": "a3NqMwuuoZCC",
+		"lat": "0.0",
+		"oaid": "ef8a43971141a8c5",
+		"dc": "869161028541084"
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/open/game'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_open_game(self, app_id):
+    logging.info('打开游戏 - 获取ticket')
+
+    url = self.urls['/x/open/game']
+
+    params = self._params_from(url)
+    params['app_id'] = app_id
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508925,"data":{"url":"https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC\u0026app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP\u0026appid=a3NqMwuuoZCC\u0026dc=869161028541084\u0026dtu=10530\u0026ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D\u0026origin_type=0\u0026platform=gapp\u0026sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js\u0026sign=455964b06b72003242a027c2c799b63f\u0026source=287001\u0026tag_id=\u0026ticket=t11XfsHWUrQyYdQvS2Qmu\u0026time=1581508925\u0026uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6","name":"填词小秀才发行app","icon":"http://newidea4-gamecenter-cms.1sapp.com/icons/20200211/11XfkpaNyv9eCSoDu8tP.png","screen_location":2,"qruntime":"{\"enable\":false,\"hot_start\":false,\"unify_load\":false,\"menu\":false}","countdown":{"is_exist":false,"duration":0,"reward_coin":0,"status":0}}}
+# ---------------------# 02-12 20:02:05---------------------
+
+def x_open_game(self, app_id):
+
+    headers = {
+		":authority": "newidea4-gamecenter-backend.1sapp.com",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"oaid": "ef8a43971141a8c5",
+		"accept-encoding": "gzip",
+		"user-agent": "okhttp/3.11.0"
+	}
+
+    params = {
+		"dtu": "10530",
+		"sign": "bf73d65cce0040b4faa8e98c881db58f",
+		"lon": "0.0",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"deviceCode": "869161028541084",
+		"source": "287001",
+		"versionName": "1.2.0.000.0208.1421",
+		"uuid": "2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"version": "10200000",
+		"platform": "gapp",
+		"network": "wifi",
+		"app_name": "game_tcxxc",
+		"g_token": "2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7ANDsBfL6nRAGCJWvWgr6KNrjKUr6xJ9ftUr7x1uGl3rvlGWvK89jTk98KJcp==",
+		"v": "10200000",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"vn": "1.2.0.000.0208.1421",
+		"OSVersion": "8.0.0",
+		"time": "1581508925430",
+		"app_id": "a3NqMwuuoZCC",
+		"lat": "0.0",
+		"oaid": "ef8a43971141a8c5",
+		"dc": "869161028541084"
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/open/game'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_open_game(self, app_id):
+    logging.info('打开游戏 - 获取ticket')
+
+    url = self.urls['/x/open/game']
+
+    params = self._params_from(url)
+    params['app_id'] = app_id
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508925,"data":{"url":"https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC\u0026app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP\u0026appid=a3NqMwuuoZCC\u0026dc=869161028541084\u0026dtu=10530\u0026ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D\u0026origin_type=0\u0026platform=gapp\u0026sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js\u0026sign=65fb2ddb70975646c2019603f7b2abee\u0026source=287001\u0026tag_id=\u0026ticket=t11XfsHWVk6KzakVireDV\u0026time=1581508925\u0026uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6","name":"填词小秀才发行app","icon":"http://newidea4-gamecenter-cms.1sapp.com/icons/20200211/11XfkpaNyv9eCSoDu8tP.png","screen_location":2,"qruntime":"{\"enable\":false,\"hot_start\":false,\"unify_load\":false,\"menu\":false}","countdown":{"is_exist":false,"duration":0,"reward_coin":0,"status":0}}}
+# ---------------------

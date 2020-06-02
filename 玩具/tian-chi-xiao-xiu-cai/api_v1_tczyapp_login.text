@@ -1,0 +1,56 @@
+# 02-12 20:02:25---------------------
+
+def api_v1_tczyapp_login(self, ticket):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"platform": "gapp",
+		"ticket": "t11XfsHWUrQyYdQvS2Qmu",
+		"pid": "1575266631",
+		"pt": "1",
+		"cver": "5",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/login'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_login(self, ticket):
+    logging.info('填词小秀才 - 获取open_id')
+
+    url = self.urls['/api/v1/tczyapp/login']
+
+    params = self._params_from(url)
+    params['ticket'] = ticket
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":1,"data":{"puid":934171,"open_id":"u11Xfqz6Azr1brU5aQ2o9","nickname":"用户453580278","avatar":"https:\/\/static-oss.qutoutiao.net\/jpg\/touxiang.jpg","cash":0,"create_time":1581488993,"to_get_bag":0,"data":"{\"data\":{\"level\":5},\"power\":60,\"newPower\":10,\"powerTime\":1581504171691,\"maxVideoPower\":0,\"isNewPalyer\":false,\"cash\":0,\"item\":{},\"dailyVideoCount\":2,\"lastDayoutTime\":1581488994306,\"tipCount\":3,\"levelupNum\":0,\"cmpCount\":0,\"cmpExCount\":0,\"rateNum\":0,\"rateMax\":10,\"dayAnwerNum\":0,\"taskList\":{},\"dayTaskList\":{\"101\":{\"id\":101,\"process\":1,\"state\":2},\"102\":{\"id\":102,\"process\":0,\"state\":0},\"103\":{\"id\":103,\"process\":0,\"state\":0},\"104\":{\"id\":104,\"process\":0,\"state\":0},\"105\":{\"id\":105,\"process\":1,\"state\":0},\"107\":{\"id\":107,\"process\":2,\"state\":0},\"109\":{\"id\":109,\"process\":0,\"state\":0}},\"weekReward\":3,\"nActionPoints\":[100013,100016,100015,100014,100100,10004],\"dailyPoints\":[120003,120004],\"devLevel\":5,\"appTipCoin\":true,\"snowRewardGotTime\":0,\"activeNum\":0,\"activeGet\":true,\"activeWordLottery\":1,\"activeWordPass\":0,\"activeWordOnceGet\":true,\"isNewCheck\":true,\"isloadCheck\":1,\"isStartCheck\":1}","utag":1,"sign_days":1,"last_sign":1581489039,"lastSnowRewardReceivedAt":1581504308,"receivedCountToday":1,"new_cash":0}}
+# ---------------------

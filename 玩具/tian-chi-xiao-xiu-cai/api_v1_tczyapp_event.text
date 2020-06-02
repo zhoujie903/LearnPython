@@ -1,0 +1,922 @@
+# 02-12 20:02:25---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "0",
+		"utag": "0",
+		"cver": "5",
+		"event": "1003",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:02:29---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "2000",
+		"source": "287001",
+		"data": "{\"value1\":4775}"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:02:29---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "1004",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:02:41---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "1010",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:02:59---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "100017",
+		"source": "287001",
+		"data": "{\"value1\":101}"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:21---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "120006",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:25---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "10005",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:29---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "10006",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:33---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "10007",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:38---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "10008",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:45---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "100010",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:45---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "110100",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:46---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "10009",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:53---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "100012",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:03:53---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "100200",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:04:34---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "110200",
+		"source": "287001"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------# 02-12 20:04:46---------------------
+
+def api_v1_tczyapp_event(self):
+
+    headers = {
+		":authority": "tczy2.game.jingyougz.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"content-type": "application/x-www-form-urlencoded",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"pid": "1575266631",
+		"puid": "934171",
+		"utag": "1",
+		"cver": "5",
+		"event": "100017",
+		"source": "287001",
+		"data": "{\"value1\":105}"
+	}
+
+    data = {
+	}
+
+    url = 'https://tczy2.game.jingyougz.com/api/v1/tczyapp/event'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def api_v1_tczyapp_event(self):
+    logging.info('api_v1_tczyapp_event')
+
+    url = self.urls['/api/v1/tczyapp/event']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+
+# ---------------------

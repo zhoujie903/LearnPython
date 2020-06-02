@@ -1,0 +1,501 @@
+# 02-12 20:02:05---------------------
+
+def x_user_token(self):
+
+    headers = {
+		":authority": "newidea4-gamecenter-backend.1sapp.com",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"oaid": "ef8a43971141a8c5",
+		"accept-encoding": "gzip",
+		"user-agent": "okhttp/3.11.0"
+	}
+
+    params = {
+		"dtu": "10530",
+		"sign": "4ead9236f9ce054e7b5a514d83f76cd2",
+		"lon": "0.0",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"deviceCode": "869161028541084",
+		"source": "287001",
+		"versionName": "1.2.0.000.0208.1421",
+		"uuid": "2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"version": "10200000",
+		"platform": "gapp",
+		"network": "wifi",
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm",
+		"app_name": "game_tcxxc",
+		"v": "10200000",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"vn": "1.2.0.000.0208.1421",
+		"OSVersion": "8.0.0",
+		"time": "1581508925087",
+		"app_id": "a3NqMwuuoZCC",
+		"lat": "0.0",
+		"oaid": "ef8a43971141a8c5",
+		"dc": "869161028541084"
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508925,"data":{"g_token":"2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7ANDsBfL6nRAGCJWvWgr6KNrjKUr6xJ9ftUr7x1uGl3rvlGWvK89jTk98KJcp==","mid":""}}
+# ---------------------# 02-12 20:02:05---------------------
+
+def x_user_token(self):
+
+    headers = {
+		":authority": "newidea4-gamecenter-backend.1sapp.com",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"oaid": "ef8a43971141a8c5",
+		"accept-encoding": "gzip",
+		"user-agent": "okhttp/3.11.0"
+	}
+
+    params = {
+		"dtu": "10530",
+		"sign": "ddd2c9268027fea4cffcf70ea43c9bf1",
+		"lon": "0.0",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"deviceCode": "869161028541084",
+		"source": "287001",
+		"versionName": "1.2.0.000.0208.1421",
+		"uuid": "2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"version": "10200000",
+		"platform": "gapp",
+		"network": "wifi",
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm",
+		"app_name": "game_tcxxc",
+		"v": "10200000",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"vn": "1.2.0.000.0208.1421",
+		"OSVersion": "8.0.0",
+		"time": "1581508925116",
+		"app_id": "a3NqMwuuoZCC",
+		"lat": "0.0",
+		"oaid": "ef8a43971141a8c5",
+		"dc": "869161028541084"
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508925,"data":{"g_token":"2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7ANDsBfL6nRAGCJWvWgr6KNrjKUr6xJ9ftUr7x1uGl3rvlGWvK89jTk98KJcp==","mid":""}}
+# ---------------------# 02-12 20:02:23---------------------
+
+def x_user_token(self):
+
+    headers = {
+		":authority": "newidea4-gamecenter-backend.1sapp.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm",
+		"platform": "gapp",
+		"source": "287001",
+		"app_id": "a3NqMwuuoZCC",
+		"origin_type": "0",
+		"device_code": "869161028541084",
+		"dtu": "10530",
+		"vn": "1.2.0.000.0208.1421",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"v": "10200000",
+		"dc": "869161028541084",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"user_mode": ""
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508943,"data":{"g_token":"2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7pfDsBfL6nRAGCJWvuM9f_1rjpqu6WgW7AiuGuMW7n3u3ueu6pk-v9N9GAJcp==","mid":""}}
+# ---------------------# 02-12 20:02:23---------------------
+
+def x_user_token(self):
+
+    headers = {
+		":authority": "newidea4-gamecenter-backend.1sapp.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm",
+		"platform": "gapp",
+		"source": "287001",
+		"app_id": "a3NqMwuuoZCC",
+		"origin_type": "0",
+		"device_code": "869161028541084",
+		"dtu": "10530",
+		"vn": "1.2.0.000.0208.1421",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"v": "10200000",
+		"dc": "869161028541084",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"user_mode": ""
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508943,"data":{"g_token":"2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7pfDsBfL6nRAGCJWvuM9f_1rjpqu6WgW7AiuGuMW7n3u3ueu6pk-v9N9GAJcp==","mid":""}}
+# ---------------------# 02-12 20:02:23---------------------
+
+def x_user_token(self):
+
+    headers = {
+		":authority": "newidea4-gamecenter-backend.1sapp.com",
+		"origin": "https://static.game.jingyougz.com",
+		"user-agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"accept": "*/*",
+		"referer": "https://static.game.jingyougz.com/tcxxc_app/tcxxcRes/index.html?app_id=a3NqMwuuoZCC&app_name=%E5%A1%AB%E8%AF%8D%E5%B0%8F%E7%A7%80%E6%89%8D%E5%8F%91%E8%A1%8CAPP&appid=a3NqMwuuoZCC&dc=869161028541084&dtu=10530&ext=eyJzb3VyY2UiOiIyODcwMDEifQ%3D%3D&origin_type=0&platform=gapp&sdk_version=cocos.2ec6fcdb0d9ef5ac289e.js&sign=455964b06b72003242a027c2c799b63f&source=287001&tag_id=&ticket=t11XfsHWUrQyYdQvS2Qmu&time=1581508925&uuid=2a61c98e6eba49d9b95b8ad7ac9f00c6",
+		"accept-encoding": "gzip, deflate",
+		"accept-language": "zh-CN,en-US;q=0.9",
+		"x-requested-with": "com.heitu.tcxxc"
+	}
+
+    params = {
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm",
+		"platform": "gapp",
+		"source": "287001",
+		"app_id": "a3NqMwuuoZCC",
+		"origin_type": "0",
+		"device_code": "869161028541084",
+		"dtu": "10530",
+		"vn": "1.2.0.000.0208.1421",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"v": "10200000",
+		"dc": "869161028541084",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"user_mode": ""
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508943,"data":{"g_token":"2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7pfDsBfL6nRAGCJWvuM9f_1rjpqu6WgW7AiuGuMW7n3u3ueu6pk-v9N9GAJcp==","mid":""}}
+# ---------------------# 02-12 20:03:15---------------------
+
+def x_user_token(self):
+
+    headers = {
+		"Host": "newidea4-gamecenter-backend.1sapp.com",
+		"Origin": "http://newidea4-gamecenter-frontend.1sapp.com",
+		"User-Agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"Accept": "*/*",
+		"Referer": "http://newidea4-gamecenter-frontend.1sapp.com/gamecenter/platform/prod/missions-gapp/index.html?is_hide_arrow=true&platform=gapp",
+		"Accept-Encoding": "gzip, deflate",
+		"Accept-Language": "zh-CN,en-US;q=0.9",
+		"X-Requested-With": "com.heitu.tcxxc",
+		"Proxy-Connection": "keep-alive"
+	}
+
+    params = {
+		"request_timestamp": "1581508994953",
+		"source": "",
+		"platform": "gapp",
+		"memberid": "453580278",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"dtu": "10530",
+		"oaid": "ef8a43971141a8c5",
+		"android_id": "348d1d1c441551bd",
+		"dc": "869161028541084",
+		"v": "10200000",
+		"vn": "1.2.0.000.0208.1421",
+		"os": "android",
+		"app_id": "a3NqMwuuoZCC",
+		"referrer": "",
+		"session_timestamp": "1581508994951",
+		"env": "prod",
+		"user_mode": "",
+		"app": "game_tcxxc",
+		"g_token": "",
+		"uuid": "453580278",
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm"
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1581508994,"data":{"g_token":"2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7Oi-7tMr7g4DsBfL6nRAGCJ96xG-GKU9fWlrj_lr7_guGAfW69qWvg4WjT4-3pervmJcp==","mid":""}}
+# ---------------------# 02-12 20:03:16---------------------
+
+def x_user_token(self):
+
+    headers = {
+		"Host": "newidea4-gamecenter-backend.1sapp.com",
+		"Origin": "http://newidea4-gamecenter-frontend.1sapp.com",
+		"User-Agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"Accept": "*/*",
+		"Referer": "http://newidea4-gamecenter-frontend.1sapp.com/gamecenter/platform/prod/missions-gapp/index.html?is_hide_arrow=true&platform=gapp",
+		"Accept-Encoding": "gzip, deflate",
+		"Accept-Language": "zh-CN,en-US;q=0.9",
+		"X-Requested-With": "com.heitu.tcxxc",
+		"Proxy-Connection": "keep-alive"
+	}
+
+    params = {
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm",
+		"platform": "gapp",
+		"app_id": "a3DAGqSqpLSC",
+		"device_code": "869161028541084",
+		"dtu": "10530",
+		"vn": "1.2.0.000.0208.1421",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"v": "10200000",
+		"dc": "869161028541084",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"user_mode": ""
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":10001,"message":"用户不存在","showErr":0,"currentTime":1581508995,"data":{}}
+# ---------------------# 02-12 20:03:16---------------------
+
+def x_user_token(self):
+
+    headers = {
+		"Host": "newidea4-gamecenter-backend.1sapp.com",
+		"Origin": "http://newidea4-gamecenter-frontend.1sapp.com",
+		"User-Agent": "Mozilla/5.0 (Linux; Android 8.0.0; MI 5 Build/OPR1.170623.032; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/68.0.3440.91 Mobile Safari/537.36 qapp_android qapp_version_10200000",
+		"Accept": "*/*",
+		"Referer": "http://newidea4-gamecenter-frontend.1sapp.com/gamecenter/platform/prod/missions-gapp/index.html?is_hide_arrow=true&platform=gapp",
+		"Accept-Encoding": "gzip, deflate",
+		"Accept-Language": "zh-CN,en-US;q=0.9",
+		"X-Requested-With": "com.heitu.tcxxc",
+		"Proxy-Connection": "keep-alive"
+	}
+
+    params = {
+		"token": "5f1fgYh3J6O21JV0HqT2EJNPRjGD7K7RxEY79PlCTMSXdWfnAQccDk5gf8HE6JYj3g_Cf9UAduL-kNn7HcDJ2-NJDvSegAPBdIjm",
+		"platform": "gapp",
+		"app_id": "a3DAGqSqpLSC",
+		"device_code": "869161028541084",
+		"dtu": "10530",
+		"vn": "1.2.0.000.0208.1421",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNasL7XWaYm3OpnbXRjeHhj",
+		"v": "10200000",
+		"dc": "869161028541084",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"user_mode": ""
+	}
+
+    data = {
+	}
+
+    url = 'https://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":10001,"message":"用户不存在","showErr":0,"currentTime":1581508996,"data":{}}
+# ---------------------
