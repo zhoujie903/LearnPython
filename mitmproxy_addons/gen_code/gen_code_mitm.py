@@ -297,7 +297,6 @@ class GenCode(object):
         '''
         request: http.HTTPRequest = flow.request
 
-        by_host_device = request.pretty_host
         host = request.pretty_host
 
         # 收集headers

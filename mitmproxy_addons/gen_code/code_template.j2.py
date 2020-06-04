@@ -233,7 +233,7 @@ def run(runner, user: User):
     用户代码
     '''
 
-def framework_main():
+def framework_main(runner,users):
     for user in genUsers():
         try:
             runner = genRunner(user)

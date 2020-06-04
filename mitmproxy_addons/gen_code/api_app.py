@@ -22,7 +22,7 @@ class Api(object):
             f_p_enc: set = None, 
             f_b_enc: set = None, 
             f_p_arg: list = None, 
-            f_b_arg: set = None, 
+            f_b_arg: list = None, 
             f_p_kwarg: dict = None, 
             f_b_kwarg: dict = None, 
             content_type=''
@@ -46,8 +46,8 @@ class Api(object):
         self.f_b_enc = f_b_enc
         if f_b_enc:
             if self.f_b_arg == None:
-                self.f_b_arg = set()
-            self.f_b_arg.update(f_b_enc)
+                self.f_b_arg = list()
+            self.f_b_arg.extend(f_b_enc)
 
         self.f_p_kwarg = f_p_kwarg
         self.f_b_kwarg = f_b_kwarg
