@@ -202,7 +202,7 @@ class GenCode(object):
 
     def response(self, flow: http.HTTPFlow):
         # 不处理'options'方法的请求
-        method = flow.request.method.lower()
+        method = flow.request.method
         if method == 'OPTIONS':
             return 
 

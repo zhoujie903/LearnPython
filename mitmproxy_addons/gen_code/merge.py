@@ -10,6 +10,8 @@ import itertools
 import collections
 import importlib
 import traceback
+from typing import List, Tuple, Dict
+from typing import Callable, Mapping, Optional, Sequence, Type, Union
 
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
@@ -113,7 +115,18 @@ def merge_enc_level2(from_values, to_values, merge_rules:dict):
                 merged_data = merge(vv, a.get(kk, []))
                 to_values[k][kk] = merged_data
 
-    
+
+def merge_app_ok(from_values, to_values, merge_rules:dict):
+    for k, v in from_values.items():
+        # k: 'app_ok','/path'
+        # v: {'code':[0,200]}
+        for kk, vv in v.items():
+            # kk:'code'
+            # vv:[0,200]
+            a = to_values.setdefault(k, {})
+            merge = merge_rules['app_ok']
+            merged_data = merge(vv, a.get(kk, []))
+            to_values[k][kk] = merged_data       
 
 env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
 
@@ -162,6 +175,8 @@ class AppSession():
     keys_enc_level2 = [
         'params_encry', 'bodys_encry',
     ]
+
+    keys_app_ok = ['api_ok']
 
     def __init__(self, path_or_vardict):
         self.file = None
@@ -298,6 +313,7 @@ class MergerSession():
             self.add_missing()
 
         self.merge_enc(merge_rules)
+        self.merge_app_ok(merge_rules)
 
     def save_as_file(self, path=None, inplace=False):
         self.to_seession.save_as_file(name='merge', path=path, inplace=inplace)
@@ -347,6 +363,18 @@ class MergerSession():
             from_v = getattr(self.from_session, k)
             to_v = getattr(self.to_seession, k)
             merge_enc_level2(from_v, to_v, app)
+
+    def merge_app_ok(self, app=None):
+        if app == None or app.get('app_ok',None) == None:
+            from merge_rule import unique_rule
+            r_u = unique_rule()
+            app = {'app_ok':r_u}
+
+        for k in AppSession.keys_app_ok:
+            from_v = getattr(self.from_session, k)
+            to_v = getattr(self.to_seession, k)
+            merge_app_ok(from_v, to_v, app)
+            pass
 
 
 def main_mitm_merge_to(from_path: str, merge_to: int):
@@ -543,7 +571,7 @@ if __name__ == "__main__":
     # main_merge_all(api_dir, dev_dir)
     # exit()
 
-    from_path = '/Users/zhoujie/Desktop/dev/qu-jian-pan/session_huawei.py'
+    from_path = '/Users/zhoujie/Desktop/dev/you-xi-he-zi/session_xiaomi.py'
 
     # 场景：同名session从api同步到dev
     # main_merge_to_same_session(from_path)
