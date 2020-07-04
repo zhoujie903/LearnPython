@@ -1,0 +1,236 @@
+# 03-26 13:27:43---------------------
+
+def happy_protocol(self):
+
+    headers = {
+		"Accept-Encoding": "identity",
+		"Content-Type": "application/x-www-form-urlencoded",
+		"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; MI 5 MIUI/V10.2.1.0.OAACNXM)",
+		"Host": "qutoutiao.atigame.com",
+		"Connection": "Keep-Alive",
+		"Content-Length": "433"
+	}
+
+    params = {
+		"uid": "1"
+	}
+
+    data = {
+		'data': '{"data":[{"openId":"u11XinsMnCDP6KSDZx1jd","gender":0,"province":"","appVersion":"1.0.1","deviceModel":"test","apkVersion":"1.0.0"},[{"method":"doLogin","openId":"u11XinsMnCDP6KSDZx1jd","nickName":"134****4460","avatarUrl":"https://static-oss.qutoutiao.net/jpg/touxiang.jpg"}]]}',
+	}
+
+    url = 'https://qutoutiao.atigame.com/happy/protocol'
+
+    result = self._post(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def happy_protocol(self):
+    logging.info('happy_protocol')
+
+    url = self.urls['/happy/protocol']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._post(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"doLogin":{"method":"doLogin","resultCode":200,"uk":"7MSW57jp","uid":16998996,"new":false}}
+# ---------------------# 03-26 13:27:44---------------------
+
+def happy_protocol(self):
+
+    headers = {
+		"Accept-Encoding": "identity",
+		"Content-Type": "application/x-www-form-urlencoded",
+		"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; MI 5 MIUI/V10.2.1.0.OAACNXM)",
+		"Host": "qutoutiao.atigame.com",
+		"Connection": "Keep-Alive",
+		"Content-Length": "350"
+	}
+
+    params = {
+		"uid": "1"
+	}
+
+    data = {
+		'data': '{"data":[{"uid":16998996,"uk":"7MSW57jp","openId":"u11XinsMnCDP6KSDZx1jd","gender":0,"province":"","appVersion":"1.0.1","deviceModel":"test","apkVersion":"1.0.0"},[{"method":"user","nickName":"134****4460"}]]}',
+	}
+
+    url = 'https://qutoutiao.atigame.com/happy/protocol'
+
+    result = self._post(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def happy_protocol(self):
+    logging.info('happy_protocol')
+
+    url = self.urls['/happy/protocol']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._post(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"user":{"method":"user","resultCode":200,"uid":16998996,"nickName":"134****4460","coin":56000,"sliverCoin":0,"qttCoin":1264,"sfCoin":0,"life":0,"dailyReward":false,"guideStep":3,"registerTime":1584108392000,"userExtendInfo":{"startGameTimes":6,"weekMaxRound":0,"weekMaxRoundTimestamp":null},"dressUpGuideStep":0,"maxLevel":3,"totalLevelCash":0.0,"cashLevelIds":{"15":false,"140":false,"130":false,"120":false,"110":false,"100":false,"3":false,"5":false,"90":false,"80":false,"70":false,"60":false,"50":false,"40":false,"30":false,"20":false,"10":false},"userLevelList":[{"levelId":1,"star":3},{"levelId":2,"star":3}],"displayLoginReward":true,"displayVipLoginReward":false,"loginRewardList":[{"dayIndex":1,"rewardItemList":[{"propId":1004,"propNum":12}],"status":1},{"dayIndex":2,"rewardItemList":[{"propId":1000,"propNum":3000}],"status":3},{"dayIndex":3,"rewardItemList":[{"propId":1004,"propNum":12}],"status":3},{"dayIndex":4,"rewardItemList":[{"propId":1000,"propNum":3000}],"status":3},{"dayIndex":5,"rewardItemList":[{"propId":1000,"propNum":3000}],"status":3},{"dayIndex":6,"rewardItemList":[{"propId":1000,"propNum":3000}],"status":3},{"dayIndex":7,"rewardItemList":[{"propId":1004,"propNum":18}],"status":3}],"vipLoginRewardList":[{"dayIndex":1,"rewardItemList":[{"propId":1004,"propNum":24}],"status":1},{"dayIndex":2,"rewardItemList":[{"propId":1004,"propNum":24}],"status":3},{"dayIndex":3,"rewardItemList":[{"propId":1004,"propNum":36}],"status":3},{"dayIndex":4,"rewardItemList":[{"propId":1004,"propNum":30}],"status":3},{"dayIndex":5,"rewardItemList":[{"propId":1004,"propNum":30}],"status":3},{"dayIndex":6,"rewardItemList":[{"propId":1004,"propNum":30}],"status":3},{"dayIndex":7,"rewardItemList":[{"propId":1004,"propNum":60}],"status":3}],"vip":false,"energy":25,"nextEnergyRemainMillis":0,"unlimitedEnergyEndTime":0,"vipEndTime":0,"freeVipEndTime":0,"today1YuanCount":0,"today3YuanCount":0,"displayVipDailyGift":false,"firstPay":false,"todayCoinLevelMaxKeysCount":1,"todayCoinLevelUsedKeysCount":0,"todayCoinLevelRemainQttCoinCount":600,"qttCoinDayLimit":false,"todayQttCoinNum":0,"discountCardNum":0,"remainDiscountCardNum":5,"totalGuaguaCardNum":0,"todayRemainGuaguaCardLimit":25,"levelEndGuaguaCard":false,"diamond":0,"areaLevelInfo":{},"starKeys":0,"adCard":0,"weekCardInfo":null,"displayApkAward":true,"displayGoldMouse":true,"singleWeek":true}}
+# ---------------------# 03-26 13:27:49---------------------
+
+def happy_protocol(self):
+
+    headers = {
+		"Accept-Encoding": "identity",
+		"Content-Type": "application/x-www-form-urlencoded",
+		"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; MI 5 MIUI/V10.2.1.0.OAACNXM)",
+		"Host": "qutoutiao.atigame.com",
+		"Connection": "Keep-Alive",
+		"Content-Length": "340"
+	}
+
+    params = {
+		"uid": "1"
+	}
+
+    data = {
+		'data': '{"data":[{"uid":16998996,"uk":"7MSW57jp","openId":"u11XinsMnCDP6KSDZx1jd","gender":0,"province":"","appVersion":"1.0.1","deviceModel":"test","apkVersion":"1.0.0"},[{"method":"startGame","levelType":0}]]}',
+	}
+
+    url = 'https://qutoutiao.atigame.com/happy/protocol'
+
+    result = self._post(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def happy_protocol(self):
+    logging.info('happy_protocol')
+
+    url = self.urls['/happy/protocol']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._post(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"startGame":{"method":"startGame","resultCode":200,"todayCoinLevelUsedKeysCount":0}}
+# ---------------------# 03-26 13:28:22---------------------
+
+def happy_protocol(self):
+
+    headers = {
+		"Accept-Encoding": "identity",
+		"Content-Type": "application/x-www-form-urlencoded",
+		"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; MI 5 MIUI/V10.2.1.0.OAACNXM)",
+		"Host": "qutoutiao.atigame.com",
+		"Connection": "Keep-Alive",
+		"Content-Length": "316"
+	}
+
+    params = {
+		"uid": "1"
+	}
+
+    data = {
+		'data': '{"data":[{"uid":16998996,"uk":"7MSW57jp","openId":"u11XinsMnCDP6KSDZx1jd","gender":0,"province":"","appVersion":"1.0.1","deviceModel":"test","apkVersion":"1.0.0"},[{"method":"clickAd"}]]}',
+	}
+
+    url = 'https://qutoutiao.atigame.com/happy/protocol'
+
+    result = self._post(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def happy_protocol(self):
+    logging.info('happy_protocol')
+
+    url = self.urls['/happy/protocol']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._post(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"clickAd":{"method":"clickAd","resultCode":200}}
+# ---------------------# 03-26 13:28:22---------------------
+
+def happy_protocol(self):
+
+    headers = {
+		"Accept-Encoding": "identity",
+		"Content-Type": "application/x-www-form-urlencoded",
+		"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; MI 5 MIUI/V10.2.1.0.OAACNXM)",
+		"Host": "qutoutiao.atigame.com",
+		"Connection": "Keep-Alive",
+		"Content-Length": "342"
+	}
+
+    params = {
+		"uid": "1"
+	}
+
+    data = {
+		'data': '{"data":[{"uid":16998996,"uk":"7MSW57jp","openId":"u11XinsMnCDP6KSDZx1jd","gender":0,"province":"","appVersion":"1.0.1","deviceModel":"test","apkVersion":"1.0.0"},[{"method":"addQttCoin","addQttCoin":6}]]}',
+	}
+
+    url = 'https://qutoutiao.atigame.com/happy/protocol'
+
+    result = self._post(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def happy_protocol(self):
+    logging.info('happy_protocol')
+
+    url = self.urls['/happy/protocol']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._post(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"addQttCoin":{"method":"addQttCoin","resultCode":200,"addQttCoin":6,"userCurrentQttCoin":1270,"qttCoinDayLimit":false}}
+# ---------------------

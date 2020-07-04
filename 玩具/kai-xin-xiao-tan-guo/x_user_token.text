@@ -1,0 +1,57 @@
+# 03-26 13:27:42---------------------
+
+def x_user_token(self):
+
+    headers = {
+		"Accept-Encoding": "identity",
+		"User-Agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; MI 5 MIUI/V10.2.1.0.OAACNXM)",
+		"Host": "newidea4-gamecenter-backend.1sapp.com",
+		"Connection": "keep-alive"
+	}
+
+    params = {
+		"token": "487ddoJfK10Gnfxpj2Zxvpi3lu7P_wxMh80A4_MAqUakzunoFukfnKDQH6nHSYVxPgrnUEnSnHsaRYpoHD7o9qiXQgVgep8pWNQx",
+		"platform": "gapp",
+		"source": "287001",
+		"app_id": "a3MasNnLgxAY",
+		"origin_type": "0",
+		"device_code": "869161028541084",
+		"dtu": "10255",
+		"vn": "1.2.3.000.0306.1716",
+		"tk": "ACFf1hkY7KIp9dPuR7naeLNaJ1K__KEXGtNnbWt4eHRn",
+		"v": "10203000",
+		"dc": "869161028541084",
+		"tuid": "X9YZGOyiKfXT7ke52nizWg",
+		"user_mode": ""
+	}
+
+    data = {
+	}
+
+    url = 'http://newidea4-gamecenter-backend.1sapp.com/x/user/token'
+
+    result = self._get(url, headers=headers, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+                
+
+def x_user_token(self):
+    logging.info('/x/user/token - 获取g_token')
+
+    url = self.urls['/x/user/token']
+
+    params = self._params_from(url)
+
+    data = self._bodys_from(url)
+
+
+    result = self._get(url, params=params, data=data)
+
+    result = json.loads(result)
+    return result
+
+
+Response:
+{"code":0,"message":"成功","showErr":0,"currentTime":1585200462,"data":{"g_token":"2eBNL6pJrGKf-vpq9fmi9eqJnj15WZ-4u6NqAGCi-7ON9Gtq-vueDsBfL6nRAGCJr7Yg-8xl9GONrjW398p4-GKeu7pq-8TMrjAiWv1Jr7uJcp==","mid":""}}
+# ---------------------
