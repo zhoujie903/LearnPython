@@ -28,6 +28,7 @@ class CommonUser(object):
         self.urlparsed = dict()
         self.api_errors = dict()
         self.exc_info = []
+        self.messages = []
         self.session = requests.Session()
         self.session.headers = self._header()
 
@@ -116,6 +117,9 @@ class CommonUser(object):
         host, path = self.__urlparsed(url)
         params_keys = self.bodys_keys[host][path]
         return { k:v for k,v in self.bodys.items() if k in set(params_keys) }
+
+    def message(self, m):
+        self.messages.append(m)
 
 
 class GameUser(CommonUser):
@@ -360,7 +364,9 @@ def ti_xian(user: GameUser):
             balance = item['balance']
             today = time.strftime('%Y-%m-%d')
             if today == create_time[0:10]:
-                logging.info(f"\033[1;31m今日已提现 - {balance}元\033[0m")
+                m = f"\033[1;31m今日已提现 - {balance}元\033[0m"
+                logging.info(m)
+                user.message(m)
                 return 
             break
 
@@ -390,7 +396,9 @@ def ti_xian(user: GameUser):
                 print(f'\033[1;31m{wx_nickname} 可以取现 {name}\033[0m')
                 result = user.withdraw_order_create(sku_id)
                 if result['code'] == 0:
-                    print(f'\033[1;31m{wx_nickname} 成功取现 {name}\033[0m')    
+                    m = f'\033[1;31m{wx_nickname} 成功取现 {name}\033[0m'
+                    print(m)
+                    user.message(m)    
                     
                 if result['code'] in [-22003, -24003, -22006, 0]:
                     #-22003-作弊用户禁止提现，有疑问请联系客服！
@@ -402,7 +410,7 @@ def ti_xian(user: GameUser):
         traceback.print_exc()
 
 
-def ti_xian_history(user: GameUser):
+def ti_xian_history(user: GameUser, start_date=None):
     try:
         user._setup_access_token()
         result = user.withdraw_order_listapp()
@@ -447,6 +455,7 @@ def income(user: GameUser):
         print(today, len(record))
         record.sort(key=lambda item: (item['name'],str(item['desc'])))
         gy = itertools.groupby(record, key=lambda item: (item['name'],str(item['desc'])))
+        l = []
         for k, g in gy:
             title = f"{k[0]} - {k[1]}"
             amount = 0            
@@ -456,7 +465,9 @@ def income(user: GameUser):
                 times += 1
             coins += amount if amount > 0 else 0
             print(f'{title} : {amount} : {times}')
+            l.append({"title":k[1],'amount':amount,'times':times})
         print(f"\033[1;31m{coins=}\033[0m")
+        return l
     except Exception as e:
         print(e)
 
@@ -485,6 +496,7 @@ def framework_main(run, users):
     sessions = []
     api_errors = {}
     exc_info = {}
+    messages = {}
 
     done, _ = asyncio.run(asyncio.wait([_run_it(run, user) for user in users]))
 
@@ -493,6 +505,7 @@ def framework_main(run, users):
         sessions.append(user.session_id)
         api_errors[user.session_id] = user.api_errors
         exc_info[user.session_id] = user.exc_info
+        messages[user.session_id] = user.messages
 
     for session, v in api_errors.items():
         if len(v):
@@ -510,7 +523,14 @@ def framework_main(run, users):
                 print()
     print()
 
-    logging.info(f"共运行: \033[1;31m{sessions}\033[0m")
+    for session, v in sorted(messages.items()):
+        if len(v):
+            logging.info(f"\033[1;31m {session} - 有如下消息: \033[0m")
+            for message in v:
+                logging.info(f"\t{message}")
+                print()
+
+    logging.info(f"共运行: \033[1;31m {len(sessions)} - {sessions}\033[0m")
 
 async def _run_it(run, user):
     try:
