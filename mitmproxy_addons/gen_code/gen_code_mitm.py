@@ -20,7 +20,8 @@ from data_api_app import apps
 
 '''
 生成接口python代码
-mitmdump -q --flow-detail 0 --set session='huawei' -s "/Users/zhoujie/Documents/zhoujie903/LearnScrapy/mitmproxy_addons/gen_code/gen_code_mitm.py" 
+Usage:
+mitmdump -q --set session='xiaomi' --set mergeto=3 -s "/Users/zhoujie/Documents/zhoujie903/LearnScrapy/mitmproxy_addons/gen_code/gen_code_mitm.py"
 '''
 
 class GenCode(object):

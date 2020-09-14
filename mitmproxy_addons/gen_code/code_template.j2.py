@@ -201,13 +201,7 @@ def {{ request.f_name }}(user: User):
 {%- endif %}
 {% endfor %}
 
-def demo_func(user: User):
-    # user.login
-    return 'demo_func_result'
 
-def demo_exception(user: User):
-    1/0
-    return 'demo_exception_result'
 
 def genRunner(user: User):
     def xxx(user: User):
