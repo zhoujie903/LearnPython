@@ -13,6 +13,7 @@ r_c_l1 = chain_rule(r_c,r_l_1)
 def apps():
 
     flowfilters = [
+        # app_zjxsp(),
         # app_bai_du_flash(),
         # app_cai_dan_sp(),
         # app_cheng_yu_da_fu_hao(),
@@ -24,13 +25,14 @@ def apps():
         # app_kai_xin_xiao_tan_guo(),
         # app_ma_yi_kd(),
         # app_qu_jian_pan(),
+        app_qu_jian_pan_flash(),
         # app_qu_tou_tiao(),
         # app_qu_zhong_cai(),
         # app_tian_chi_xiao_xiu_cai(),
         # app_wan_zhe_da_nao(),
         # app_wei_xin(),
         # app_yang_ji_chang(),
-        app_you_xi_he_zi(),
+        # app_you_xi_he_zi(),
         # app_zhong_qin_kd(),
         # app_zhu_lai_le(),
     ]
@@ -92,6 +94,61 @@ def api_baidu():
     ]
     return urls
 
+def api_qu_jian_pan():
+    ''' 趣键盘 '''
+    urls = [
+        r'/qjp-app/user/info',
+
+        # 翻牌
+        r'/qjp-app/game/fanpai/basicInfo',
+        r'/qjp-app/game/fanpai/getAward',
+        r'/qjp-app/game/fanpai/awardDouble',
+        r'/qjp-app/game/fanpai/',
+
+        # 储蓄罐
+        r'/qjp-app/game/savingsBank/taskInfo',
+        r'/qjp-app/game/savingsBank/signIn',
+        r'/qjp-app/game/savingsBank/collectPigMoney',
+        r'/qjp-app/game/savingsBank/exchangePigMoney',
+        Api(r'/qjp-app/game/savingsBank/unlockDouble',f_b_arg=['taskType'], content_type='json'),
+        Api(r'/qjp-app/game/savingsBank/finishTask',f_b_arg=['taskCode'], content_type='json'),
+        Api(r'/qjp-app/game/savingsBank/doubleBox',f_b_arg=['ticket'], content_type='json'),
+
+        # 小猪刮刮乐
+        r'/qjp-app/game/guagua/',
+
+        # 小猪转盘
+        r'/qjp-app/pig/turntable/info',
+        # type	Integer	3
+        r'/qjp-app/pig/turntable/draw',
+        Api('/qjp-app/pig/turntable/receiveVideoReward', f_b_arg=['ticket']),
+        r'/qjp-app/pig/turntable/',
+
+        #  大转盘
+        r'/gk/draw/info',
+        r'/gk/draw/extract',
+        Api('/gk/draw/double', f_b_arg=['ticket']),
+        r'/gk/draw/package',
+        r'/gk/draw/pkdouble',
+
+        # 便利店 - 已没有入口
+        # Api('/gk/game/bianlidian/receiveBox', f_b_arg=['packageId']),
+        # Api('/gk/game/bianlidian/draw/double', f_b_arg=['ticket']),
+        # Api('/gk/game/bianlidian/receiveGift', log='便利店 - xxx金币礼包碎片', f_b_arg=['ticket']),
+        # Api('/gk/game/bianlidian/receiveMediumCoin', log='便利店 - 随机金币奖励', f_b_arg=['ticket']),
+        # r'/gk/game/bianlidian/',
+
+        # 打地鼠 - 已没有入口 
+        # r'/gk/game/dadishu/',
+
+
+        r'/qujianpan/',
+
+        # 已没有入口
+        # r'/gk/garbage/',
+    ]
+    return urls
+
 # ''' 填词小秀才 - 游戏
 def api_tczyqtt():
     c_tczyqtt = [
@@ -107,6 +164,15 @@ def api_tczyqtt():
         '/api/v1/tczyqtt/'
     ]
     return c_tczyqtt
+
+def app_zjxsp():
+    '''  '''
+    urls = [
+        '/user/getallfloatgold',
+        Api(r'/user/drawfloatgold', f_p_arg=['floatGoldId']), 
+    ]
+    urls.extend(api_baidu())
+    return App(urls, 'zjxsp')
 
 # ''' 百度 - 百度极速版 '''
 def app_bai_du_flash():
@@ -132,11 +198,14 @@ def app_hao_kan():
 def app_cai_dan_sp():
     ''' 彩蛋视频 '''
     urls = [
+        Api('/h5/task/index',log='任务信息'),
         Api('/task/sign',log='sign - 签到、金币信息'),
         Api('/task/timer_submit',log='看视频 - 得金币', f_b_enc={'qdata'}, f_b_arg=['qdata'], f_merge_key=r_u),
+        
         Api('/h5/task/submit',log='日常福利 - 观看小视频', body_as_all=True, f_merge_key=r_d),
-        Api('/h5/reduce/reward',log='瓜分他人金币', body_as_all=True),
-        Api('/h5/reward/prize',log='iphone免费抽'),
+        Api('/h5/reduce/reward',log='瓜分他人金币', body_as_all=True, f_merge_key=r_d),
+        Api('/h5/reward/prize',log='iphone免费抽', body_as_all=True, f_merge_key=r_d),
+        Api('/h5/active_value/reward_prize',log='活跃奖励', body_as_all=True, f_merge_key=r_d),
     ]
     urls.extend(api_common())
     return App(urls, 'cai-dan-sp')
@@ -157,6 +226,7 @@ def app_cheng_yu_da_fu_hao():
 # ''' 成语趣味消
 def app_cheng_yu_qu_wei_xiao():
     urls = [
+        Api('/chengyu_app/login', log='成语趣味消 - 登入', f_p_arg=['ticket']),
         Api('/chengyu_app/signin', log='签到'),
         Api('/chengyu_app/draw_fuca', log='抽字'),
         Api('/chengyu_app/addcoin', f_b_arg=['open_id','add_num']),
@@ -222,45 +292,17 @@ def app_kai_xin_xiao_tan_guo():
 def app_qu_jian_pan():
     ''' 趣键盘 '''
     urls = [
-        r'/gk/game/fanpai/basicInfo',
-        r'/gk/game/fanpai/getAward',
-        r'/gk/game/fanpai/awardDouble',
-        r'/gk/game/fanpai/',
-
-        r'/gk/game/savingsBank/collectPigMoney',
-        r'/gk/game/savingsBank/exchangePigMoney',
-        Api(r'/gk/game/savingsBank/unlockDouble',f_b_arg=['taskType'], content_type='json'),
-
-        # 小猪刮刮乐
-        r'/qjp-app/game/guagua/',
-
-        # 小猪转盘
-        r'/qjp-app/pig/turntable/info',
-        # type	Integer	3
-        r'/qjp-app/pig/turntable/draw',
-        Api('/qjp-app/pig/turntable/receiveVideoReward', f_b_arg=['ticket']),
-        r'/qjp-app/pig/turntable/',
-
-        #  大转盘
-        r'/gk/draw/info',
-        r'/gk/draw/extract',
-        Api('/gk/draw/double', f_b_arg=['ticket']),
-        r'/gk/draw/package',
-        r'/gk/draw/pkdouble',
-
-        # 便利店
-        Api('/gk/game/bianlidian/receiveBox', f_b_arg=['packageId']),
-        Api('/gk/game/bianlidian/draw/double', f_b_arg=['ticket']),
-        Api('/gk/game/bianlidian/receiveGift', log='便利店 - xxx金币礼包碎片', f_b_arg=['ticket']),
-        Api('/gk/game/bianlidian/receiveMediumCoin', log='便利店 - 随机金币奖励', f_b_arg=['ticket']),
-        r'/gk/game/dadishu/',
-        r'/gk/game/bianlidian/',
-        r'/qujianpan/',
-
-        # 已没有入口
-        # r'/gk/garbage/',
     ]
+    urls.extend(api_qu_jian_pan())
     return App(urls, 'qu-jian-pan')
+
+# ''' 趣键盘极速版 '''
+def app_qu_jian_pan_flash():
+    ''' 趣键盘极速版 '''
+    urls = [
+    ]
+    urls.extend(api_qu_jian_pan())
+    return App(urls, 'qu-jian-pan-flash')
 
 # ''' 趣头条 '''
 def app_qu_tou_tiao():
