@@ -4,7 +4,7 @@
 '''
 代码模板
 '''
-
+import asyncio
 import json
 import logging
 import pathlib
@@ -19,31 +19,14 @@ from urllib.parse import urlparse
 import requests
 
 from sessions import users
+from same_hard import CommonUser, framework_main
 
 logging.basicConfig(format='%(asctime)s:%(message)s', datefmt='%m-%d %H:%M:%S', level=logging.INFO)
 
-logging.info(sys.stdout.encoding)
 
-class User(object):
+class User(CommonUser):
     def __init__(self, session_data: dict): 
-        self.headers = session_data['header_values']
-        self.params_keys = session_data['params_keys']
-        self.bodys_keys = session_data['bodys_keys']
-        self.urls = session_data['fn_url']
-        self.params = session_data['param_values']
-        self.bodys = session_data['body_values']
-        self.params_as_all = session_data['params_as_all']
-        self.bodys_as_all = session_data['bodys_as_all']
-        self.params_encry = session_data['params_encry']
-        self.bodys_encry = session_data['bodys_encry']
-        self.session_id = session_data['session_id']
-        self.api_ok = session_data['api_ok']
-        self.urlparsed = dict()
-        self.api_errors = dict()
-        self.exc_info = []
-        self.messages = []
-        self.session = requests.Session()
-        self.session.headers = self._header()
+        super().__init__(session_data)
 
 
     def _header(self):
@@ -52,84 +35,6 @@ class User(object):
             'user-agent': self.headers['user-agent'],
             # 'Cookie':self.headers['Cookie'],
         }
-
-    def __urlparsed(self, url):
-        if self.urlparsed.get(url):
-            host, path = self.urlparsed[url]
-        else:
-            parse_result = urlparse(url)
-            host = parse_result.netloc
-            path = parse_result.path
-            self.urlparsed[url] = host, path
-        return host, path
-
-    def __parse(self, url, res, p):
-        result = res.text
-        j = ""
-        try:
-            j = json.loads(result)
-            app_ok_codes = self.api_ok['app_ok']# dict(str,list)
-
-            response_key = 'nil'
-            for k in app_ok_codes:
-                if not j.get(k, 9999999) == 9999999:
-                    response_key = k
-                    break
-
-            response_code = j.get(response_key, 9999999)
-
-            codes_app = app_ok_codes.get(response_key, [])
-
-            if response_code in codes_app:
-                p(j)
-                return result
-
-            _, path = self.__urlparsed(url)
-            codes_url = self.api_ok.get(path, {}).get(response_key,[])
-            if response_code in codes_url:
-                p(j)
-                return result
-
-            self.api_errors[path] = j
-            logging.error(f"\033[1;31m {j} \033[0m")
-        except json.JSONDecodeError:
-            p(result)
-        except :
-            logging.error(f"\033[1;31m {j} \033[0m")
-        finally:
-            print()
-        return result
-
-    def _post(self, url, p=logging.warning, **kwargs):
-        r"""Sends a POST request.
-
-        :param params: (optional) Dictionary or bytes to be sent in the query
-            string for the :class:`Request`.
-        :param data: (optional) Dictionary, list of tuples, bytes, or file-like
-            object to send in the body of the :class:`Request`.
-        :param json: (optional) json to send in the body of the
-            :class:`Request`.
-        :param headers: (optional) Dictionary of HTTP Headers to send with the
-            :class:`Request`.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: str
-        """
-        res = self.session.post(url, **kwargs)
-        return self.__parse(url, res, p)
-
-    def _get(self, url, p=logging.warning, **kwargs):
-        res = self.session.get(url, **kwargs)
-        return self.__parse(url, res, p)
-
-    def _params_from(self, url):
-        host, path = self.__urlparsed(url)
-        params_keys = self.params_keys[host][path]
-        return { k:v for k,v in self.params.items() if k in set(params_keys) }
-
-    def _bodys_from(self, url):
-        host, path = self.__urlparsed(url)
-        params_keys = self.bodys_keys[host][path]
-        return { k:v for k,v in self.bodys.items() if k in set(params_keys) }
 
 {% for request in seq %}
     def {{ request.f_name }}(self{{ request.fun_params }}):
@@ -175,7 +80,7 @@ class User(object):
         data = body_as_all
     {%- endif %}
 
-    {% if request.content_type == 'json' %}
+    {%- if request.content_type == 'json' %}
         result = self._{{ request.method }}(url, params=params, json=data)
     {% else %}
         result = self._{{ request.method }}(url, params=params, data=data)
@@ -211,42 +116,16 @@ def {{ request.f_name }}(user: User):
 {%- endif %}
 {% endfor %}
 
-
-
-def genRunner(user: User):
-    def xxx(user: User):
-        pass
-    r = xxx
-    r = yield
-    while True:
-        try:
-            r = yield r(user)
-        except StopIteration as e:
-            print('StopIteration', e)
-        except Exception as e:
-            user.exc_info.append(sys.exc_info())
-            r = yield sys.exc_info()
-
-            
 def genUsers():
     for session_data in users:
         yield User(session_data)
 
-def run(runner, user: User):
-    '''
-    用户代码
-    '''
+async def run(runner, user: User):
+    tasks = [
 
-def framework_main(runner,users):
-    for user in genUsers():
-        try:
-            runner = genRunner(user)
-            runner.send(None)
-
-            run(runner, user)
-        except Exception as e:
-            traceback.print_exc()
-
+    ]
+    for t in tasks:
+        runner.send(t)
 
 if __name__ == "__main__":
     framework_main(run, genUsers())
