@@ -41,6 +41,7 @@ class User(object):
         self.urlparsed = dict()
         self.api_errors = dict()
         self.exc_info = []
+        self.messages = []
         self.session = requests.Session()
         self.session.headers = self._header()
 
@@ -67,18 +68,27 @@ class User(object):
         j = ""
         try:
             j = json.loads(result)
-            app_ok_key = self.api_ok['app_ok_key']
-            for k in app_ok_key:
-                if j.get(k, 9999999) in self.api_ok['app_ok']:
-                    p(j)
-                    return result
+            app_ok_codes = self.api_ok['app_ok']# dict(str,list)
+
+            response_key = 'nil'
+            for k in app_ok_codes:
+                if not j.get(k, 9999999) == 9999999:
+                    response_key = k
+                    break
+
+            response_code = j.get(response_key, 9999999)
+
+            codes_app = app_ok_codes.get(response_key, [])
+
+            if response_code in codes_app:
+                p(j)
+                return result
 
             _, path = self.__urlparsed(url)
-            for k in app_ok_key:
-                codes = self.api_ok.get(path, {k:[88888888]})[k]
-                if j.get(k, 9999999) in codes:
-                    p(j)
-                    return result
+            codes_url = self.api_ok.get(path, {}).get(response_key,[])
+            if response_code in codes_url:
+                p(j)
+                return result
 
             self.api_errors[path] = j
             logging.error(f"\033[1;31m {j} \033[0m")
@@ -89,7 +99,7 @@ class User(object):
         finally:
             print()
         return result
-        
+
     def _post(self, url, p=logging.warning, **kwargs):
         r"""Sends a POST request.
 
