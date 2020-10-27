@@ -21,11 +21,11 @@ def apps():
         # app_dong_fan_tt(),
         # app_hao_kan(),
         # app_huo_shan(),
-        # app_jin_ri_tou_tiao(),
+        app_jin_ri_tou_tiao(),
         # app_kai_xin_xiao_tan_guo(),
         # app_ma_yi_kd(),
         # app_qu_jian_pan(),
-        app_qu_jian_pan_flash(),
+        # app_qu_jian_pan_flash(),
         # app_qu_tou_tiao(),
         # app_qu_zhong_cai(),
         # app_tian_chi_xiao_xiu_cai(),
@@ -39,20 +39,7 @@ def apps():
 
     return flowfilters
 
-    # urls = [
-    #     r'/login/index',
-    #     r'/main/index',
-    #     r'/card/info',
-    #     r'/card/open',
-    #     r'/card/doublereward',
-    # ]
-    # kai_xin_da_ti = App(urls, 'kai-xin-da-ti')
 
-    # 趣头条小视频
-    # urls = [
-    #     Api(r'seafood-api.1sapp.com/v1/readtimer/report',log='看视频得金币', f_b_enc={'qdata'}, f_b_arg=['qdata'])
-    # ]
-    # qtt_video = App(urls, 'qtt-video')
 
 def api_common():
     common = [
@@ -260,10 +247,12 @@ def app_dong_fan_tt():
 def app_huo_shan():
     ''' 火山极速版 '''
     urls = [
+        Api('/luckycat/hotsoon/v1/task/done/excitation_ad_treasure_box', log='火山-开宝箱-看视频', f_name='task_done_excitation_ad_treasure_box'),
+
         Api('/luckycat/hotsoon/v1/task/page', log='火山-获取任务状态'),
         Api('/luckycat/hotsoon/v1/task/done/treasure_task', log='火山-开宝箱'),
         Api('/luckycat/hotsoon/v1/task/done/show_money', log='火山-晒收入', params_as_all=True),
-        Api('/luckycat/hotsoon/v1/task/done/excitation_ad', log='火山-', params_as_all=True, body_as_all=True),
+        Api('/luckycat/hotsoon/v1/task/done/excitation_ad', log='火山-看视频赚海量金币', params_as_all=True),
         Api('/luckycat/hotsoon/v1/task/done/daily_read_1m', log='火山-1分钟', params_as_all=True),
         Api('/luckycat/hotsoon/v1/task/done/daily_read_2m', log='火山-2分钟', params_as_all=True),
         Api('luckycat/v1/task/page/', log='火山-获取任务状态', params_as_all=True, f_merge_key=r_c_l1),
@@ -274,7 +263,7 @@ def app_huo_shan():
         Api('luckycat/v1/task/get_read_bonus/',params_as_all=True),
         Api('api/ad/v1/inspire/', log='火山-获取广告', params_as_all=True),
     ]
-    return App(urls, 'huo-shan')
+    return App(urls, 'huo-shan', api_ok={'code':[0],'err_no':[0]})
 
 # ''' 开心消糖果 '''
 def app_kai_xin_xiao_tan_guo():
@@ -518,19 +507,21 @@ def app_you_xi_he_zi():
 def app_jin_ri_tou_tiao():
     ''' 今日头条 '''
     urls = [
-        # 'score_task/v1/task/page_data/',
-        # 'score_task/v1/task/sign_in/',
-        # 'score_task/v1/task/open_treasure_box/',
-        # Api('/score_task/v1/task/open_treasure_box', f_name='task_open_treasure_box'),            
+        Api('/task/page_data/', f_name='task_page_data'),            
+        Api('/score_task/v1/task/sign_in/', f_name='task_sign_in'),            
+        Api('/score_task/v1/task/open_treasure_box', f_name='task_open_treasure_box'),            
         Api('/score_task/v1/task/new_excitation_ad', f_name='task_new_excitation_ad', f_b_arg=['task_id'], params_as_all=True),            
-        # Api('/score_task/v1/task/get_read_bonus/', f_name='task_get_read_bonus', params_as_all=True, f_p_arg=['group_id']),            
+        Api('/score_task/v1/task/get_read_bonus/', f_name='task_get_read_bonus', params_as_all=True, f_p_arg=['group_id'], f_merge_key=r_c_l1),            
+
+        # 全场景计时器
+        Api('/activity/done_whole_scene_task/', f_name='done_whole_scene_task', params_as_all=True, f_b_arg=['group_id'], f_merge_key=r_c_l1),            
         # 'score_task/v1/task/done_task/',
         # 'score_task/v1/landing/add_amount/',
         # 'score_task/v1/user/profit_detail/',
 
         # # 小说
-        # Api('/api/novel/book/directory/list/v1/', log='书目录', f_p_arg=['book_id']),  
-        # Api('score_task/v1/novel/bonus/', f_b_arg=['item_id']),  # 读小说得金币
+        Api('/api/novel/book/directory/list/v1', log='书目录', f_p_arg=['book_id']),  
+        Api('score_task/v1/novel/bonus/', f_b_arg=['item_id'], params_as_all=True, f_merge_key=r_c_l1),  # 读小说得金币
 
         # # 搜索 
         # 'search/suggest/homepage_suggest/',
@@ -539,57 +530,67 @@ def app_jin_ri_tou_tiao():
         # Api('/search/', log='搜索', f_p_arg=['keyword']),
 
         # # 走咯
-        # Api(r'score_task/v1/walk/count/', {"count": None}),
-        # r'score_task/v1/walk/',
+        Api(r'score_task/v1/walk/count/', f_b_arg=['count']),
+        r'score_task/v1/walk/',
 
         # # 睡觉
-        # 'score_task/v1/sleep/status/',
-        # 'score_task/v1/sleep/start/',
-        # 'score_task/v1/sleep/stop/',
-        # 'score_task/v1/sleep/done_task/',  # 睡觉领金币
+        'score_task/v1/sleep/status/',
+        'score_task/v1/sleep/start/',
+        'score_task/v1/sleep/stop/',
+        'score_task/v1/sleep/done_task/',  # 睡觉领金币
 
         # # 农场
-        # Api('/ttgame/game_farm/home_info', f_name='farm_home_info', api_ok={'status_code':[0]}),            
-        # r'ttgame/game_farm/',
+        Api('/ttgame/game_farm/home_info', f_name='farm_home_info', api_ok={'status_code':[0]}),            
+        r'/ttgame/game_farm/',
 
         # # 吃
+        r'/luckycat/lite/v1/eat/eat_info/',
+        r'/luckycat/lite/v1/eat/done_eat/',
         # r'score_task/lite/v1/eat/eat_info/',
-        # 'score_task/lite/v1/eat/done_eat/',
+        # r'score_task/lite/v1/eat/done_eat/',
 
-        # 'api/news/feed/v47/',  # 安卓视频tab页
+        'api/news/feed/v47/',  # 安卓视频tab页
         # 'api/news/feed/v64/',  # ios视频tab页
         
         # # 'score_task/v1',
         # 'score_task/v2',
     ]
-    return App(urls, 'jin-ri-tou-tiao', api_ok_key=['err_no','status_code'])
+    return App(urls, 'jin-ri-tou-tiao', api_ok={'code':[0],'err_no':[0],'message':['success']})
 
 def app_ma_yi_kd():
     # 蚂蚁看点
     urls = [
-        Api(r'article/treasure_chest', log='时段签到', f_b_enc={'p'}, content_type='multipart_form'),
+        Api(r'article/treasure_chest', log='时段签到', f_name='hourly_sign', f_b_enc={'p'}, content_type='multipart_form'),
         Api(r'/user/shai_income_task_award',log='晒收'),
-        r'TaskCenter/daily_sign',
+        Api(r'TaskCenter/daily_sign', log='每日签到',f_name='daily_sign'),
+
+        # 重点：看广告、看小视频、看文章
+        Api(r'/v5/user/rewar_video_callback.json', log='视频广告 - 得金币', f_name='rewar_video_callback', f_b_enc={'p'}, f_merge_key=chain_rule(limit_rule(20),r_u),content_type='multipart_form'),
+        Api(r'/v5/article/haotu_video.json',log='看视频 - 得金币', f_name='haotu_video',f_b_enc={'p'}, f_merge_key=chain_rule(limit_rule(20),r_u),content_type='multipart_form'),
+        Api(r'/v5/article/complete_article',log='读文章 - 得金币', f_name='complete_article', f_b_enc={'p'}, f_merge_key=chain_rule(limit_rule(20),r_u),content_type='multipart_form'),
+
+
+        Api(r'/user/userinfo.json', log='用户信息', f_name='userinfo', params_as_all=True, f_merge_key=r_c_l1, content_type='multipart_form'),
+
+
         # r'WebApi/',
         r'WebApi/Stage/task_reward',
         r'WapPage/get_video_status',
+
+        # 装盘
         r'WebApi/RotaryTable/turn_rotary_new',
         r'WebApi/RotaryTable/turn_reward',
         r'WebApi/RotaryTable/video_double',
         r'WebApi/RotaryTable/chestReward',
 
-
+        # 睡觉
         Api(r'/WebApi/sleep/sleep_start',log='睡觉 - 开始'),
         Api(r'/WebApi/sleep/get_sleep_score',log='睡觉 - 醒来'),
 
-        Api(r'article/haotu_video',log='看视频得金币', f_b_enc={'p'}, content_type='multipart_form'),
-        Api(r'article/complete_article',log='读文章得金币', f_b_enc={'p'}, content_type='multipart_form'),
-        Api(r'/v5/user/rewar_video_callback', log='视频广告 - 得金币', f_b_enc={'p'}, content_type='multipart_form'),
         Api(r'/v5/article/complete_welfare_score.json', log='福袋 - 得金币', f_b_enc={'p'}, content_type='multipart_form'),
         Api(r'/v5/user/adlickstart.json',log='点击广告领金币 - 开始', f_b_enc={'p'}, content_type='multipart_form'),
         Api(r'/v5/user/adlickend.json',log='点击广告领金币 - 结束', f_b_enc={'p'}, content_type='multipart_form'),
         Api(r'/v5/user/task_second_callback.json',f_b_enc={'p'}, content_type='multipart_form'),
-        Api(r'/v3/user/userinfo.json', log='用户信息', params_as_all=True, p_as_all_limit=1, content_type='multipart_form'),
         Api(r'/user/income_ajax', log='收益详情', f_p_arg=['page'], content_type='multipart_form'),
 
         # 新版答题
@@ -605,7 +606,7 @@ def app_ma_yi_kd():
         # r'WebApi/Answer/video_double',
         # r'WebApi/Answer/fill_energy',
     ]
-    return App(urls, 'ma-yi-kd')
+    return App(urls, 'ma-yi-kd', api_ok={'error_code':['0']})
 
 # ''' 填词小秀才app '''
 def app_tian_chi_xiao_xiu_cai():
