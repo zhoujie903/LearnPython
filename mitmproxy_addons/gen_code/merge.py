@@ -106,6 +106,13 @@ def merge_enc_level1(from_values, to_values, merge_rules:dict):
             merged_data = merge(v, to_values.get(k, []))
             to_values[k] = merged_data
 
+    # 场景：from_values.items.len = 0;to_values.items.len !=0; merge_rules.contains(sort_rule)
+    for k, v in to_values.items():
+        if merge_rules and merge_rules.get(k, None):
+            merge = merge_rules[k]
+            merged_data = merge([],v)
+            to_values[k] = merged_data   
+
 def merge_enc_level2(from_values, to_values, merge_rules:dict):
     for k, v in from_values.items():
         if merge_rules and merge_rules.get(k, None):
