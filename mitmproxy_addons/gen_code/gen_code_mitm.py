@@ -29,11 +29,6 @@ class GenCode(object):
         ctx.log.info('__init__')
         # 设置代码文件生成的目录\文件夹
         self.api_dir = pathlib.Path('/Users/zhoujie/Desktop/api/')
-        self.guess_session = collections.OrderedDict(
-            ios=re.compile(r'iphone|ios', flags=re.IGNORECASE),
-            xiaomi=re.compile(r'xiaomi|mi\+5|miui', flags=re.IGNORECASE),
-            huawei=re.compile(r'huawei', flags=re.IGNORECASE),
-        )
 
         self.env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
         self.api_template = self.env.get_template('api_template.j2.py')
@@ -59,12 +54,6 @@ class GenCode(object):
 
     def load(self, loader):
         ctx.log.info('event: load')
-        loader.add_option(
-            name='guess_as_session',
-            typespec=str,
-            default='default',
-            help='若接口不能推断出session,则用这值来设定默认值',
-        )
 
         loader.add_option(
             name='session',
@@ -90,7 +79,6 @@ class GenCode(object):
     def running(self):
         ctx.log.info('event: running')
         ctx.log.error('session = ' + ctx.options.session)
-        ctx.log.error('guess-as-session = ' + ctx.options.guess_as_session)
 
     def done(self):
         print('event: done')
@@ -234,25 +222,28 @@ class GenCode(object):
 
             function_name = re.sub(r'[./-]', '_', url_path).strip('_').lower()
             api_url = f'{request.scheme}://{request.pretty_host}{url_path}'
-            headers_code = self.headers_string(flow)
-            params_code = self.params_string(flow)
-            data_code = self.data_string(flow, api)
 
-            path = self.api_dir.joinpath(ft.app_name) 
-            if not path.exists():
-                path.mkdir(parents=True, exist_ok=True)
-            with (path/f'{function_name}.text').open('a') as f:
 
-                app_apis = self.app_apis.setdefault(ft.app_name, dict())
-                if function_name not in app_apis:
-                    api.name = function_name
-                    api.url = api_url
-                    api.url_path = url_path
-                    api.method = request.method.lower()
-                    api.content_type = 'json' if 'json' in request.headers.get('content-type','') else ''
-                    api.fun_params = api.str_fun_params()
-                    app_apis[function_name] = api
-    
+            # 如果App代码目录不存在，则创建目录
+            session_dir = self.api_dir.joinpath(ft.app_name, self._session()) 
+            if not session_dir.exists():
+                session_dir.mkdir(parents=True, exist_ok=True) 
+
+
+            app_apis = self.app_apis.setdefault(ft.app_name, dict())
+            if function_name not in app_apis:
+                api.name = function_name
+                api.url = api_url
+                api.url_path = url_path
+                api.method = request.method.lower()
+                api.content_type = 'json' if 'json' in request.headers.get('content-type','') else ''
+                api.fun_params = api.str_fun_params()
+                app_apis[function_name] = api
+
+            with (session_dir/f'{function_name}.text').open('a') as f:
+                headers_code = self.headers_string(flow)
+                params_code = self.params_string(flow)
+                data_code = self.data_string(flow, api)
                 api.time = time.strftime('%m-%d %H:%M:%S')
                 api.headers_code = headers_code
                 api.params_code = params_code
@@ -262,14 +253,14 @@ class GenCode(object):
                 code = self.api_template.render(request=api)
                 f.write(code)
 
-                device = self._guess_session(flow, api)
+            device = self._session()
 
-                self.gather_params_and_bodys(flow, api, device=device, app=ft.app_name)
-                self.session_hit.add((device, ft.app_name))
+            self.gather_params_and_bodys(flow, api, device=device, app=ft.app_name)
+            self.session_hit.add((device, ft.app_name))
 
-                d_v = self.app_fn_url.setdefault(device, dict())
-                fn_url = d_v.setdefault(ft.app_name, dict())
-                fn_url[url_path] = api_url
+            d_v = self.app_fn_url.setdefault(device, dict())
+            fn_url = d_v.setdefault(ft.app_name, dict())
+            fn_url[url_path] = api_url
 
             ctx.log.error('|' + '-'*20 + '|')
 
@@ -362,41 +353,12 @@ class GenCode(object):
             json.dump(o, fd, indent=2, sort_keys=True)
             print(f"生成 {f} 成功")
 
-    def _guess_session(self, flow: http.HTTPFlow, api: Api):
-        session = ''
-        guess_by_data = ''
-        request = flow.request
+    def _session(self):
 
-        if ctx.options.session:
-            session = ctx.options.session
-            ctx.log.error(f'指定为：session = {session}')
-            return session
-
-        def guess(data):
-            nonlocal guess_by_data, session
-            found = False
-            for k, v in data:
-                for s, r in self.guess_session.items():
-                    if r.search(v):
-                        session = s
-                        guess_by_data = v
-                        found = True
-                        break
-                if found:
-                    break
-
-        guess(itertools.chain(request.headers.items(), request.query.items()))
-        if not session:
-            d = self.dict_from_request_body(flow, api)
-            if d:
-                guess(d.items())
-
-        ctx.log.error(f'依据值：{guess_by_data}')
-        ctx.log.error(f'猜测为：session = {session}')
-        if session == '':
-            ctx.log.error(f"not guess: {request.url}")
-            session = ctx.options.guess_as_session
+        session = ctx.options.session
+        ctx.log.error(f'指定为：session = {session}')
         return session
+
 
     def gen_file_from_jinja2(self, tfile, gfile, **kwargs):
         t = self.env.get_template(tfile)
